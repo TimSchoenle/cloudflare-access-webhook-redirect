@@ -390,7 +390,6 @@ dependencies = [
  "actix-web",
  "anyhow",
  "config",
- "http 1.4.0",
  "lazy_static",
  "regex",
  "reqwest",
