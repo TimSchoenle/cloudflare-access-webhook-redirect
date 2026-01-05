@@ -49,6 +49,12 @@
         "pin"
       ],
       "automerge": true
+    },
+    {
+      "matchPackageNames": [
+        "dtolnay/rust-toolchain"
+      ],
+      "pinDigests": false
     }
   ]
 }
