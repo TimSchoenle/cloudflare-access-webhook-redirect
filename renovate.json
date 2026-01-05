@@ -59,7 +59,8 @@
     {
       "matchPackageNames": [
         "lukemathwalker/cargo-chef",
-        "aquasecurity/trivy-action"
+        "aquasecurity/trivy-action",
+        "taiki-e/install-action"
       ],
       "enabled": false
     }
