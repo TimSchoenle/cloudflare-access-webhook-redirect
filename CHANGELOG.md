@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.3...v0.3.4) (2026-01-05)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([#152](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/152)) ([48825e1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/48825e14d106cd8ca992af208915c6715e0d86fd))
+* **deps:** lock file maintenance ([#155](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/155)) ([dc898a6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/dc898a61158302c7f7d10c2aaebdea7b5473d3cd))
+* **deps:** update all non-major dependencies ([#132](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/132)) ([e883a74](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e883a74c1a89b209ddf98efbee1b8209cd352b43))
+* **deps:** update rust crate reqwest to 0.13.0 ([#149](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/149)) ([e90e8cd](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e90e8cd23efc81e385da4396b6c482562d69a248))
+* flagged dependencies ([#150](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/150)) ([6371f55](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/6371f55469652695cc73e396826b3d3e136d13b4))
+
 ## [0.3.3](https://github.com/Timmi6790/cloudflare-access-webhook-redirect/compare/v0.3.2...v0.3.3) (2025-10-27)
 
 
