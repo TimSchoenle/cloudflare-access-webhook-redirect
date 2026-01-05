@@ -1,25 +1,36 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
-    ":disableRateLimiting"
+    "config:best-practices",
+    "helpers:pinGitHubActionDigests",
+    "workarounds:all"
   ],
-  "assigneesFromCodeOwners": true,
-  "labels": [
-    "dependencies"
-  ],
+  "dependencyDashboard": true,
+  "semanticCommits": "enabled",
+  "semanticCommitType": "fix",
+  "labels": ["dependencies"],
+  "rebaseWhen": "auto",
+  "timezone": "Europe/Berlin",
+  "minimumReleaseAge": null,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 0,
+  "branchConcurrentLimit": 0,
   "packageRules": [
     {
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "all non-major dependencies",
-      "groupSlug": "all-minor-patch",
-      "automerge": true,
-      "matchPackageNames": [
-        "*"
-      ]
+      "description": "Auto-merge safe dev updates",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "automerge": true
+    },
+    {
+      "description": "CI actions: safe to auto-merge",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "major", "pin"],
+      "automerge": true
     }
   ]
 }
