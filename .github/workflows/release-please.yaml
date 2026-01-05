@@ -6,7 +6,13 @@ on:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
+
+env:
+  DOCKER_REPO: timmi6790/cloudflare-access-webhook-redirect
+  HELM_REPO: TimSchoenle/helm-charts
+  CHART_PATH: charts/cloudflare-access-webhook-redirect
 
 jobs:
   release-please:
@@ -24,9 +30,15 @@ jobs:
     outputs:
       image_digest: ${{ steps.build.outputs.digest }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -44,7 +56,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: timmi6790/cloudflare-access-webhook-redirect
+          images: ${{ env.DOCKER_REPO }}
           tags: |
             type=raw,value=${{ needs.release-please.outputs.tag_name }}
             type=raw,value=latest
@@ -55,6 +67,8 @@ jobs:
         with:
           context: .
           push: true
+          provenance: mode=max
+          sbom: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -66,6 +80,17 @@ jobs:
             VERSION=${{ needs.release-please.outputs.tag_name }}
           secrets: |
             sentry_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Sign the images with GitHub OIDC Token
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          images=""
+          for tag in ${TAGS}; do
+            images+="${tag}@${DIGEST} "
+          done
+          cosign sign --yes ${images}
 
   sentry-release:
     needs: release-please
@@ -85,7 +110,7 @@ jobs:
           environment: production
 
   helm-release:
-    needs: [release-please, docker-release]
+    needs: [ release-please, docker-release ]
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
@@ -93,7 +118,7 @@ jobs:
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
-          helm-repo: TimSchoenle/helm-charts
-          chart-path: charts/cloudflare-access-webhook-redirect
+          helm-repo: ${{ env.HELM_REPO }}
+          chart-path: ${{ env.CHART_PATH }}
           new-tag: ${{ needs.release-please.outputs.tag_name }}
           image-digest: ${{ needs.docker-release.outputs.image_digest }}
