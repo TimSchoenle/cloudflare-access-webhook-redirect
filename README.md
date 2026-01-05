@@ -6,19 +6,19 @@
     A lightweight, high-performance reverse proxy for exposing specific paths from Cloudflare Access-protected services
     <br />
     <br />
-    <a href="https://github.com/Timmi6790/cloudflare-access-webhook-redirect/issues">Report Bug</a>
+    <a href="https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues">Report Bug</a>
     ·
-    <a href="https://github.com/Timmi6790/cloudflare-access-webhook-redirect/issues">Request Feature</a>
+    <a href="https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues">Request Feature</a>
   </p>
 </p>
 
 <div align="center">
 
 ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/timmi6790/cloudflare-access-webhook-redirect)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Timmi6790/cloudflare-access-webhook-redirect/build.yaml)
-![Issues](https://img.shields.io/github/issues/Timmi6790/cloudflare-access-webhook-redirect)
-[![codecov](https://codecov.io/gh/Timmi6790/cloudflare-access-webhook-redirect/branch/master/graph/badge.svg?token=dDUZjsYmh2)](https://codecov.io/gh/Timmi6790/cloudflare-access-webhook-redirect)
-![License](https://img.shields.io/github/license/Timmi6790/cloudflare-access-webhook-redirect)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/TimSchoenle/cloudflare-access-webhook-redirect/build.yaml)
+![Issues](https://img.shields.io/github/issues/TimSchoenle/cloudflare-access-webhook-redirect)
+[![codecov](https://codecov.io/gh/TimSchoenle/cloudflare-access-webhook-redirect/branch/master/graph/badge.svg?token=dDUZjsYmh2)](https://codecov.io/gh/TimSchoenle/cloudflare-access-webhook-redirect)
+![License](https://img.shields.io/github/license/TimSchoenle/cloudflare-access-webhook-redirect)
 
 </div>
 
@@ -204,7 +204,7 @@ spec:
 ### Helm Chart
 
 The official Helm chart is available in
-the [Timmi6790/helm-charts](https://github.com/Timmi6790/helm-charts/tree/main/charts/cloudflare-access-webhook-redirect)
+the [TimSchoenle/helm-charts](https://github.com/TimSchoenle/helm-charts/tree/main/charts/cloudflare-access-webhook-redirect)
 repository.
 
 ## ⚙️ Configuration
