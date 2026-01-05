@@ -101,7 +101,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Sentry Release
-        uses: getsentry/action-release@v3.4.0
+        uses: getsentry/action-release@dab6548b3c03c4717878099e43782cf5be654289 # v3.5.0
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
