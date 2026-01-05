@@ -3,8 +3,7 @@ use crate::data::WebHookData;
 use actix_web::http::Method;
 use actix_web::web::Query;
 use actix_web::{HttpRequest, HttpResponse, web};
-use reqwest::{Body, Url};
-use reqwest_middleware::{ClientWithMiddleware, RequestBuilder};
+use reqwest::{Body, Client, RequestBuilder, Url};
 use std::collections::HashMap;
 
 pub fn get_config(cfg: &mut web::ServiceConfig) {
@@ -83,7 +82,7 @@ async fn redirect(
 }
 
 struct ReqwestBuilder<'a> {
-    client: &'a ClientWithMiddleware,
+    client: &'a Client,
     url: Url,
     body: Body,
     headers: reqwest::header::HeaderMap,
@@ -96,7 +95,7 @@ struct ReqwestBuilder<'a> {
 
 impl<'a> ReqwestBuilder<'a> {
     pub fn new(
-        client: &'a ClientWithMiddleware,
+        client: &'a Client,
         url: Url,
         body: Body,
         headers: reqwest::header::HeaderMap,
@@ -171,7 +170,7 @@ mod tests {
     use super::*;
     use crate::config::AllowedMethod;
     use actix_web::{App, test};
-    use reqwest_middleware::ClientBuilder;
+    use reqwest::Client;
     use secrecy::SecretString;
     use std::collections::HashSet;
     use wiremock::{Mock, ResponseTemplate};
@@ -214,7 +213,7 @@ mod tests {
 
             let allowed_paths = paths.try_into().unwrap();
 
-            let client = ClientBuilder::new(reqwest::Client::new()).build();
+            let client = Client::new();
             let web_hook_data = WebHookData::new(
                 client,
                 target,

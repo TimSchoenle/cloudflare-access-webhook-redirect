@@ -4,14 +4,14 @@ use derive_new::new;
 use regex::RegexSet;
 use reqwest::Url;
 use reqwest::header::HeaderValue;
-use reqwest_middleware::ClientWithMiddleware;
+use reqwest::Client;
 use secrecy::{ExposeSecret, SecretString};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Getters, Debug)]
 #[getset(get = "pub")]
 pub struct WebHookData {
-    client: ClientWithMiddleware,
+    client: Client,
     #[getset(skip)]
     target_host: Url,
     allowed_paths: AllowedPaths,
@@ -21,7 +21,7 @@ pub struct WebHookData {
 
 impl WebHookData {
     pub fn new(
-        client: ClientWithMiddleware,
+        client: Client,
         target_host: Url,
         allowed_paths: AllowedPaths,
         access_id: SecretString,
@@ -118,7 +118,7 @@ mod tests_webhook_data {
     use crate::data::WebHookData;
     use lazy_static::lazy_static;
     use reqwest::Url;
-    use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+    use reqwest::Client;
     use secrecy::SecretString;
     use std::collections::{HashMap, HashSet};
 
@@ -136,7 +136,7 @@ mod tests_webhook_data {
         ];
     }
     pub struct TestWebHookData {
-        client: ClientWithMiddleware,
+        client: Client,
         target_host: Url,
         allowed_paths: HashMap<String, HashSet<AllowedMethod>>,
         access_id: SecretString,
@@ -154,7 +154,7 @@ mod tests_webhook_data {
             );
 
             Self {
-                client: ClientBuilder::new(reqwest::Client::new()).build(),
+                client: reqwest::Client::new(),
                 target_host: Url::parse("https://example.com").unwrap(),
                 allowed_paths,
                 access_id: SecretString::new(Box::from("test id")),
