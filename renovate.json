@@ -55,6 +55,13 @@
         "dtolnay/rust-toolchain"
       ],
       "pinDigests": false
+    },
+    {
+      "matchPackageNames": [
+        "lukemathwalker/cargo-chef",
+        "aquasecurity/trivy-action"
+      ],
+      "enabled": false
     }
   ]
 }
