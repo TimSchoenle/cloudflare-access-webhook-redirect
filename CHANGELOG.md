@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.5...v0.3.6) (2026-01-05)
+
+
+### Bug Fixes
+
+* helm auto release action integration ([105c883](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/105c88376575e67b803fe5734af7109ca7f887ef))
+
 ## [0.3.5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.4...v0.3.5) (2026-01-05)
 
 
