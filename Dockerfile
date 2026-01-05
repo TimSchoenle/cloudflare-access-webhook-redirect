@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.20
+# syntax=docker/dockerfile:1.20@sha256:26147acbda4f14c5add9946e2fd2ed543fc402884fd75146bd342a7f6271dc1d
 
 FROM lukemathwalker/cargo-chef:latest-rust-alpine AS chef
 RUN apk add --no-cache musl-dev pkgconfig openssl-dev openssl-libs-static upx curl jq
@@ -39,7 +39,7 @@ RUN --mount=type=secret,id=sentry_token \
 RUN strip --strip-all /app/target/x86_64-unknown-linux-musl/release/cloudflare-access-webhook-redirect && \
     upx --best --lzma /app/target/x86_64-unknown-linux-musl/release/cloudflare-access-webhook-redirect
 
-FROM alpine:3.23 AS env
+FROM alpine:3.23@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62 AS env
 
 # mailcap is used for content type (MIME type) detection
 # tzdata is used for timezones info
