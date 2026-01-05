@@ -1,17 +1,14 @@
 use std::env;
 use std::str::FromStr;
 
-use reqwest_middleware::ClientBuilder;
-use reqwest_tracing::{SpanBackendWithUrl, TracingMiddleware};
-use sentry::ClientInitGuard;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::{Layer, filter};
-
 use cloudflare_access_webhook_redirect::Result;
 use cloudflare_access_webhook_redirect::config::Config;
 use cloudflare_access_webhook_redirect::data::WebHookData;
 use cloudflare_access_webhook_redirect::server::Server;
+use sentry::ClientInitGuard;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::{Layer, filter};
 
 #[macro_use]
 extern crate tracing;
@@ -34,9 +31,7 @@ async fn main() -> Result<()> {
         let config = Config::get_configuration()?;
 
         server = Server::new(config.server().host().to_string(), *config.server().port());
-        let client = ClientBuilder::new(reqwest::Client::new())
-            .with(TracingMiddleware::<SpanBackendWithUrl>::new())
-            .build();
+        let client = reqwest::Client::new();
 
         web_hook_data = WebHookData::new(
             client,
