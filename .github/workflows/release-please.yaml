@@ -6,30 +6,48 @@ on:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
+
+env:
+  DOCKER_REPO: timmi6790/cloudflare-access-webhook-redirect
+  HELM_REPO: TimSchoenle/helm-charts
+  CHART_PATH: charts/cloudflare-access-webhook-redirect
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
-      # Docker Image release
+
+  docker-release:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    outputs:
+      image_digest: ${{ steps.build.outputs.digest }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
       - name: Checkout
         uses: actions/checkout@v6
-        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-        if: ${{ steps.release.outputs.release_created }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        if: ${{ steps.release.outputs.release_created }}
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
-        if: ${{ steps.release.outputs.release_created }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -37,41 +55,70 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
-        if: ${{ steps.release.outputs.release_created }}
         with:
-          images: timmi6790/cloudflare-access-webhook-redirect
+          images: ${{ env.DOCKER_REPO }}
           tags: |
-            type=raw,value=${{ steps.release.outputs.tag_name }}
+            type=raw,value=${{ needs.release-please.outputs.tag_name }}
             type=raw,value=latest
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          provenance: mode=max
+          sbom: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            version=${{ needs.release-please.outputs.tag_name }}
+            release=${{ needs.release-please.outputs.tag_name }}
+            vendor=Timmi6790
+            SENTRY_ORG=${{ secrets.SENTRY_ORG }}
+            SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
+            VERSION=${{ needs.release-please.outputs.tag_name }}
+          secrets: |
+            sentry_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Sign the images with GitHub OIDC Token
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          images=""
+          for tag in ${TAGS}; do
+            images+="${tag}@${DIGEST} "
+          done
+          cosign sign --yes ${images}
+
+  sentry-release:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Sentry Release
         uses: getsentry/action-release@v3.4.0
-        if: ${{ steps.release.outputs.release_created }}
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        with:
-          version: ${{ steps.release.outputs.tag_name }}
+          version: ${{ needs.release-please.outputs.tag_name }}
           environment: production
 
-      - uses: Swatinem/rust-cache@v2
-        if: ${{ steps.release.outputs.release_created }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        if: ${{ steps.release.outputs.release_created }}
+  helm-release:
+    needs: [ release-please, docker-release ]
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: TimSchoenle/actions/actions/helm/update-chart-version@actions/helm/update-chart-version-v1.1.0
         with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            version=${{ steps.release.outputs.tag_name }}
-            release=${{ steps.release.outputs.tag_name }}
-            vendor=Timmi6790
-            SENTRY_ORG=${{ secrets.SENTRY_ORG }}
-            SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
-            VERSION=${{ steps.release.outputs.tag_name }}
-          secrets: |
-            sentry_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          helm-repo: ${{ env.HELM_REPO }}
+          chart-path: ${{ env.CHART_PATH }}
+          new-tag: ${{ needs.release-please.outputs.tag_name }}
+          image-digest: ${{ needs.docker-release.outputs.image_digest }}
