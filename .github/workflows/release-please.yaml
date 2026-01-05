@@ -21,6 +21,8 @@ jobs:
   docker-release:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
+    outputs:
+      image_digest: ${{ steps.build.outputs.digest }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,6 +50,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -78,6 +81,19 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        with:
           version: ${{ needs.release-please.outputs.tag_name }}
           environment: production
+
+  helm-release:
+    needs: [release-please, docker-release]
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: TimSchoenle/actions/actions/helm/update-chart-version@actions/helm/update-chart-version-v1.1.0
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          helm-repo: TimSchoenle/helm-charts
+          chart-path: charts/cloudflare-access-webhook-redirect
+          new-tag: ${{ needs.release-please.outputs.tag_name }}
+          image-digest: ${{ needs.docker-release.outputs.image_digest }}
