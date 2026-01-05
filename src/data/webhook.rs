@@ -2,9 +2,9 @@ use crate::Result;
 use crate::error::Error;
 use derive_new::new;
 use regex::RegexSet;
+use reqwest::Client;
 use reqwest::Url;
 use reqwest::header::HeaderValue;
-use reqwest::Client;
 use secrecy::{ExposeSecret, SecretString};
 use std::collections::{HashMap, HashSet};
 
@@ -117,8 +117,8 @@ mod tests_webhook_data {
     use crate::config::AllowedMethod;
     use crate::data::WebHookData;
     use lazy_static::lazy_static;
-    use reqwest::Url;
     use reqwest::Client;
+    use reqwest::Url;
     use secrecy::SecretString;
     use std::collections::{HashMap, HashSet};
 
