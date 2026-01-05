@@ -10,36 +10,32 @@ use crate::error::Error;
 const DEFAULT_SERVER_HOST: &str = "127.0.0.1";
 const DEFAULT_SERVER_PORT: u16 = 8080;
 
-#[derive(Debug, serde::Deserialize, Getters)]
-#[getset(get = "pub")]
+#[derive(Debug, serde::Deserialize)]
 pub struct Config {
-    server: ServerConfig,
-    cloudflare: CloudFlareConfig,
-    webhook: WebhookConfig,
+    pub server: ServerConfig,
+    pub cloudflare: CloudFlareConfig,
+    pub webhook: WebhookConfig,
 }
 
-#[derive(Debug, serde::Deserialize, Getters)]
-#[getset(get = "pub")]
+#[derive(Debug, serde::Deserialize)]
 pub struct CloudFlareConfig {
-    client_id: SecretString,
-    client_secret: SecretString,
+    pub client_id: SecretString,
+    pub client_secret: SecretString,
 }
 
-#[derive(Debug, serde::Deserialize, Getters)]
-#[getset(get = "pub")]
+#[derive(Debug, serde::Deserialize)]
 pub struct ServerConfig {
-    host: String,
-    port: u16,
+    pub host: String,
+    pub port: u16,
 }
 
-#[derive(Debug, serde::Deserialize, Getters)]
-#[getset(get = "pub")]
+#[derive(Debug, serde::Deserialize)]
 pub struct WebhookConfig {
     #[serde(deserialize_with = "deserialize_url_from_string")]
-    target_base: Url,
+    pub target_base: Url,
     // Regex path: Allowed methods
     #[serde(deserialize_with = "deserialize_paths_from_string")]
-    paths: HashMap<String, HashSet<AllowedMethod>>,
+    pub paths: HashMap<String, HashSet<AllowedMethod>>,
 }
 
 impl Config {
@@ -287,8 +283,8 @@ mod tests_try_from {
         set.insert(AllowedMethod::DELETE);
 
         let allowed_path: crate::config::AllowedPath = set.try_into().unwrap();
-        assert!(allowed_path.all());
-        assert_eq!(allowed_path.methods().len(), 5);
+        assert!(allowed_path.all);
+        assert_eq!(allowed_path.methods.len(), 5);
     }
 
     #[test]
@@ -297,13 +293,9 @@ mod tests_try_from {
         set.insert(AllowedMethod::GET);
 
         let allowed_path: crate::config::AllowedPath = set.try_into().unwrap();
-        assert!(!allowed_path.all());
-        assert_eq!(allowed_path.methods().len(), 1);
-        assert!(
-            allowed_path
-                .methods()
-                .contains(&actix_web::http::Method::GET)
-        );
+        assert!(!allowed_path.all);
+        assert_eq!(allowed_path.methods.len(), 1);
+        assert!(allowed_path.methods.contains(&actix_web::http::Method::GET));
     }
 
     #[test]
@@ -312,8 +304,8 @@ mod tests_try_from {
         set.insert(AllowedMethod::ALL);
 
         let allowed_path: crate::config::AllowedPath = set.try_into().unwrap();
-        assert!(allowed_path.all());
-        assert_eq!(allowed_path.methods().len(), 0);
+        assert!(allowed_path.all);
+        assert_eq!(allowed_path.methods.len(), 0);
     }
 
     #[test]
@@ -376,16 +368,16 @@ mod tests {
         )?;
 
         assert_eq!(
-            config.cloudflare().client_id().expose_secret(),
+            config.cloudflare.client_id.expose_secret(),
             CORRECT_CLOUDFLARE_CLIENT_ID
         );
         assert_eq!(
-            config.cloudflare().client_secret().expose_secret(),
+            config.cloudflare.client_secret.expose_secret(),
             CORRECT_CLOUDFLARE_CLIENT_SECRET
         );
 
         assert_eq!(
-            config.webhook().target_base().as_str(),
+            config.webhook.target_base.as_str(),
             CORRECT_WEBHOOK_TARGET_BASE
         );
 
@@ -395,7 +387,7 @@ mod tests {
         methods.insert(AllowedMethod::ALL);
         paths.insert("/test".to_string(), methods);
 
-        assert_eq!(config.webhook().paths(), &paths);
+        assert_eq!(config.webhook.paths, paths);
 
         Ok(())
     }
@@ -420,20 +412,20 @@ mod tests {
             Config::get_configuration,
         )?;
 
-        assert_eq!(config.server().host(), CORRECT_SERVER_HOST);
-        assert_eq!(config.server().port(), &8080u16);
+        assert_eq!(config.server.host, CORRECT_SERVER_HOST);
+        assert_eq!(config.server.port, 8080u16);
 
         assert_eq!(
-            config.cloudflare().client_id().expose_secret(),
+            config.cloudflare.client_id.expose_secret(),
             CORRECT_CLOUDFLARE_CLIENT_ID
         );
         assert_eq!(
-            config.cloudflare().client_secret().expose_secret(),
+            config.cloudflare.client_secret.expose_secret(),
             CORRECT_CLOUDFLARE_CLIENT_SECRET
         );
 
         assert_eq!(
-            config.webhook().target_base().as_str(),
+            config.webhook.target_base.as_str(),
             CORRECT_WEBHOOK_TARGET_BASE
         );
 
@@ -452,7 +444,7 @@ mod tests {
         methods.insert(AllowedMethod::PUT);
         paths.insert(r"/test\d*".to_string(), methods);
 
-        assert_eq!(config.webhook().paths(), &paths);
+        assert_eq!(config.webhook.paths, paths);
 
         Ok(())
     }

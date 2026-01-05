@@ -1,6 +1,5 @@
 use crate::Result;
 use crate::error::Error;
-use derive_new::new;
 use regex::RegexSet;
 use reqwest::Url;
 use reqwest::header::HeaderValue;
@@ -8,15 +7,13 @@ use reqwest_middleware::ClientWithMiddleware;
 use secrecy::{ExposeSecret, SecretString};
 use std::collections::{HashMap, HashSet};
 
-#[derive(Getters, Debug)]
-#[getset(get = "pub")]
+#[derive(Debug)]
 pub struct WebHookData {
-    client: ClientWithMiddleware,
-    #[getset(skip)]
-    target_host: Url,
-    allowed_paths: AllowedPaths,
-    access_id: HeaderValue,
-    access_secret: HeaderValue,
+    pub(crate) client: ClientWithMiddleware,
+    pub(crate) target_host: Url,
+    pub(crate) allowed_paths: AllowedPaths,
+    pub(crate) access_id: HeaderValue,
+    pub(crate) access_secret: HeaderValue,
 }
 
 impl WebHookData {
@@ -51,11 +48,10 @@ impl WebHookData {
     }
 }
 
-#[derive(Getters, Debug)]
-#[getset(get = "pub")]
+#[derive(Debug)]
 pub struct AllowedPaths {
-    allowed_paths: RegexSet,
-    allowed_methods: HashMap<String, AllowedPath>,
+    pub(crate) allowed_paths: RegexSet,
+    pub(crate) allowed_methods: HashMap<String, AllowedPath>,
 }
 
 impl AllowedPaths {
@@ -99,16 +95,19 @@ impl AllowedPaths {
     }
 }
 
-#[derive(new, Getters, Debug)]
-#[getset(get = "pub")]
+#[derive(Debug)]
 pub struct AllowedPath {
-    all: bool,
-    methods: HashSet<actix_web::http::Method>,
+    pub(crate) all: bool,
+    pub(crate) methods: HashSet<actix_web::http::Method>,
 }
 
 impl AllowedPath {
     pub fn is_allowed(&self, method: &actix_web::http::Method) -> bool {
         self.all || self.methods.contains(method)
+    }
+
+    pub fn new(all: bool, methods: HashSet<actix_web::http::Method>) -> Self {
+        Self { all, methods }
     }
 }
 

@@ -45,10 +45,10 @@ async fn redirect(
         ActixToReqwestConverter::convert_headers(request.headers(), 2);
 
     // Add Cloudflare Access headers
-    target_headers.append("CF-Access-Client-Id", web_hook_data.access_id().clone());
+    target_headers.append("CF-Access-Client-Id", web_hook_data.access_id.clone());
     target_headers.append(
         "CF-Access-Client-Secret",
-        web_hook_data.access_secret().clone(),
+        web_hook_data.access_secret.clone(),
     );
 
     // Query params
@@ -56,7 +56,7 @@ async fn redirect(
 
     // Redirect request
     let response = ReqwestBuilder::new(
-        web_hook_data.client(),
+        &web_hook_data.client,
         target_url,
         body,
         target_headers,
@@ -178,8 +178,6 @@ mod tests {
 
     const RETURN_STRING: &str = "Success!";
 
-    #[derive(Getters)]
-    #[getset(get = "pub")]
     pub struct TestApp {
         _mock_server: wiremock::MockServer,
         web_hook_data: web::Data<WebHookData>,
@@ -237,7 +235,7 @@ mod tests {
         let test_app = TestApp::new("GET", "test", "GET", "test").await;
         let app = test::init_service(
             App::new()
-                .app_data(test_app.web_hook_data().clone())
+                .app_data(test_app.web_hook_data.clone())
                 .configure(get_config),
         )
         .await;
@@ -264,7 +262,7 @@ mod tests {
         let test_app = TestApp::new("PUT", "test", "ALL", "test").await;
         let app = test::init_service(
             App::new()
-                .app_data(test_app.web_hook_data().clone())
+                .app_data(test_app.web_hook_data.clone())
                 .configure(get_config),
         )
         .await;
@@ -291,7 +289,7 @@ mod tests {
         let test_app = TestApp::new("PUT", "test/10090", "ALL", r"test/\d*").await;
         let app = test::init_service(
             App::new()
-                .app_data(test_app.web_hook_data().clone())
+                .app_data(test_app.web_hook_data.clone())
                 .configure(get_config),
         )
         .await;

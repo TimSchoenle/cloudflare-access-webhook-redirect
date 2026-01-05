@@ -1,6 +1,4 @@
 #[macro_use]
-extern crate getset;
-#[macro_use]
 extern crate tracing;
 
 use crate::error::Error;
