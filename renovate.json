@@ -3,12 +3,15 @@
   "extends": [
     "config:best-practices",
     "helpers:pinGitHubActionDigests",
-    "workarounds:all"
+    "workarounds:all",
+    "github>TimSchoenle/actions//configs/renovate/base"
   ],
   "dependencyDashboard": true,
   "semanticCommits": "enabled",
   "semanticCommitType": "fix",
-  "labels": ["dependencies"],
+  "labels": [
+    "dependencies"
+  ],
   "rebaseWhen": "auto",
   "timezone": "Europe/Berlin",
   "minimumReleaseAge": null,
@@ -22,14 +25,29 @@
   "packageRules": [
     {
       "description": "Auto-merge safe dev updates",
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "digest"
+      ],
       "automerge": true
     },
     {
       "description": "CI actions: safe to auto-merge",
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch", "digest", "major", "pin"],
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "major",
+        "pin"
+      ],
       "automerge": true
     }
   ]
