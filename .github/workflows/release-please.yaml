@@ -114,7 +114,7 @@ jobs:
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
-      - uses: TimSchoenle/actions/actions/helm/update-chart-version@actions-helm-update-chart-version-v1.2.3
+      - uses: TimSchoenle/actions/actions/helm/update-chart-version@actions-helm-update-chart-version-v1.2.4
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
