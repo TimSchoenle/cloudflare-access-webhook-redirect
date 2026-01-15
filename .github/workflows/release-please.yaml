@@ -4,7 +4,11 @@ on:
     branches:
       - master
 
-permissions: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: { }
 
 env:
   DOCKER_REPO: timmi6790/cloudflare-access-webhook-redirect
