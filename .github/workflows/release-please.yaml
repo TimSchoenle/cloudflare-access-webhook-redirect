@@ -21,6 +21,11 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
       - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4
         id: release
 
@@ -34,6 +39,11 @@ jobs:
       contents: read
       id-token: write
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
@@ -97,6 +107,11 @@ jobs:
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
@@ -114,6 +129,11 @@ jobs:
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
       - uses: TimSchoenle/actions/actions/helm/update-chart-version@be64fd48790540af353d0561c1ba5c1580e8e36d # actions-helm-update-chart-version-v1.4.1
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
