@@ -161,6 +161,7 @@ jobs:
           args: --all-features --all-targets
 
   docker-build-test:
+    name: Docker Build and Test
     runs-on: ubuntu-latest
     needs: check
     permissions:
