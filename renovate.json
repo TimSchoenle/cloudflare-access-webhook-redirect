@@ -1,63 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:best-practices",
-    "helpers:pinGitHubActionDigests",
-    "workarounds:all",
-    "github>TimSchoenle/actions//configs/renovate/base"
+    "github>TimSchoenle/actions//configs/renovate/default"
   ],
-  "dependencyDashboard": true,
-  "semanticCommits": "enabled",
-  "semanticCommitType": "fix",
-  "labels": [
-    "dependencies"
-  ],
-  "rebaseWhen": "auto",
-  "timezone": "Europe/Berlin",
-  "minimumReleaseAge": null,
-  "lockFileMaintenance": {
-    "enabled": true,
-    "automerge": true
-  },
-  "prHourlyLimit": 0,
-  "prConcurrentLimit": 0,
-  "branchConcurrentLimit": 0,
   "packageRules": [
     {
-      "description": "Auto-merge safe dev updates",
-      "matchDepTypes": [
-        "devDependencies"
-      ],
-      "matchUpdateTypes": [
-        "major",
-        "minor",
-        "patch",
-        "digest"
-      ],
-      "automerge": true
-    },
-    {
-      "description": "CI actions: safe to auto-merge",
-      "matchManagers": [
-        "github-actions"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest",
-        "major",
-        "pin"
-      ],
-      "automerge": true
-    },
-    {
       "matchPackageNames": [
-        "dtolnay/rust-toolchain"
-      ],
-      "pinDigests": false
-    },
-    {
-      "matchPackageNames": [
+        "dtolnay/rust-toolchain",
         "lukemathwalker/cargo-chef",
         "aquasecurity/trivy-action",
         "taiki-e/install-action"

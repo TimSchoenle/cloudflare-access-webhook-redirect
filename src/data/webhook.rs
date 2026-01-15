@@ -289,7 +289,7 @@ mod tests_webhook_data {
 
         // Check /test/ path
         ALL_HTTP_METHODS.iter().for_each(|method| {
-            if method == &actix_web::http::Method::GET || method == &actix_web::http::Method::POST {
+            if method == actix_web::http::Method::GET || method == actix_web::http::Method::POST {
                 assert!(web_hook_data.is_allowed_path("/test/", method));
             } else {
                 assert!(!web_hook_data.is_allowed_path("/test/", method));
