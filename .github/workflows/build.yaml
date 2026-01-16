@@ -34,7 +34,7 @@ permissions:
 jobs:
   check:
     name: Check
-    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@workflows-rust-cargo-check-v1.1.0
+    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@workflows-rust-cargo-check-v1.1.1
 
   test-and-coverage:
     name: Test & Coverage
