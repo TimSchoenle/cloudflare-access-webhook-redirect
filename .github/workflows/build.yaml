@@ -32,13 +32,13 @@ jobs:
     name: Check
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@workflows-rust-cargo-check-v1.1.2
+    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@workflows-rust-cargo-check-v1.1.3
 
   coverage:
     name: Coverage
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@workflows-rust-coverage-codecov-v1.0.0
+    uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@workflows-rust-coverage-codecov-v1.0.1
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -46,11 +46,11 @@ jobs:
     name: Test
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-test.yaml@workflows-rust-test-v1.0.0
+    uses: TimSchoenle/actions/.github/workflows/rust-test.yaml@workflows-rust-test-v1.0.1
 
   fmt:
     name: Auto Format
-    uses: TimSchoenle/actions/.github/workflows/rust-auto-format.yaml@workflows-rust-auto-format-v1.1.0
+    uses: TimSchoenle/actions/.github/workflows/rust-auto-format.yaml@workflows-rust-auto-format-v1.1.1
     secrets:
       APP_ID: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
       PRIVATE_KEY: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
@@ -60,7 +60,7 @@ jobs:
     permissions:
       contents: read # Required to checkout the code
       checks: write # Required to annotate the commit with clippy warnings
-    uses: TimSchoenle/actions/.github/workflows/rust-clippy.yaml@workflows-rust-clippy-v1.1.0
+    uses: TimSchoenle/actions/.github/workflows/rust-clippy.yaml@workflows-rust-clippy-v1.1.1
 
   docker-build-test:
     name: Docker Build and Test
