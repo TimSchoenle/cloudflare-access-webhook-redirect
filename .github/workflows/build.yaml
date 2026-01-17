@@ -39,14 +39,14 @@ jobs:
     permissions:
       contents: read # Required to checkout the code
     uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@workflows-rust-coverage-codecov-v1.0.0
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test:
     name: Test
     permissions:
       contents: read # Required to checkout the code
     uses: TimSchoenle/actions/.github/workflows/rust-test.yaml@workflows-rust-test-v1.0.0
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   fmt:
     name: Auto Format
