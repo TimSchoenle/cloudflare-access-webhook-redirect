@@ -1,32 +1,25 @@
-name: Security
+name: GitHub Actions Security Analysis with zizmor 🌈
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ '**' ]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [ "**" ]
 
 permissions: { }
 
 jobs:
   zizmor:
-    name: Zizmor
     runs-on: ubuntu-latest
     permissions:
-      contents: read # to fetch code
-      actions: read # to read action configurations
-      security-events: write # to upload SARIF results
+      security-events: write
+      contents: read # only needed for private or internal repos
+      actions: read # only needed for private or internal repos
     steps:
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
-      - name: Run Zizmor
+      - name: Run zizmor 🌈
         uses: zizmorcore/zizmor-action@3aa7e2f1ad15075829ef5158ee06938ae12e1769 # v0.4.0
-        with:
-          persona: pedantic
