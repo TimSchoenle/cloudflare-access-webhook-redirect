@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.3.9](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.8...v0.3.9) (2026-01-18)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([#161](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/161)) ([737488d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/737488d95d54cc864b18604f8e0ea17a9b284251))
+
+
+### Build System
+
+* imrpove CI ([#167](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/167)) ([47a1f14](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/47a1f1432ca5bcc23785c5f8ce2fec0dae503517))
+* run check on shared workflow ([#170](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/170)) ([8d8e0c6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/8d8e0c6e1e1957b9679dd36aa139d973420bef3f))
+* use propper bot for release PRs ([#175](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/175)) ([577f566](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/577f566b2577884ca7ed5e22a8371627505f2e1d))
+
+
+### Miscellaneous
+
+* **deps:** pin timschoenle/actions action to 72da508 ([#162](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/162)) ([02462a3](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/02462a38e7ef4d7faf822f20a6e772bfb4be2b72))
+* **deps:** update ([#171](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/171)) ([b4c3430](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b4c34301f01deae5935bbc73dc28c334f8f18e70))
+* **deps:** update rust crate sentry to v0.46.1 ([#163](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/163)) ([c15577a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/c15577a95979e9271549c52565dfcffb2acb5533))
+* **deps:** update rust crate serde_json to v1.0.149 ([#164](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/164)) ([ee58519](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ee58519d04ad0abb8eac9439c9ca825a518206c6))
+* **deps:** update rust crate tracing-actix-web to v0.7.21 ([#168](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/168)) ([c626fe6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/c626fe64e75cf9b117dd5aaa805f0ac9774490d7))
+* **deps:** update to vactions-helm-update-chart-version-v1.4.1 ([#165](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/165)) ([5711f97](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5711f97aeed9904e92c271ae4be80bbe9efe75e1))
+* **deps:** update to vactions-helm-update-chart-version-v1.4.3 ([#169](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/169)) ([084f5fd](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/084f5fdc862e423eed62f44687bd80f800ea10b9))
+* **deps:** update zizmorcore/zizmor-action action to v0.4.0 ([#172](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/172)) ([5a76ae5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5a76ae56d5bb0a9405df9dc23d3be68413ac1c93))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#173](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/173)) ([16d79ef](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/16d79ef53fbad6a91472d012896137b0ae156c99))
+* **deps:** lock file maintenance ([#174](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/174)) ([306ed19](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/306ed191b2751c714bd2256041406d1306099598))
+
 ## [0.3.8](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.7...v0.3.8) (2026-01-06)
 
 
