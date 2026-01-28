@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.11](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.10...v0.3.11) (2026-01-28)
+
+
+### Miscellaneous
+
+* **deps:** update alpine:3.23 docker digest to 2510918 ([#190](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/190)) ([19f5110](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/19f51108eddfc5758b54d73fc1497c560f463027))
+* **deps:** update github/codeql-action action to v4.32.0 ([#188](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/188)) ([4259da1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/4259da1dde57e785d6c672839a78c910da177dfb))
+* **deps:** update to vactions-helm-update-chart-version-v1.4.4 ([#180](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/180)) ([c55f610](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/c55f610b0c5f1c2f75c919e341f55da82b509099))
+
 ## [0.3.10](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.9...v0.3.10) (2026-01-26)
 
 
