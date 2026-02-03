@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.3.11](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.10...v0.3.11) (2026-02-02)
+
+
+### Miscellaneous
+
+* **deps:** update alpine:3.23 docker digest to 2510918 ([#190](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/190)) ([19f5110](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/19f51108eddfc5758b54d73fc1497c560f463027))
+* **deps:** update docker/login-action digest to c94ce9f ([#191](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/191)) ([b28f8c5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b28f8c56aa64cb00541de2cdfa4372041f4be365))
+* **deps:** update github/codeql-action action to v4.32.0 ([#188](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/188)) ([4259da1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/4259da1dde57e785d6c672839a78c910da177dfb))
+* **deps:** update github/codeql-action action to v4.32.1 ([#202](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/202)) ([2bf32ad](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2bf32ad91367850a3679052f4f7cc39e7ba33410))
+* **deps:** update to vactions-helm-update-chart-version-v1.4.4 ([#180](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/180)) ([c55f610](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/c55f610b0c5f1c2f75c919e341f55da82b509099))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#192](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/192)) ([05b1f6b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/05b1f6b06525603b086fc2515df793689a4c320c))
+* **deps:** lock file maintenance ([#193](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/193)) ([bd48179](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/bd48179018336baa8b788b43522c2b4f824b2d4d))
+* **deps:** lock file maintenance ([#194](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/194)) ([11b0da5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/11b0da5203fcf38a94388c2d6fa5d25f15223fe6))
+* **deps:** lock file maintenance ([#195](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/195)) ([cef2a60](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/cef2a60ed746de646a3c06e1818b8f2f4f8e01e4))
+* **deps:** lock file maintenance ([#196](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/196)) ([372eb26](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/372eb26e0ebebcda3a3325ce7a07e132062b3a86))
+* **deps:** lock file maintenance ([#197](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/197)) ([0342273](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0342273aa2a93db2f8497cb5ee07f15d01154bce))
+* **deps:** lock file maintenance ([#198](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/198)) ([26018ef](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/26018efaff28407857f7e9eff021b51061ca17c7))
+* **deps:** lock file maintenance ([#199](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/199)) ([60137af](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/60137af89fd260fd9f6c7f4f3ff8ba079964d81e))
+* **deps:** lock file maintenance ([#200](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/200)) ([4334543](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/4334543cab318482076be02c7fc87e63e3d64427))
+* **deps:** lock file maintenance ([#201](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/201)) ([3b5c203](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/3b5c2035062ab812f555232fef47e0d8ebe6f78d))
+
 ## [0.3.10](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.9...v0.3.10) (2026-01-26)
 
 
