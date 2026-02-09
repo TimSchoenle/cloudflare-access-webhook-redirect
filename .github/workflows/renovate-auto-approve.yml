@@ -9,7 +9,7 @@ permissions: {}
 jobs:
   auto-approve-renovate:
     name: Auto Approve Renovate
-    uses: TimSchoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml@e01b2c45ee28f8485d436ba3049f20ccb096299a # workflows-maintenance-auto-approve-renovate-v1.2.5
+    uses: TimSchoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml@948d83073fd717c74eace2f6be5c9780767892ab # workflows-maintenance-auto-approve-renovate-v1.3.0
     permissions:
       pull-requests: write # To approve PRs
     with:
