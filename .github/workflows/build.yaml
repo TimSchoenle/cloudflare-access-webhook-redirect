@@ -19,13 +19,13 @@ jobs:
     name: Check
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@d26be78199d3532cf21c4cab6ca850dd45e5627e # workflows-rust-cargo-check-v1.1.3
+    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@db5bbe354aa20b8a5cf9800f689160c4c0f75256 # workflows-rust-cargo-check-v1.1.4
 
   coverage:
     name: Coverage
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@5933b5b32a3022bdcfdf1eebc8b459f5748763a4 # workflows-rust-coverage-codecov-v1.0.1
+    uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@4cc259b6dee1e74394faed473262cfc652f23bae # workflows-rust-coverage-codecov-v1.0.2
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -47,7 +47,7 @@ jobs:
     permissions:
       contents: read # Required to checkout the code
       checks: write # Required to annotate the commit with clippy warnings
-    uses: TimSchoenle/actions/.github/workflows/rust-clippy.yaml@1a99a0b6267fad9f94b53277f3911c8d64f78026 # workflows-rust-clippy-v1.1.1
+    uses: TimSchoenle/actions/.github/workflows/rust-clippy.yaml@0139849aaaac592ebf44af62ca1b469632172737 # workflows-rust-clippy-v1.1.2
 
   docker-build-test:
     name: Docker Build and Test
@@ -116,7 +116,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # v4.32.2
+        uses: github/codeql-action/upload-sarif@9e907b5e64f6b83e7804b09294d44122997950d6 # v4.32.3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
