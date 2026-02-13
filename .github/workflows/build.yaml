@@ -37,7 +37,7 @@ jobs:
 
   fmt:
     name: Auto Format
-    uses: TimSchoenle/actions/.github/workflows/rust-auto-format.yaml@0369062f8f6310d02d8df754bec56e02727f5a36 # workflows-rust-auto-format-v1.1.1
+    uses: TimSchoenle/actions/.github/workflows/rust-auto-format.yaml@a7d92c33bdf0a2820fdecc6da9c986d5b9c36995 # workflows-rust-auto-format-v1.1.2
     secrets:
       APP_ID: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
       PRIVATE_KEY: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
