@@ -25,7 +25,7 @@ jobs:
     name: Coverage
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@4cc259b6dee1e74394faed473262cfc652f23bae # workflows-rust-coverage-codecov-v1.0.2
+    uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@da2570ccadc26a91e57c290c18082cff8e4345bb # workflows-rust-coverage-codecov-v1.0.3
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
