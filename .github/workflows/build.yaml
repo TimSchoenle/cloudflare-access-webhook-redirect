@@ -25,7 +25,7 @@ jobs:
     name: Coverage
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@da2570ccadc26a91e57c290c18082cff8e4345bb # workflows-rust-coverage-codecov-v1.0.3
+    uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@cefa8b269bfd7aa38af7825dc24841ea594199d8 # workflows-rust-coverage-codecov-v1.0.4
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -62,7 +62,7 @@ jobs:
       pull-requests: write # Required to comment on PRs with image size
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
@@ -116,7 +116,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@9e907b5e64f6b83e7804b09294d44122997950d6 # v4.32.3
+        uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -146,7 +146,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
