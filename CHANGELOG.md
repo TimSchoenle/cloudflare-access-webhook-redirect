@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.3.13](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.12...v0.3.13) (2026-02-27)
+
+
+### Build System
+
+* always run full CI tests for better auto merge renovate setup ([42e85a3](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/42e85a37db384f50ee99481f74b451af3100c600))
+* update trivy action version to 0.34.1 ([bc2b0c4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/bc2b0c4b8c7e6672401ce59f2b2fe31f7d9752e7))
+
+
+### Miscellaneous
+
+* **deps:** update all non-major action updates ([#227](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/227)) ([16d8489](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/16d8489c65c3fab50b7454529087915fb0f0f4d3))
+* **deps:** update all non-major action updates ([#229](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/229)) ([450a5f2](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/450a5f2b66f5df3eff27b6dfd046ce1e185aa124))
+* **deps:** update docker/build-push-action digest to 10e90e3 ([#225](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/225)) ([ed0d90a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ed0d90afe03896ab4fb2ff4b5fd78b3275e3f14b))
+* **deps:** update docker/build-push-action digest to 601a80b ([#224](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/224)) ([01044f6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/01044f6f19bdd32fd1a20a2a393e370e95dd9d71))
+* **deps:** update docker/build-push-action digest to ee4ca42 ([#222](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/222)) ([4c09509](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/4c095092a4444f3bfdf0fa34ed0c8c066767f47b))
+* **deps:** update rust crate actix-web to v4.13.0 ([#233](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/233)) ([8a62490](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/8a62490e3131a1bf1b855b334874287b8b72cc4d))
+* **deps:** update to vactions-helm-update-chart-version-v1.5.0 ([#226](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/226)) ([2ccd951](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2ccd9517eeae50a818ff2a1c9e8153abc95e9152))
+* **deps:** update to vworkflows-rust-auto-format-v1.1.2 ([#228](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/228)) ([b9b901d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b9b901d10947a9cb6896b5f1aff8f6c0e51dc36d))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#230](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/230)) ([2d7c6fe](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2d7c6fe95d418aafc921202ed436cd833f0f3144))
+* **deps:** lock file maintenance ([#231](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/231)) ([d82ce47](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/d82ce477b87b1354679fba9cd4d71c52c318dabe))
+* **deps:** lock file maintenance ([#232](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/232)) ([57f219d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/57f219d5288c3e2ffbf1de847ac15e40a6217d16))
+
 ## [0.3.12](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.11...v0.3.12) (2026-02-10)
 
 
