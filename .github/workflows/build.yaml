@@ -19,7 +19,7 @@ jobs:
     name: Check
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@db5bbe354aa20b8a5cf9800f689160c4c0f75256 # workflows-rust-cargo-check-v1.1.4
+    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@304bd1442f3ae5cdc3401aa145fa80fc4f8097e6 # workflows-rust-cargo-check-v1.1.5
 
   coverage:
     name: Coverage
@@ -47,7 +47,7 @@ jobs:
     permissions:
       contents: read # Required to checkout the code
       checks: write # Required to annotate the commit with clippy warnings
-    uses: TimSchoenle/actions/.github/workflows/rust-clippy.yaml@0139849aaaac592ebf44af62ca1b469632172737 # workflows-rust-clippy-v1.1.2
+    uses: TimSchoenle/actions/.github/workflows/rust-clippy.yaml@5d0165e4c39e664afa0ff74d7ccb8eeaf68aa727 # workflows-rust-clippy-v1.1.3
 
   docker-build-test:
     name: Docker Build and Test
