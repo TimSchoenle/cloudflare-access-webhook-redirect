@@ -19,7 +19,7 @@ jobs:
     name: Check
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@304bd1442f3ae5cdc3401aa145fa80fc4f8097e6 # workflows-rust-cargo-check-v1.1.5
+    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@ad33b5a29560a2b160da0ab7fda62a93217435ce # workflows-rust-cargo-check-v1.1.6
 
   coverage:
     name: Coverage
