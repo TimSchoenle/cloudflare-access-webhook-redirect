@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.16](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.15...v0.3.16) (2026-03-19)
+
+
+### Build System
+
+* add missing clippy check ([#279](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/279)) ([e51a292](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e51a29243e250e9e5a1a29410245927e6f17c275))
+* correctly pin review action ([e6a5b03](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e6a5b03ae5a0ce412abab8e74ca0bf32e6c5ca61))
+* migrate actions to propper actions with environment isolation ([#278](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/278)) ([d580397](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/d580397f9f0d1b7c7691e6a87cfba5740c176426))
+
+
+### Miscellaneous
+
+* **deps:** update all non-major action updates ([#275](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/275)) ([6325447](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/63254475f315ee0ec3fc1aaf23d43a658f1cc3e4))
+* **deps:** update rust crate config to v0.15.22 ([#276](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/276)) ([8b1589d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/8b1589d792937e8ea84726c2967eec4c2d4f6eed))
+* **deps:** update to vactions-helm-update-chart-version-v1.5.6 ([#277](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/277)) ([32a59eb](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/32a59eb6f0b6473cb31c95a82f0cb25cc5d8e7a3))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#270](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/270)) ([f73a6a1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f73a6a193e99b32a6ac8a5090078cbea44552cd7))
+* **deps:** lock file maintenance ([#272](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/272)) ([fdf1f77](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/fdf1f7717a2defe5b0315a1267c33af818b5cf6c))
+* **deps:** lock file maintenance ([#273](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/273)) ([b6ddd0b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b6ddd0b0b951c90f1ec01ed8b5f3164277c4faa6))
+* **deps:** lock file maintenance ([#274](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/274)) ([1421fe5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/1421fe5b933c10d7c9be1efd37aa74c854721526))
+
 ## [0.3.15](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.14...v0.3.15) (2026-03-14)
 
 
