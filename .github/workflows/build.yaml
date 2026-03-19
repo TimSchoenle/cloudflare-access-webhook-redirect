@@ -14,48 +14,76 @@ env:
 permissions:
   contents: read # Required to checkout the code
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     name: Check
+    runs-on: ubuntu-latest
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-cargo-check.yaml@ad33b5a29560a2b160da0ab7fda62a93217435ce # workflows-rust-cargo-check-v1.1.6
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
+      - name: Run Check
+        uses: TimSchoenle/actions/actions/rust/cargo-check@6907d47179efeebed4a374ebacb32921ec4dd3fa # actions-rust-cargo-check-v1.1.0
 
   coverage:
     name: Coverage
+    environment: ci
+    runs-on: ubuntu-latest
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-coverage-codecov.yaml@c18cad8aaba7daab9fc8837ce06d3cdb2218b87f # workflows-rust-coverage-codecov-v1.0.7
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
+      - name: Run Coverage
+        uses: TimSchoenle/actions/actions/rust/coverage-codecov@7017314d05900d32e2359a7eef7eeae2c75d042d # actions-rust-coverage-codecov-v1.1.1
+        with:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
   test:
     name: Test
+    runs-on: ubuntu-latest
     permissions:
       contents: read # Required to checkout the code
-    uses: TimSchoenle/actions/.github/workflows/rust-test.yaml@d681dc1bc16b10592a57a57d2845acbe97adb131 # workflows-rust-test-v1.0.1
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
+      - name: Run Test
+        uses: TimSchoenle/actions/actions/rust/test@0db455a705ea67cf5c0844b1b180ed6b653e1c8d # actions-rust-test-v1.1.0
 
   fmt:
     name: Auto Format
-    uses: TimSchoenle/actions/.github/workflows/rust-auto-format.yaml@8ca649033a4ca9a47dc99bd5674a2aba5a4916b3 # workflows-rust-auto-format-v1.1.4
-    secrets:
-      APP_ID: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
-      PRIVATE_KEY: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
+    environment: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
 
-  clippy:
-    name: Clippy
-    permissions:
-      contents: read # Required to checkout the code
-      checks: write # Required to annotate the commit with clippy warnings
-    uses: TimSchoenle/actions/.github/workflows/rust-clippy.yaml@08b56c200b8b2279970a0d22ce15ea146d70d703 # workflows-rust-clippy-v1.1.4
+      - name: Auto Format
+        uses: TimSchoenle/actions/actions/rust/auto-format@1361f508f575af13c560c00f774db66b6c020ce3 # actions-rust-auto-format-v1.1.0
+        with:
+          bot_app_id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
+          bot_private_key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
 
   docker-build-test:
     name: Docker Build and Test
     runs-on: ubuntu-latest
     needs: check
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-docker
-      cancel-in-progress: true
     permissions:
       contents: read # Required to checkout the code
       security-events: write # Required to upload Trivy scan results
@@ -140,9 +168,6 @@ jobs:
     name: Dependency Review
     runs-on: ubuntu-latest
     needs: check
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-dependency-review
-      cancel-in-progress: true
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden Runner
