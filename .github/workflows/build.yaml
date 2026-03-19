@@ -80,6 +80,21 @@ jobs:
           bot_app_id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
           bot_private_key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
 
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required to checkout the code
+      checks: write # Required to annotate the commit with clippy warnings
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
+      - name: Run Clippy
+        uses: TimSchoenle/actions/actions/rust/clippy@3f3dfc3d387da6af5a33e8aa507e9db0383e7a45 # actions-rust-clippy-v1.1.0
+
   docker-build-test:
     name: Docker Build and Test
     runs-on: ubuntu-latest
