@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.3.17](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.16...v0.3.17) (2026-03-27)
+
+
+### Miscellaneous
+
+* **deps:** update github/codeql-action action to v4.34.0 ([#280](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/280)) ([5b1956e](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5b1956e163fe00f594afe2357e44dd13ca5bdd4f))
+* **deps:** update github/codeql-action action to v4.34.1 ([#284](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/284)) ([1359746](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/1359746bb39777652318cd4d7e2852d5af687089))
+* **deps:** update github/codeql-action action to v4.35.0 ([#291](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/291)) ([db14ac4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/db14ac49da7d19279e3ece791e89ca45a64eb7fd))
+* **deps:** update github/codeql-action action to v4.35.1 ([#292](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/292)) ([fb4d53b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/fb4d53bd655fd68983430600a4925f7e5fa74362))
+* **deps:** update sigstore/cosign-installer action to v4.1.1 ([#289](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/289)) ([5fb8dd3](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5fb8dd38c966f2542c34c7a368f49840e91661c7))
+* **deps:** update to vactions-rust-coverage-codecov-v1.1.2 ([#290](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/290)) ([3161db6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/3161db65422272cd2e37f2a36a5a355e67eab28f))
+* **deps:** update to vworkflows-maintenance-auto-approve-renovate-v1.4.1 ([#282](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/282)) ([4c2d9ac](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/4c2d9ac854ec3fc9b09f34e73a406d5dbf07eac1))
+* **deps:** update to vworkflows-maintenance-timed-auto-pr-approve-v1.2.12 ([#283](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/283)) ([0e2b4c6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0e2b4c65ef92b2ae47a935e66f918fb6fec10664))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#285](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/285)) ([98a884c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/98a884c928aca0762ac08e06b018abb279a3a095))
+* **deps:** lock file maintenance ([#286](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/286)) ([fc9dde2](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/fc9dde2eeaa5f7b708f4f6cb014aba9c06913214))
+* **deps:** lock file maintenance ([#287](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/287)) ([001d6b6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/001d6b6b988069ecff033f579bf5e1a2c13f412a))
+* **deps:** lock file maintenance ([#288](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/288)) ([9a6ac67](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/9a6ac67f2b0ebad64aac61917a6a1a1aa72da542))
+
 ## [0.3.16](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.15...v0.3.16) (2026-03-19)
 
 
