@@ -35,7 +35,9 @@ jobs:
 
   coverage:
     name: Coverage
-    environment: ci
+    environment:
+      name: ci
+      deployment: false
     runs-on: ubuntu-latest
     permissions:
       contents: read # Required to checkout the code
@@ -66,7 +68,9 @@ jobs:
 
   fmt:
     name: Auto Format
-    environment: ci
+    environment:
+      name: ci
+      deployment: false
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
@@ -151,7 +155,7 @@ jobs:
           fi
 
       - name: Scan Docker image for vulnerabilities
-        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518 # v0.34.1
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
           image-ref: cloudflare-access-webhook-redirect:test
           format: 'sarif'
