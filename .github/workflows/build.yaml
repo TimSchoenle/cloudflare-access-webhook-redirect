@@ -35,7 +35,9 @@ jobs:
 
   coverage:
     name: Coverage
-    environment: ci
+    environment:
+      name: ci
+      deployment: false
     runs-on: ubuntu-latest
     permissions:
       contents: read # Required to checkout the code
@@ -66,7 +68,9 @@ jobs:
 
   fmt:
     name: Auto Format
-    environment: ci
+    environment:
+      name: ci
+      deployment: false
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner

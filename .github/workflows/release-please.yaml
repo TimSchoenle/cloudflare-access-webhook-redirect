@@ -17,7 +17,9 @@ env:
 
 jobs:
   release-please:
-    environment: release
+    environment:
+      name: release
+      deployment: false
     name: Release Please
     runs-on: ubuntu-latest
     permissions:
@@ -46,7 +48,9 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
 
   docker-release:
-    environment: release
+    environment:
+      name: release
+      deployment: false
     name: Docker Release
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
@@ -123,7 +127,9 @@ jobs:
           cosign sign --yes ${images}
 
   sentry-release:
-    environment: release
+    environment:
+      name: release
+      deployment: false
     name: Sentry Release
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
@@ -151,7 +157,9 @@ jobs:
           environment: production
 
   helm-release:
-    environment: release
+    environment:
+      name: release
+      deployment: false
     name: Helm Release
     needs: [ release-please, docker-release ]
     if: ${{ needs.release-please.outputs.release_created }}
