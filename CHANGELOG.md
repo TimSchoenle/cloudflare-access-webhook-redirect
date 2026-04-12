@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.3.19](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.18...v0.3.19) (2026-04-12)
+
+
+### Build System
+
+* update trivy scanner & use none deployment env ([#317](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/317)) ([48c4c97](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/48c4c973fb4aa01afed1a9e9374ebdbda8f6eb59))
+
+
+### Miscellaneous
+
+* **deps:** update actions/create-github-app-token action to v3.1.0 ([#315](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/315)) ([597b236](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/597b23665cd78bca90de36cde700cfc79d25b73b))
+* **deps:** update actions/create-github-app-token action to v3.1.1 ([#316](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/316)) ([40cc222](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/40cc22286349e5948ebfa6d7096da4d68811f7ba))
+* **deps:** update actions/github-script action to v9 ([#313](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/313)) ([0699df9](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0699df999087110f71a5866a0eabc9d094195f2a))
+* **deps:** update all non-major action updates ([#308](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/308)) ([88c8d97](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/88c8d973e5cba33afb8e81edf3556c44ce9b6082))
+* **deps:** update docker/build-push-action digest to bcafcac ([#314](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/314)) ([ba1d78c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ba1d78c6c5c07b40436bbd0864db1eed33bd31d4))
+* **deps:** update rust crate tokio to v1.51.1 ([#311](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/311)) ([be1b0c3](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/be1b0c3f7dceb30cb1c12fc9a36dbc2709757fb0))
+* **deps:** update step-security/harden-runner action to v2.17.0 ([#312](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/312)) ([be5c083](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/be5c0835fc932bf0cc86d10b74977743256729fb))
+* **deps:** update to vactions-rust-coverage-codecov-v1.1.5 ([#309](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/309)) ([abbdf88](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/abbdf88e31de05dcc4eee5f6371d393159f0e3e3))
+* **deps:** update to vworkflows-maintenance-auto-approve-renovate-v1.4.2 ([#310](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/310)) ([58b519e](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/58b519ea43f9f72dddcc5f5f9e399d2b1608a50b))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#304](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/304)) ([ee186fb](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ee186fbb8382848713e39451f9c22c63b01e166c))
+* **deps:** lock file maintenance ([#306](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/306)) ([8def264](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/8def264f5ae2bc0acfc1479dc9c84b8b363dcff4))
+* **deps:** lock file maintenance ([#307](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/307)) ([5e0952d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5e0952dc98f401fd9958456d30c1d54b295b946e))
+
 ## [0.3.18](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.17...v0.3.18) (2026-04-03)
 
 
