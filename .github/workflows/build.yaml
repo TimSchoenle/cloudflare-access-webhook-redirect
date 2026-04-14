@@ -97,7 +97,7 @@ jobs:
           egress-policy: audit
 
       - name: Run Clippy
-        uses: TimSchoenle/actions/actions/rust/clippy@3f3dfc3d387da6af5a33e8aa507e9db0383e7a45 # tag=actions-rust-clippy-v1.1.0
+        uses: TimSchoenle/actions/actions/rust/clippy@bcab607db683736d14781974e312d58445270c5c # actions-rust-clippy-v1.1.1
 
   docker-build-test:
     name: Docker Build and Test
