@@ -1,4 +1,4 @@
-name: release-please
+﻿name: release-please
 on:
   push:
     branches:
@@ -172,7 +172,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: TimSchoenle/actions/actions/helm/update-chart-version@57671aff26a042a6a6dfcafd8407cb61abe88bae # actions-helm-update-chart-version-v1.5.8
+      - uses: TimSchoenle/actions/actions/helm/update-chart-version@57671aff26a042a6a6dfcafd8407cb61abe88bae # tag=actions-helm-update-chart-version-v1.5.8
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}

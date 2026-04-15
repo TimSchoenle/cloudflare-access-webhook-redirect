@@ -1,4 +1,4 @@
-name: Build
+﻿name: Build
 
 on:
   push:
@@ -48,7 +48,7 @@ jobs:
           egress-policy: audit
 
       - name: Run Coverage
-        uses: TimSchoenle/actions/actions/rust/coverage-codecov@5333016058a4f20248d71226365fa364b0e69e68 # actions-rust-coverage-codecov-v1.1.6
+        uses: TimSchoenle/actions/actions/rust/coverage-codecov@5333016058a4f20248d71226365fa364b0e69e68 # tag=actions-rust-coverage-codecov-v1.1.6
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -97,7 +97,7 @@ jobs:
           egress-policy: audit
 
       - name: Run Clippy
-        uses: TimSchoenle/actions/actions/rust/clippy@bcab607db683736d14781974e312d58445270c5c # actions-rust-clippy-v1.1.1
+        uses: TimSchoenle/actions/actions/rust/clippy@bcab607db683736d14781974e312d58445270c5c # tag=actions-rust-clippy-v1.1.1
 
   docker-build-test:
     name: Docker Build and Test
