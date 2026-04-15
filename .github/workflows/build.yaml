@@ -79,7 +79,7 @@ jobs:
           egress-policy: audit
 
       - name: Auto Format
-        uses: TimSchoenle/actions/actions/rust/auto-format@1361f508f575af13c560c00f774db66b6c020ce3 # tag=actions-rust-auto-format-v1.1.0
+        uses: TimSchoenle/actions/actions/rust/auto-format@a8ecb4e918cbaa7adc2add02eb30a5eeccfe8f16 # tag=actions-rust-auto-format-v1.1.1
         with:
           bot_app_id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
           bot_private_key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
