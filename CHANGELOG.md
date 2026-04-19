@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.3.20](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.19...v0.3.20) (2026-04-17)
+
+
+### Documentation
+
+* add simple security policy ([f53c81b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f53c81bad79003e9c51277e1af91f03863f1aaff))
+
+
+### Build System
+
+* **ci:** adjust version comments for zizmor ([3753566](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/3753566da12247f9a046877da00666aad3bfdbce))
+* **ci:** adjust version comments for zizmor ([7a84310](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/7a84310ecd1c101a2e5cd483837b7e8f349ade3a))
+
+
+### Miscellaneous
+
+* **deps:** update all non-major action updates ([#321](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/321)) ([344d0d6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/344d0d6a09745de80572797ea1a066494678f1b1))
+* **deps:** update alpine:3.23 docker digest to 5b10f43 ([#328](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/328)) ([52aed9a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/52aed9a486d30e6d2d14d1dcce89447d65f463ae))
+* **deps:** update github/codeql-action action to v4.35.2 ([#325](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/325)) ([3700cd9](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/3700cd9a24d95b83c3c95dc125e645d25dad6257))
+* **deps:** update googleapis/release-please-action digest to 5c625bf ([#319](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/319)) ([f98732d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f98732d17f66f091e6a8e04ca5f7786980808f0f))
+* **deps:** update rust crate tokio to v1.52.0 ([#323](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/323)) ([ace71ac](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ace71acfcf34542d3fb63fbe1e010428b991c78f))
+* **deps:** update step-security/harden-runner action to v2.18.0 ([#324](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/324)) ([f06090c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f06090cd6553169604b2327b993a51b993b2f6a1))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml to vworkflows-maintenance-auto-approve-renovate-v1.4.4 ([#329](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/329)) ([898585a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/898585a4c86e2b01452a5db824dbc2f7f46b26ae))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml to vworkflows-maintenance-timed-auto-pr-approve-v1.2.14 ([#330](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/330)) ([d89bc31](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/d89bc31127ace819f5baae0145fae26046361ac1))
+* **deps:** update timschoenle/actions/actions/helm/update-chart-version to vactions-helm-update-chart-version-v1.5.9 ([#331](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/331)) ([f0b83b0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f0b83b09a78917d754233be4e6760a4b54e87b4f))
+* **deps:** update timschoenle/actions/actions/rust/auto-format to vactions-rust-auto-format-v1.1.1 ([#326](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/326)) ([d9c8900](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/d9c890097388f7df39399274b17c4cf173aab8f3))
+* **deps:** update timschoenle/actions/actions/rust/cargo-check to vactions-rust-cargo-check-v1.1.1 ([#327](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/327)) ([c972701](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/c9727010f7a0abc7087f14abcebff9400c56efc4))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.7 ([#332](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/332)) ([9f32ae5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/9f32ae5bbd6af8f4ae1062700291c0170a485ff6))
+* **deps:** update to vactions-rust-coverage-codecov-v1.1.6 ([#322](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/322)) ([25b15f4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/25b15f43a3282973263d5d61620ad068624a2898))
+* **deps:** update zizmorcore/zizmor-action action to v0.5.3 ([#320](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/320)) ([86ccd94](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/86ccd9441d9e00b36a49ba18e679ffada0c6ff66))
+
 ## [0.3.19](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.18...v0.3.19) (2026-04-12)
 
 
