@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.3.21](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.20...v0.3.21) (2026-04-27)
+
+
+### Miscellaneous
+
+* **deps:** update step-security/harden-runner action to v2.19.0 ([#339](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/339)) ([16661aa](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/16661aa8ade062c38e7f86b254927b583f284624))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml to vworkflows-maintenance-auto-approve-renovate-v1.4.5 ([#343](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/343)) ([b30fd79](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b30fd793c05d88da54c2b964f3a13b805e5e1fbc))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml to vworkflows-maintenance-timed-auto-pr-approve-v1.2.15 ([#341](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/341)) ([641b96e](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/641b96e56e956c4e4b189a2dfa4c8dc9984a0fe9))
+* **deps:** update timschoenle/actions/actions/rust/clippy to vactions-rust-clippy-v1.1.2 ([#340](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/340)) ([04315fb](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/04315fb92e5ae1b059e7ff8a646961bd015167e7))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.8 ([#338](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/338)) ([38bbb16](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/38bbb1651651daee0054c8858d6559cf365fc4f5))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.9 ([#348](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/348)) ([1bf4d76](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/1bf4d763253dfb3e872d76f0a0abda6ec9f7e3a3))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#334](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/334)) ([ea49c5c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ea49c5c19c6a6414cdc88547ce035d8f22dfab2a))
+* **deps:** lock file maintenance ([#336](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/336)) ([eea420b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/eea420b1013ee1f6ac4a6c400cdcfc1e7e62a44e))
+* **deps:** lock file maintenance ([#337](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/337)) ([c58451f](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/c58451fd4fe76a5296a0ffcfc1a493767c73599a))
+* **deps:** lock file maintenance ([#344](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/344)) ([be2b1df](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/be2b1df440b5bdf63c32e61df2414278d74de507))
+* **deps:** lock file maintenance ([#345](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/345)) ([70c2700](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/70c2700692d600c882be21517b76e79f3442ab47))
+* **deps:** lock file maintenance ([#346](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/346)) ([410c5dd](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/410c5dd96b698842910d587c514c6c39a58d8828))
+* **deps:** lock file maintenance ([#347](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/347)) ([d6be802](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/d6be802a847f7b83085fedbcb493eb7e5417b641))
+
 ## [0.3.20](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.19...v0.3.20) (2026-04-17)
 
 
