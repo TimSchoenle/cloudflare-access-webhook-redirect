@@ -64,7 +64,7 @@ jobs:
           egress-policy: audit
 
       - name: Run Test
-        uses: TimSchoenle/actions/actions/rust/test@0db455a705ea67cf5c0844b1b180ed6b653e1c8d # tag=actions-rust-test-v1.1.0
+        uses: TimSchoenle/actions/actions/rust/test@c6844b562767b6e68fff4d39bdf9eced6e29b318 # tag=actions-rust-test-v1.1.1
 
   fmt:
     name: Auto Format
