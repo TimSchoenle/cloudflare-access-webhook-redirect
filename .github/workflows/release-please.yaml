@@ -172,11 +172,17 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: TimSchoenle/actions/actions/helm/update-chart-version@0ada9fd480cb7ecb07078bac8a77702caa1d6b99 # tag=actions-helm-update-chart-version-v1.5.23
+      - uses: TimSchoenle/actions/actions/helm/update-chart-version@a9b52e270a60b696cb1c90f996f01977bf27a7c1 # tag=actions-helm-update-chart-version-v1.6.0
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
           helm-repo: ${{ env.HELM_REPO }}
           chart-path: ${{ env.CHART_PATH }}
-          new-tag: ${{ needs.release-please.outputs.tag_name }}
-          image-digest: ${{ needs.docker-release.outputs.image_digest }}
+          images: |
+            {
+              "image.tag": {
+                "tag": "${{ needs.release-please.outputs.tag_name }}",
+                "digest": "${{ needs.docker-release.outputs.image_digest }}"
+              }
+            }
+          app-version: ${{ needs.release-please.outputs.tag_name }}
