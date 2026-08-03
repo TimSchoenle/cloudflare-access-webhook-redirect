@@ -450,7 +450,7 @@ dependencies = [
  "config",
  "derive-new",
  "getset",
- "http 1.4.0",
+ "http 1.4.2",
  "lazy_static",
  "regex",
  "reqwest",
@@ -1083,7 +1083,7 @@ dependencies = [
  "fnv",
  "futures-core",
  "futures-sink",
- "http 1.4.0",
+ "http 1.4.2",
  "indexmap",
  "slab",
  "tokio",
@@ -1172,9 +1172,9 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "1.4.0"
+version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3ba2a386d7f85a81f119ad7498ebe444d2e22c2af0b86b069416ace48b3311a"
+checksum = "6970f50e31d6fc17d3fa27329444bfa74e196cf62e95052a3f6fee181dba6425"
 dependencies = [
  "bytes",
  "itoa",
@@ -1187,7 +1187,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1efedce1fb8e6913f23e0c92de8e62cd5b772a67e7b3946df930a62566c93184"
 dependencies = [
  "bytes",
- "http 1.4.0",
+ "http 1.4.2",
 ]
 
 [[package]]
@@ -1198,7 +1198,7 @@ checksum = "b021d93e26becf5dc7e1b75b1bed1fd93124b374ceb73f43d4d4eafec896a64a"
 dependencies = [
  "bytes",
  "futures-core",
- "http 1.4.0",
+ "http 1.4.2",
  "http-body",
  "pin-project-lite",
 ]
@@ -1235,7 +1235,7 @@ dependencies = [
  "futures-channel",
  "futures-core",
  "h2 0.4.13",
- "http 1.4.0",
+ "http 1.4.2",
  "http-body",
  "httparse",
  "httpdate",
@@ -1252,7 +1252,7 @@ version = "0.27.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33ca68d021ef39cf6463ab54c1d0f5daf03377b70561305bb89a8f83aab66e0f"
 dependencies = [
- "http 1.4.0",
+ "http 1.4.2",
  "hyper",
  "hyper-util",
  "rustls",
@@ -1287,7 +1287,7 @@ dependencies = [
  "bytes",
  "futures-channel",
  "futures-util",
- "http 1.4.0",
+ "http 1.4.2",
  "http-body",
  "hyper",
  "ipnet",
@@ -2282,7 +2282,7 @@ dependencies = [
  "futures-core",
  "futures-util",
  "h2 0.4.13",
- "http 1.4.0",
+ "http 1.4.2",
  "http-body",
  "http-body-util",
  "hyper",
@@ -3179,7 +3179,7 @@ dependencies = [
  "bitflags",
  "bytes",
  "futures-util",
- "http 1.4.0",
+ "http 1.4.2",
  "http-body",
  "iri-string",
  "pin-project-lite",
@@ -3352,7 +3352,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e994ba84b0bd1b1b0cf92878b7ef898a5c1760108fe7b6010327e274917a808c"
 dependencies = [
  "base64",
- "http 1.4.0",
+ "http 1.4.2",
  "httparse",
  "log",
 ]
@@ -3880,7 +3880,7 @@ dependencies = [
  "base64",
  "deadpool",
  "futures",
- "http 1.4.0",
+ "http 1.4.2",
  "http-body-util",
  "hyper",
  "hyper-util",
