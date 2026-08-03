@@ -1,5 +1,60 @@
 # Changelog
 
+## [0.3.22](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.21...v0.3.22) (2026-08-03)
+
+
+### CI
+
+* update Codecov action version in build workflow ([#395](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/395)) ([5fcc202](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5fcc2027c388d5df40a543cd7f51abae08f4bded))
+* update helm chart update action ([38402ca](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/38402ca3a7f384794182219347a5d78e05d33a82))
+
+
+### Build System
+
+* add native arm support ([cec8d0b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/cec8d0bff365135a4256807a4b45bae59b147994))
+
+
+### Miscellaneous
+
+* **deps:** update actions/checkout action to v7 ([#383](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/383)) ([76bb25c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/76bb25cf1d0a7bcf5745c587d6eaddb272dbe0fb))
+* **deps:** update actions/dependency-review-action action to v5 ([#376](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/376)) ([b0c6fec](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b0c6fec63768e922b5ff2670eb44d729894e4066))
+* **deps:** update all non-major action updates ([f269363](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f2693636b26aae4191848bcc42d23b376642abd6))
+* **deps:** update all non-major action updates ([#364](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/364)) ([f269363](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f2693636b26aae4191848bcc42d23b376642abd6))
+* **deps:** update all non-major action updates (minor) ([#373](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/373)) ([afc7413](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/afc7413c050f62e758c7b2b90d5bbd5970f84d25))
+* **deps:** update alpine docker tag to v3.24 ([#381](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/381)) ([5f69c16](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5f69c1694a364b364bb228cbb463a48317973e5e))
+* **deps:** update alpine:3.23 docker digest to fd791d7 ([#377](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/377)) ([79f7049](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/79f704971691f44ed217cc7987470e4f3d535ab9))
+* **deps:** update docker/build-push-action digest to 53b7df9 ([#360](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/360)) ([373b635](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/373b635e7bf6b89b16a1dedac55d74f4047bbd53))
+* **deps:** update docker/dockerfile docker tag to v1.26 ([#374](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/374)) ([d156ff4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/d156ff4a98bd7b7045d705e1e4e187b02276d827))
+* **deps:** update docker/login-action digest to dbcb813 ([#361](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/361)) ([413f4b6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/413f4b6ea586e866c2f497f146c87de307beed78))
+* **deps:** update docker/metadata-action digest to 80c7e94 ([#358](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/358)) ([1489783](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/14897832298371e221dd5758e09514da43fbcfa7))
+* **deps:** update docker/metadata-action digest to dc80280 ([#386](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/386)) ([2d10578](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2d105787400f3be15440d18417308ca21c2ff6bf))
+* **deps:** update docker/setup-buildx-action digest to bb05f3f ([#362](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/362)) ([850c19f](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/850c19f7de4c814df824d32145810e6011901ea1))
+* **deps:** update googleapis/release-please-action action to v5 ([#342](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/342)) ([cd49529](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/cd495290f2b801283e3f5e2a520df0b9a73ba994))
+* **deps:** update rust crate actix-web to v4.14.0 ([#382](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/382)) ([17d7eb7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/17d7eb7da4f4d424dc4725ffb13a57c49a6d8891))
+* **deps:** update rust crate anyhow to v1.0.103 [security] ([#385](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/385)) ([5067d34](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5067d340fc8b777cbd27b3e52fad8e91b6a7a146))
+* **deps:** update rust crate config to v0.15.25 ([#365](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/365)) ([f36895e](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f36895e13d2a0f6a6bb42430273b2ad842828eee))
+* **deps:** update rust crate getset to v0.1.7 ([#366](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/366)) ([3225bea](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/3225bea4c228888939589d2fda3b1f9db369def0))
+* **deps:** update rust crate http to v1.5.0 ([#394](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/394)) ([80b2988](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/80b29885d7b5d4f74c77d2911277128117a87d3c))
+* **deps:** update rust crate regex to v1.12.4 ([#367](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/367)) ([919236f](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/919236fe11680f4dc1024e0f71a5e29bbe761b41))
+* **deps:** update rust crate reqwest to v0.13.4 ([#352](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/352)) ([3e5a746](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/3e5a746bccba464e5cc85fc6001350e59b88c25a))
+* **deps:** update rust crate serde to v1.0.229 ([#390](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/390)) ([88ac17e](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/88ac17ebb2e86b029a28d5b29357900bac754535))
+* **deps:** update rust crate serde_json to v1.0.151 ([#368](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/368)) ([80caadb](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/80caadbc29d80ff945305a50eb55f4c139e866be))
+* **deps:** update rust crate thiserror to v2.0.19 ([#391](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/391)) ([37e20d0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/37e20d062b675d80c12d90c1dc663f8a0598331c))
+* **deps:** update rust crate tokio to v1.53.1 ([#393](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/393)) ([93ecba4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/93ecba4121fbccafa3da13c79de2e73fa0fe3a4b))
+* **deps:** update rust crate tokio-stream to v0.1.19 ([#392](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/392)) ([289e343](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/289e343ec84a9a883cf0325d780b5aec96f4bbfa))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml to vworkflows-maintenance-timed-auto-pr-approve-v1.2.27 ([#349](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/349)) ([4fdee41](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/4fdee41ada2a6dce23b41c129c897f1376063ad5))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml to vworkflows-maintenance-timed-auto-pr-approve-v1.2.28 ([#397](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/397)) ([0bb5468](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0bb546862b7ca0d6f686b13006f08598aedf6b48))
+* **deps:** update timschoenle/actions/actions/helm/update-chart-version to vactions-helm-update-chart-version-v1.5.23 ([#369](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/369)) ([f2ecd2c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f2ecd2c325fe6c8192d44ced5ab7664d5e94f32b))
+* **deps:** update timschoenle/actions/actions/rust/auto-format to vactions-rust-auto-format-v1.1.8 ([#370](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/370)) ([fbfab3c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/fbfab3c19965bc96645422ddb450c2adfd8e2dbb))
+* **deps:** update timschoenle/actions/actions/rust/cargo-check to vactions-rust-cargo-check-v1.1.5 ([#371](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/371)) ([1a8b5a7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/1a8b5a7473aedb217b4f6e85493e82901917483c))
+* **deps:** update timschoenle/actions/actions/rust/clippy to vactions-rust-clippy-v1.1.9 ([#350](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/350)) ([337618f](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/337618f1dd59cdf6de5ef8d34df07ff2c5b5b78f))
+* **deps:** update timschoenle/actions/actions/rust/test to vactions-rust-test-v1.1.1 ([#372](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/372)) ([fe7f147](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/fe7f147bb69e2e4f63f254bbe9d32c63570814f6))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#355](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/355)) ([1c8df55](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/1c8df55fb7ae48f4c871a2772784add6fb2d0616))
+
 ## [0.3.21](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.20...v0.3.21) (2026-04-27)
 
 
