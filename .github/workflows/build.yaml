@@ -100,13 +100,26 @@ jobs:
         uses: TimSchoenle/actions/actions/rust/clippy@c076d8181a6e23c7a274a7ca2019110dbf7b2e36 # tag=actions-rust-clippy-v1.1.2
 
   docker-build-test:
-    name: Docker Build and Test
-    runs-on: ubuntu-latest
+    name: Docker Build and Test (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
     needs: check
     permissions:
       contents: read # Required to checkout the code
       security-events: write # Required to upload Trivy scan results
       pull-requests: write # Required to comment on PRs with image size
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Each platform is built on a native runner, so no QEMU emulation is involved
+          - arch: amd64
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    env:
+      IMAGE: cloudflare-access-webhook-redirect:test-${{ matrix.arch }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
@@ -118,9 +131,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
 
@@ -128,26 +138,49 @@ jobs:
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7
         with:
           context: .
+          platforms: ${{ matrix.platform }}
           push: false
           load: true
-          tags: cloudflare-access-webhook-redirect:test
+          tags: ${{ env.IMAGE }}
           build-args: |
             version=test
             release=test
             vendor=Timmi6790
             VERSION=test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=build-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=build-${{ matrix.arch }}
 
       - name: Test Docker image runs
         run: |
-          docker run --rm cloudflare-access-webhook-redirect:test --version || true
-          docker run --rm cloudflare-access-webhook-redirect:test --help || true
+          docker run -d --name smoke-test -p 8080:8080 \
+            -e SERVER.HOST=0.0.0.0 \
+            -e SERVER.PORT=8080 \
+            -e CLOUDFLARE.CLIENT_ID=ci-client-id \
+            -e CLOUDFLARE.CLIENT_SECRET=ci-client-secret \
+            -e WEBHOOK.TARGET_BASE=https://example.invalid \
+            -e 'WEBHOOK.PATHS=/webhook/.*:ALL' \
+            "${IMAGE}"
+
+          for _ in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/health > /dev/null; then
+              echo "Health check passed on ${{ matrix.platform }}"
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "::error::Container did not become healthy on ${{ matrix.platform }}"
+          docker logs smoke-test
+          exit 1
+
+      - name: Remove smoke test container
+        if: always()
+        run: docker rm -f smoke-test || true
 
       - name: Check image size
         id: size-check
         run: |
-          SIZE=$(docker image inspect cloudflare-access-webhook-redirect:test --format='{{.Size}}' | awk '{print int($1/1024/1024)}')
+          SIZE=$(docker image inspect "${IMAGE}" --format='{{.Size}}' | awk '{print int($1/1024/1024)}')
           echo "size=${SIZE}" >> $GITHUB_OUTPUT
           echo "Image size: ${SIZE}MB"
           if [ $SIZE -gt 150 ]; then
@@ -157,7 +190,7 @@ jobs:
       - name: Scan Docker image for vulnerabilities
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
-          image-ref: cloudflare-access-webhook-redirect:test
+          image-ref: ${{ env.IMAGE }}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
@@ -167,20 +200,22 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
+          category: trivy-${{ matrix.arch }} # Keeps the per-architecture scans from overwriting each other
 
       - name: Comment image size on PR
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         if: github.event_name == 'pull_request'
         env:
           SIZE: ${{ steps.size-check.outputs.size }}
+          PLATFORM: ${{ matrix.platform }}
         with:
           script: |
-            const size = process.env.SIZE;
+            const { SIZE, PLATFORM } = process.env;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🐳 Docker image size: **${size}MB**`
+              body: `🐳 Docker image size (\`${PLATFORM}\`): **${SIZE}MB**`
             });
 
   dependency-review:

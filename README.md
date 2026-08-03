@@ -55,6 +55,7 @@ gateway for specific paths.
 | :heavy_check_mark: | **Sentry Integration** - Optional error tracking and monitoring                           |
 | :heavy_check_mark: | **Structured Logging** - Comprehensive tracing with configurable log levels               |
 | :heavy_check_mark: | **Minimal Docker Image** - Secure, distroless container (~10MB) built with musl           |
+| :heavy_check_mark: | **Multi-Architecture Images** - Native `linux/amd64` and `linux/arm64` builds              |
 | :hourglass:        | **Response Headers Forwarding** - Planned for future releases                             |
 
 ## 🏗️ Architecture
@@ -94,6 +95,9 @@ docker run -p 8080:8080 \
 ```
 
 ## 📦 Installation
+
+The published images are multi-architecture manifest lists covering `linux/amd64` and `linux/arm64`.
+Docker selects the matching architecture automatically, so no platform flag is required.
 
 ### Docker
 
