@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.22...v1.0.0) (2026-08-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* read configuration from files via terrace-config ([#404](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/404))
+
+### Features
+
+* read configuration from files via terrace-config ([#404](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/404)) ([0d1f3f0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0d1f3f014ebad5f434ec4ee4e9ecd6cefec54aaf))
+
+
+### Miscellaneous
+
+* **deps:** update all non-major action updates (patch) ([#400](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/400)) ([0b35e1a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0b35e1a6879defe48f6b9a532aec782c9dc5dafb))
+* **deps:** update rust crate actix-web to v4.14.1 ([#405](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/405)) ([db3d1f0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/db3d1f04b98869a184a4b204e27826fdc2ee6986))
+* **deps:** update rust crate thiserror to v2.0.20 ([#406](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/406)) ([fb6315b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/fb6315bcefb6e069929286439e727b6e0211849c))
+* **deps:** update timschoenle/actions/actions/helm/update-chart-version to vactions-helm-update-chart-version-v1.6.1 ([#402](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/402)) ([0fbefde](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0fbefdecd3c53765d413c3734de6ec93f6b63a55))
+* **deps:** update timschoenle/actions/actions/rust/auto-format to vactions-rust-auto-format-v1.1.9 ([#398](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/398)) ([9a369a4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/9a369a48e1465674a84e4d0049e28e1e7c0e9795))
+
 ## [0.3.22](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.21...v0.3.22) (2026-08-03)
 
 
