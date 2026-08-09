@@ -52,6 +52,8 @@ gateway for specific paths.
 | :heavy_check_mark: | **Request Body Forwarding** - Transparently forwards request bodies                       |
 | :heavy_check_mark: | **Response Passthrough** - Returns the original response body and status code             |
 | :heavy_check_mark: | **Health Check Endpoint** - Built-in `/health` endpoint for monitoring                    |
+| :heavy_check_mark: | **Layered Configuration** - TOML file, environment, mounted secrets directory, `_FILE`    |
+| :heavy_check_mark: | **Live Reload** - Rotate a mounted credential and the proxy rebuilds without a restart    |
 | :heavy_check_mark: | **Sentry Integration** - Optional error tracking and monitoring                           |
 | :heavy_check_mark: | **Structured Logging** - Comprehensive tracing with configurable log levels               |
 | :heavy_check_mark: | **Minimal Docker Image** - Secure, distroless container (~10MB) built with musl           |
@@ -84,13 +86,29 @@ The proxy acts as an intermediary that:
 
 ## 🚀 Quick Start
 
+Write a `config.toml` (see [`config.example.toml`](config.example.toml)):
+
+```toml
+[server]
+host = "0.0.0.0"
+
+[cloudflare]
+client_id = "your-client-id"
+client_secret = "your-client-secret"
+
+[webhook]
+target_base = "https://your-protected-service.com"
+
+[webhook.paths]
+"/webhook/.*" = ["ALL"]
+"/api/public/.*" = ["POST"]
+```
+
+and mount it at `/app/config.toml`, which is where the image looks:
+
 ```bash
 docker run -p 8080:8080 \
-  -e SERVER.HOST=0.0.0.0 \
-  -e CLOUDFLARE.CLIENT_ID=your-client-id \
-  -e CLOUDFLARE.CLIENT_SECRET=your-client-secret \
-  -e WEBHOOK.TARGET_BASE=https://your-protected-service.com \
-  -e WEBHOOK.PATHS="/webhook/.*:ALL; /api/public/.*:POST" \
+  -v "$(pwd)/config.toml:/app/config.toml:ro" \
   timmi6790/cloudflare-access-webhook-redirect
 ```
 
@@ -106,18 +124,19 @@ docker run -d \
   --name cf-webhook-redirect \
   --restart unless-stopped \
   -p 8080:8080 \
-  -e SERVER.HOST=0.0.0.0 \
-  -e CLOUDFLARE.CLIENT_ID=your-client-id \
-  -e CLOUDFLARE.CLIENT_SECRET=your-client-secret \
-  -e WEBHOOK.TARGET_BASE=https://your-protected-service.com \
-  -e WEBHOOK.PATHS="/webhook/.*:ALL; /api/public/.*:POST" \
+  -v "$(pwd)/config.toml:/app/config.toml:ro" \
+  -v "$(pwd)/secrets:/run/secrets:ro" \
+  -e WEBHOOK_REDIRECT_SECRETS_DIR=/run/secrets \
   timmi6790/cloudflare-access-webhook-redirect
 ```
+
+With `secrets/cloudflare__client_id` and `secrets/cloudflare__client_secret` holding the service
+token, the credentials stay out of both the image and the process environment. Rotating either
+file is picked up without a restart.
 
 ### Docker Compose
 
 ```yaml
-version: '3.8'
 services:
   webhook-redirect:
     image: timmi6790/cloudflare-access-webhook-redirect
@@ -125,18 +144,56 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
+    volumes:
+      - ./config.toml:/app/config.toml:ro
     environment:
-      - SERVER.HOST=0.0.0.0
-      - CLOUDFLARE.CLIENT_ID=your-client-id
-      - CLOUDFLARE.CLIENT_SECRET=your-client-secret
-      - WEBHOOK.TARGET_BASE=https://your-protected-service.com
-      - WEBHOOK.PATHS=/webhook/.*:ALL; /api/public/.*:POST
-      - LOG_LEVEL=info
+      - WEBHOOK_REDIRECT_SERVER__HOST=0.0.0.0
+      - WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL=info
+      - WEBHOOK_REDIRECT_SECRETS_DIR=/run/secrets
+    secrets:
+      - cloudflare__client_id
+      - cloudflare__client_secret
+
+secrets:
+  cloudflare__client_id:
+    file: ./secrets/client-id
+  cloudflare__client_secret:
+    file: ./secrets/client-secret
 ```
+
+Compose mounts each secret at `/run/secrets/<name>`, so the secret names *are* the configuration
+keys: `cloudflare__client_id` fills `cloudflare.client_id`.
 
 ### Kubernetes
 
+The proxy is built for a projected `Secret` volume: it follows the `..data` symlink the kubelet
+rewrites on rotation, and rebuilds itself when the mount changes rather than serving with a
+credential that has since been revoked.
+
 ```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cf-webhook-redirect
+data:
+  config.toml: |
+    [webhook]
+    target_base = "https://your-protected-service.com"
+
+    [webhook.paths]
+    "/webhook/.*" = ["ALL"]
+    "/api/public/.*" = ["POST"]
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cf-access-credentials
+type: Opaque
+stringData:
+  # The file names are the configuration keys: `__` separates nesting levels.
+  cloudflare__client_id: your-client-id
+  cloudflare__client_secret: your-client-secret
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -158,20 +215,19 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: WEBHOOK.TARGET_BASE
-              value: "https://your-protected-service.com"
-            - name: CLOUDFLARE.CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: cf-access-credentials
-                  key: client-id
-            - name: CLOUDFLARE.CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: cf-access-credentials
-                  key: client-secret
-            - name: WEBHOOK.PATHS
-              value: "/webhook/.*:ALL; /api/public/.*:POST"
+            - name: WEBHOOK_REDIRECT_SERVER__HOST
+              value: "0.0.0.0"
+            - name: WEBHOOK_REDIRECT_CONFIG
+              value: /etc/cf-webhook-redirect/config.toml
+            - name: WEBHOOK_REDIRECT_SECRETS_DIR
+              value: /run/secrets
+          volumeMounts:
+            - name: config
+              mountPath: /etc/cf-webhook-redirect
+              readOnly: true
+            - name: credentials
+              mountPath: /run/secrets
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /health
@@ -191,6 +247,13 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
+      volumes:
+        - name: config
+          configMap:
+            name: cf-webhook-redirect
+        - name: credentials
+          secret:
+            secretName: cf-access-credentials
 ---
 apiVersion: v1
 kind: Service
@@ -213,16 +276,100 @@ repository.
 
 ## ⚙️ Configuration
 
-### Environment Variables
+Configuration is layered by [terrace-config](https://github.com/TimSchoenle/terrace-config).
+Lowest precedence first:
 
-| Variable                   | Required | Default | Description                                                                                                               |
-|----------------------------|----------|---------|---------------------------------------------------------------------------------------------------------------------------|
-| `CLOUDFLARE.CLIENT_ID`     | Yes      | -       | Cloudflare Access Client ID                                                                                               |
-| `CLOUDFLARE.CLIENT_SECRET` | Yes      | -       | Cloudflare Access Client Secret                                                                                           |
-| `WEBHOOK.TARGET_BASE`      | Yes      | -       | URL of your Cloudflare Access protected service                                                                           |
-| `WEBHOOK.PATHS`            | Yes      | -       | Semicolon-space-separated list of path patterns in format `<regex>:<methods>` (e.g., `/webhook/.*:ALL; /api/.*:POST,GET`) |
-| `LOG_LEVEL`                | No       | `info`  | Log level (`debug`, `info`, `warn`, `error`)                                                                              |
-| `SENTRY_DSN`               | No       | -       | Sentry DSN for error tracking                                                                                             |
+| # | Layer               | Source                                                    | Example                                     |
+|---|---------------------|-----------------------------------------------------------|---------------------------------------------|
+| 1 | Defaults            | built in                                                  | `server.port = 8080`                        |
+| 2 | TOML                | `$WEBHOOK_REDIRECT_CONFIG`, defaulting to `./config.toml` | `[server]`<br>`port = 8080`                 |
+| 3 | Environment         | `WEBHOOK_REDIRECT_`-prefixed, `__`-nested                 | `WEBHOOK_REDIRECT_SERVER__PORT=8080`        |
+| 4 | Secrets directory   | every key-named file in `$WEBHOOK_REDIRECT_SECRETS_DIR`   | `/run/secrets/cloudflare__client_secret`    |
+| 5 | File indirection    | `WEBHOOK_REDIRECT_<KEY>_FILE=/path`                       | `WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_SECRET_FILE=/run/secrets/cf` |
+
+All five spell the same field the same way: `__` separates nesting levels and case is folded, so
+`cloudflare.client_id` is `WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_ID` as a variable and
+`cloudflare__client_id` as a file name.
+
+**A key supplied by two of the last three layers fails the boot** rather than being resolved by
+precedence: a stale environment variable shadowing a mounted secret that has since been rotated
+would otherwise keep the proxy running on the revoked credential, and the discrepancy would
+surface during an incident rather than during a deploy.
+
+If `$WEBHOOK_REDIRECT_CONFIG` names a **directory**, every `*.toml` directly inside it is merged
+in sorted order, which is how a mounted `ConfigMap` of `10-base.toml` and `20-overrides.toml`
+behaves. A missing config file is not an error.
+
+### Settings
+
+| Key                      | Required | Default     | Description                                                                        |
+|--------------------------|----------|-------------|------------------------------------------------------------------------------------|
+| `cloudflare.client_id`   | Yes      | -           | Cloudflare Access Client ID                                                        |
+| `cloudflare.client_secret` | Yes    | -           | Cloudflare Access Client Secret                                                    |
+| `webhook.target_base`    | Yes      | -           | URL of your Cloudflare Access protected service                                    |
+| `webhook.paths`          | Yes      | -           | Table of path regex to allowed methods (`ALL`, `GET`, `POST`, `PUT`, `PATCH`, `DELETE`) |
+| `server.host`            | No       | `127.0.0.1` | Bind address; containers want `0.0.0.0`                                            |
+| `server.port`            | No       | `8080`      | Bind port                                                                          |
+| `telemetry.log_level`    | No       | `info`      | Log level (`trace`, `debug`, `info`, `warn`, `error`)                              |
+| `telemetry.sentry_dsn`   | No       | -           | Sentry DSN for error tracking                                                      |
+
+`webhook.paths` is a table, so it is the one setting the environment layer cannot express — it
+comes from the TOML file:
+
+```toml
+[webhook.paths]
+"/webhook/.*" = ["ALL"]
+"/api/public/.*" = ["GET", "POST"]
+```
+
+Two variables configure the loader itself rather than the service, and are read straight from
+the environment:
+
+| Variable                       | Default        | Description                                          |
+|--------------------------------|----------------|------------------------------------------------------|
+| `WEBHOOK_REDIRECT_CONFIG`      | `./config.toml`| TOML file, or a directory of `*.toml` files          |
+| `WEBHOOK_REDIRECT_SECRETS_DIR` | unset          | Directory of key-named secret files to read          |
+
+### Reloading
+
+The watched directories — the config file's directory, the secrets directory, and any `_FILE`
+target's directory — are watched for changes. When one changes and then goes quiet for 500 ms,
+the configuration is re-read and the proxy is rebuilt: new client, newly compiled path patterns,
+new credentials, new listener. A reload that fails to load, or that resolves to the values
+already running, leaves the running proxy exactly as it is and logs why.
+
+`telemetry.*` is the exception. The tracing subscriber and the Sentry client are installed once
+per process, before the reloadable runtime exists, so changing either still needs a restart.
+
+### Migrating from the environment-only configuration
+
+Releases before this one read unprefixed, dot-separated variables. The mapping:
+
+| Before                     | After                                                                      |
+|----------------------------|----------------------------------------------------------------------------|
+| `SERVER.HOST`              | `WEBHOOK_REDIRECT_SERVER__HOST`                                            |
+| `SERVER.PORT`              | `WEBHOOK_REDIRECT_SERVER__PORT`                                            |
+| `CLOUDFLARE.CLIENT_ID`     | `WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_ID`                                   |
+| `CLOUDFLARE.CLIENT_SECRET` | `WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_SECRET`                               |
+| `WEBHOOK.TARGET_BASE`      | `WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE`                                    |
+| `WEBHOOK.PATHS`            | the `[webhook.paths]` table in the config file                             |
+| `LOG_LEVEL`                | `WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL`                                    |
+| `SENTRY_DSN`               | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN`                                   |
+
+`WEBHOOK.PATHS` packed every pattern into one string as `<regex>:<methods>` separated by `; `,
+which made a pattern containing either separator unspellable. The table has no such limit:
+
+```
+WEBHOOK.PATHS=/webhook/.*:ALL; /api/public/.*:POST,GET
+```
+
+becomes
+
+```toml
+[webhook.paths]
+"/webhook/.*" = ["ALL"]
+"/api/public/.*" = ["POST", "GET"]
+```
 
 ## 🤝 Contributing
 
