@@ -3,8 +3,6 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Tracing error")]
-    Logger(#[from] tracing::metadata::ParseLevelError),
     #[error("IO error")]
     IoError(#[from] std::io::Error),
     #[error("Serde error")]
@@ -13,8 +11,13 @@ pub enum Error {
     Regex(#[from] regex::Error),
     #[error("Invalid route")]
     InvalidRoute(String),
-    #[error("Config error")]
-    Config(#[from] config::ConfigError),
+    /// A configuration could not be assembled: a missing or unparseable value, an unreadable
+    /// file-backed source, or one key supplied by more than one layer.
+    #[error("Config error: {0}")]
+    Config(#[from] terrace_config::Error),
+    /// The filesystem watcher backing configuration reloads could not be installed.
+    #[error(transparent)]
+    Watch(#[from] terrace_config::reload::WatchError),
     #[error("{0}")]
     Custom(String),
 }

@@ -152,13 +152,23 @@ jobs:
 
       - name: Test Docker image runs
         run: |
+          # `webhook.paths` is a table, so it comes from the config file the image reads at
+          # `/app/config.toml`. The scalars stay on the command line to keep both layers
+          # exercised.
+          cat > "${RUNNER_TEMP}/config.toml" <<'EOF'
+          [webhook]
+          target_base = "https://example.invalid"
+
+          [webhook.paths]
+          "/webhook/.*" = ["ALL"]
+          EOF
+
           docker run -d --name smoke-test -p 8080:8080 \
-            -e SERVER.HOST=0.0.0.0 \
-            -e SERVER.PORT=8080 \
-            -e CLOUDFLARE.CLIENT_ID=ci-client-id \
-            -e CLOUDFLARE.CLIENT_SECRET=ci-client-secret \
-            -e WEBHOOK.TARGET_BASE=https://example.invalid \
-            -e 'WEBHOOK.PATHS=/webhook/.*:ALL' \
+            -v "${RUNNER_TEMP}/config.toml:/app/config.toml:ro" \
+            -e WEBHOOK_REDIRECT_SERVER__HOST=0.0.0.0 \
+            -e WEBHOOK_REDIRECT_SERVER__PORT=8080 \
+            -e WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_ID=ci-client-id \
+            -e WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_SECRET=ci-client-secret \
             "${IMAGE}"
 
           for _ in $(seq 1 30); do

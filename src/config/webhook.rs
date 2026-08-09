@@ -1,61 +1,33 @@
+//! What is proxied, and where to.
+
 use crate::data::{AllowedPath, AllowedPaths};
+use crate::error::Error;
 use reqwest::Url;
-use secrecy::SecretString;
 use serde::{Deserialize, Deserializer};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
-use crate::error::Error;
-
-const DEFAULT_SERVER_HOST: &str = "127.0.0.1";
-const DEFAULT_SERVER_PORT: u16 = 8080;
-
-#[derive(Debug, serde::Deserialize, Getters)]
-#[getset(get = "pub")]
-pub struct Config {
-    server: ServerConfig,
-    cloudflare: CloudFlareConfig,
-    webhook: WebhookConfig,
-}
-
-#[derive(Debug, serde::Deserialize, Getters)]
-#[getset(get = "pub")]
-pub struct CloudFlareConfig {
-    client_id: SecretString,
-    client_secret: SecretString,
-}
-
-#[derive(Debug, serde::Deserialize, Getters)]
-#[getset(get = "pub")]
-pub struct ServerConfig {
-    host: String,
-    port: u16,
-}
-
-#[derive(Debug, serde::Deserialize, Getters)]
+/// The upstream and the paths allowed to reach it.
+#[derive(Debug, Clone, Deserialize, Getters)]
 #[getset(get = "pub")]
 pub struct WebhookConfig {
+    /// Base URL of the Cloudflare Access protected service every allowed path is joined onto.
     #[serde(deserialize_with = "deserialize_url_from_string")]
     target_base: Url,
-    // Regex path: Allowed methods
-    #[serde(deserialize_with = "deserialize_paths_from_string")]
+    /// Path regex to the methods allowed on it.
+    ///
+    /// A table rather than the packed string the environment layer forced, so a pattern
+    /// containing the old separators is no longer unspellable:
+    ///
+    /// ```toml
+    /// [webhook.paths]
+    /// "/webhook/.*" = ["ALL"]
+    /// "/api/public/.*" = ["GET", "POST"]
+    /// ```
     paths: HashMap<String, HashSet<AllowedMethod>>,
 }
 
-impl Config {
-    pub fn get_configuration() -> crate::Result<Self> {
-        config::Config::builder()
-            .add_source(config::Environment::default().try_parsing(true))
-            .set_default("server.host", DEFAULT_SERVER_HOST)?
-            .set_default("server.port", DEFAULT_SERVER_PORT)?
-            .build()
-            .map_err(|e| Error::custom(format!("Can't parse config: {e}")))?
-            .try_deserialize::<Config>()
-            .map_err(|e| Error::custom(format!("Failed to deserialize configuration: {e}")))
-    }
-}
-
-pub fn deserialize_url_from_string<'de, D>(deserializer: D) -> Result<Url, D::Error>
+fn deserialize_url_from_string<'de, D>(deserializer: D) -> Result<Url, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -63,43 +35,12 @@ where
     Url::parse(&string).map_err(serde::de::Error::custom)
 }
 
-pub fn deserialize_paths_from_string<'de, D>(
-    deserializer: D,
-) -> Result<HashMap<String, HashSet<AllowedMethod>>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let string: String = Deserialize::deserialize(deserializer)?;
-
-    let values: Result<HashMap<String, HashSet<AllowedMethod>>, D::Error> = string
-        .split("; ")
-        .map(|s| {
-            let mut split = s.split(':');
-
-            let path = match split.next() {
-                Some(s) => Ok(s),
-                None => Err(serde::de::Error::custom("Path is missing")),
-            }?;
-
-            let methods = match split.next() {
-                Some(s) => Ok(s),
-                None => Err(serde::de::Error::custom("Methods are missing")),
-            }?;
-
-            let methods: Result<HashSet<AllowedMethod>, _> = methods
-                .split(',')
-                .map(|s| s.to_uppercase())
-                .map(|s| AllowedMethod::try_from(&s))
-                .collect();
-
-            Ok((path.to_string(), methods.map_err(serde::de::Error::custom)?))
-        })
-        .collect();
-
-    values
-}
-
+/// A method a path may be proxied with, or [`AllowedMethod::ALL`] for every one of them.
+///
+/// Deserialised through [`FromStr`] rather than by variant name, so `"get"` and `"GET"` are the
+/// same value — operators write these by hand.
 #[derive(Debug, serde::Deserialize, Eq, PartialEq, Hash, Clone)]
+#[serde(try_from = "String")]
 pub enum AllowedMethod {
     ALL,
     GET,
@@ -122,10 +63,10 @@ impl AllowedMethod {
     }
 }
 
-impl TryFrom<&String> for AllowedMethod {
-    type Error = crate::Error;
+impl FromStr for AllowedMethod {
+    type Err = Error;
 
-    fn try_from(value: &String) -> Result<Self, Self::Error> {
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value.to_uppercase().as_str() {
             "ALL" => Ok(AllowedMethod::ALL),
             "GET" => Ok(AllowedMethod::GET),
@@ -135,6 +76,22 @@ impl TryFrom<&String> for AllowedMethod {
             "DELETE" => Ok(AllowedMethod::DELETE),
             _ => Err(Error::custom(format!("Unknown method: {}", value))),
         }
+    }
+}
+
+impl TryFrom<String> for AllowedMethod {
+    type Error = Error;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+
+impl TryFrom<&String> for AllowedMethod {
+    type Error = Error;
+
+    fn try_from(value: &String) -> Result<Self, Self::Error> {
+        value.parse()
     }
 }
 
@@ -258,7 +215,7 @@ mod tests_try_from {
         methods.insert(AllowedMethod::ALL);
         paths.insert("/test".to_string(), methods);
 
-        let allowed_paths: crate::config::AllowedPaths = paths.try_into().unwrap();
+        let allowed_paths: crate::data::AllowedPaths = paths.try_into().unwrap();
         assert!(allowed_paths.is_allowed("/test", &actix_web::http::Method::GET));
         assert!(allowed_paths.is_allowed("/test", &actix_web::http::Method::PUT));
     }
@@ -271,7 +228,7 @@ mod tests_try_from {
         methods.insert(AllowedMethod::GET);
         paths.insert("/test".to_string(), methods);
 
-        let allowed_paths: crate::config::AllowedPaths = paths.try_into().unwrap();
+        let allowed_paths: crate::data::AllowedPaths = paths.try_into().unwrap();
         assert!(allowed_paths.is_allowed("/test", &actix_web::http::Method::GET));
         assert!(!allowed_paths.is_allowed("/test", &actix_web::http::Method::PUT));
     }
@@ -286,7 +243,7 @@ mod tests_try_from {
         set.insert(AllowedMethod::PATCH);
         set.insert(AllowedMethod::DELETE);
 
-        let allowed_path: crate::config::AllowedPath = set.try_into().unwrap();
+        let allowed_path: crate::data::AllowedPath = set.try_into().unwrap();
         assert!(allowed_path.all());
         assert_eq!(allowed_path.methods().len(), 5);
     }
@@ -296,7 +253,7 @@ mod tests_try_from {
         let mut set = HashSet::new();
         set.insert(AllowedMethod::GET);
 
-        let allowed_path: crate::config::AllowedPath = set.try_into().unwrap();
+        let allowed_path: crate::data::AllowedPath = set.try_into().unwrap();
         assert!(!allowed_path.all());
         assert_eq!(allowed_path.methods().len(), 1);
         assert!(
@@ -311,7 +268,7 @@ mod tests_try_from {
         let mut set = HashSet::new();
         set.insert(AllowedMethod::ALL);
 
-        let allowed_path: crate::config::AllowedPath = set.try_into().unwrap();
+        let allowed_path: crate::data::AllowedPath = set.try_into().unwrap();
         assert!(allowed_path.all());
         assert_eq!(allowed_path.methods().len(), 0);
     }
@@ -337,123 +294,94 @@ mod tests_try_from {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::config::{AllowedMethod, Config};
-    use secrecy::ExposeSecret;
-    use std::collections::{HashMap, HashSet};
+mod tests_deserialize {
+    use super::{AllowedMethod, WebhookConfig};
+    use figment::providers::Format;
+    use std::collections::HashSet;
 
-    const ENV_SERVER_HOST: &str = "SERVER.HOST";
-    const ENV_SERVER_PORT: &str = "SERVER.PORT";
-
-    const ENV_CLOUDFLARE_CLIENT_ID: &str = "CLOUDFLARE.CLIENT_ID";
-    const ENV_CLOUDFLARE_CLIENT_SECRET: &str = "CLOUDFLARE.CLIENT_SECRET";
-
-    const ENV_WEBHOOK_TARGET_BASE: &str = "WEBHOOK.TARGET_BASE";
-    const ENV_WEBHOOK_PATHS: &str = "WEBHOOK.PATHS";
-
-    const CORRECT_SERVER_HOST: &str = "0.0.0.0";
-    const CORRECT_SERVER_PORT: &str = "8080";
-
-    const CORRECT_CLOUDFLARE_CLIENT_ID: &str = "client_id";
-    const CORRECT_CLOUDFLARE_CLIENT_SECRET: &str = "client_secret";
-
-    const CORRECT_WEBHOOK_TARGET_BASE: &str = "https://example.com/";
-    const CORRECT_WEBHOOK_PATHS: &str = "/test:ALL";
-
-    #[test]
-    fn test_get_configurations_minimal_correct() -> Result<(), Box<dyn std::error::Error>> {
-        let config = temp_env::with_vars(
-            vec![
-                (ENV_CLOUDFLARE_CLIENT_ID, Some(CORRECT_CLOUDFLARE_CLIENT_ID)),
-                (
-                    ENV_CLOUDFLARE_CLIENT_SECRET,
-                    Some(CORRECT_CLOUDFLARE_CLIENT_SECRET),
-                ),
-                (ENV_WEBHOOK_TARGET_BASE, Some(CORRECT_WEBHOOK_TARGET_BASE)),
-                (ENV_WEBHOOK_PATHS, Some(CORRECT_WEBHOOK_PATHS)),
-            ],
-            Config::get_configuration,
-        )?;
-
-        assert_eq!(
-            config.cloudflare().client_id().expose_secret(),
-            CORRECT_CLOUDFLARE_CLIENT_ID
-        );
-        assert_eq!(
-            config.cloudflare().client_secret().expose_secret(),
-            CORRECT_CLOUDFLARE_CLIENT_SECRET
-        );
-
-        assert_eq!(
-            config.webhook().target_base().as_str(),
-            CORRECT_WEBHOOK_TARGET_BASE
-        );
-
-        let mut paths = HashMap::new();
-
-        let mut methods = HashSet::new();
-        methods.insert(AllowedMethod::ALL);
-        paths.insert("/test".to_string(), methods);
-
-        assert_eq!(config.webhook().paths(), &paths);
-
-        Ok(())
+    /// The error is stringified because `figment::Error` is large enough to trip
+    /// `clippy::result_large_err`, and every assertion below reads its message anyway.
+    fn deserialize(toml: &str) -> Result<WebhookConfig, String> {
+        figment::Figment::from(figment::providers::Toml::string(toml))
+            .extract()
+            .map_err(|e| e.to_string())
     }
 
     #[test]
-    fn test_get_configurations_full_correct() -> Result<(), Box<dyn std::error::Error>> {
-        let config = temp_env::with_vars(
-            vec![
-                (ENV_SERVER_HOST, Some(CORRECT_SERVER_HOST)),
-                (ENV_SERVER_PORT, Some(CORRECT_SERVER_PORT)),
-                (ENV_CLOUDFLARE_CLIENT_ID, Some(CORRECT_CLOUDFLARE_CLIENT_ID)),
-                (
-                    ENV_CLOUDFLARE_CLIENT_SECRET,
-                    Some(CORRECT_CLOUDFLARE_CLIENT_SECRET),
-                ),
-                (ENV_WEBHOOK_TARGET_BASE, Some(CORRECT_WEBHOOK_TARGET_BASE)),
-                (
-                    ENV_WEBHOOK_PATHS,
-                    Some(r"/test:All; /test2:GET; /test\d*:POST,PUT"),
-                ),
-            ],
-            Config::get_configuration,
-        )?;
+    fn a_path_table_becomes_the_method_sets() {
+        let config = deserialize(
+            r#"
+            target_base = "https://example.com/"
 
-        assert_eq!(config.server().host(), CORRECT_SERVER_HOST);
-        assert_eq!(config.server().port(), &8080u16);
+            [paths]
+            "/webhook/.*" = ["ALL"]
+            "/api/public/.*" = ["get", "POST"]
+            "#,
+        )
+        .unwrap();
 
+        assert_eq!(config.target_base().as_str(), "https://example.com/");
+        assert_eq!(config.paths().len(), 2);
         assert_eq!(
-            config.cloudflare().client_id().expose_secret(),
-            CORRECT_CLOUDFLARE_CLIENT_ID
+            config.paths().get("/webhook/.*"),
+            Some(&HashSet::from([AllowedMethod::ALL]))
         );
         assert_eq!(
-            config.cloudflare().client_secret().expose_secret(),
-            CORRECT_CLOUDFLARE_CLIENT_SECRET
+            config.paths().get("/api/public/.*"),
+            Some(&HashSet::from([AllowedMethod::GET, AllowedMethod::POST]))
         );
+    }
 
-        assert_eq!(
-            config.webhook().target_base().as_str(),
-            CORRECT_WEBHOOK_TARGET_BASE
+    /// The packed `"<regex>:<methods>; …"` string the environment layer forced could not
+    /// express a pattern containing `:` or `; `. A TOML key can.
+    #[test]
+    fn a_path_regex_may_contain_the_old_separators() {
+        let config = deserialize(
+            r#"
+            target_base = "https://example.com/"
+
+            [paths]
+            "/webhook/[a-z]{2}; ?:[0-9]*" = ["POST"]
+            "#,
+        )
+        .unwrap();
+
+        assert!(config.paths().contains_key("/webhook/[a-z]{2}; ?:[0-9]*"));
+    }
+
+    #[test]
+    fn an_unknown_method_is_refused() {
+        let error = deserialize(
+            r#"
+            target_base = "https://example.com/"
+
+            [paths]
+            "/webhook/.*" = ["FETCH"]
+            "#,
+        )
+        .expect_err("FETCH is not a method");
+
+        assert!(
+            error.to_string().contains("FETCH"),
+            "the error must name the value: {error}"
         );
+    }
 
-        let mut paths = HashMap::new();
+    #[test]
+    fn a_malformed_target_base_is_refused() {
+        let error = deserialize(
+            r#"
+            target_base = "not-a-url"
 
-        let mut methods = HashSet::new();
-        methods.insert(AllowedMethod::ALL);
-        paths.insert("/test".to_string(), methods);
+            [paths]
+            "/webhook/.*" = ["ALL"]
+            "#,
+        )
+        .expect_err("not a URL");
 
-        let mut methods = HashSet::new();
-        methods.insert(AllowedMethod::GET);
-        paths.insert("/test2".to_string(), methods);
-
-        let mut methods = HashSet::new();
-        methods.insert(AllowedMethod::POST);
-        methods.insert(AllowedMethod::PUT);
-        paths.insert(r"/test\d*".to_string(), methods);
-
-        assert_eq!(config.webhook().paths(), &paths);
-
-        Ok(())
+        assert!(
+            error.to_string().contains("target_base"),
+            "the error must name the key: {error}"
+        );
     }
 }

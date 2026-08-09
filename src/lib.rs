@@ -11,5 +11,6 @@ pub mod data;
 pub mod error;
 mod routes;
 pub mod server;
+pub mod shutdown;
 
 pub type Result<T> = anyhow::Result<T, Error>;

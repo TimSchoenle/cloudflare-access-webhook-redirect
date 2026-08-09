@@ -1,0 +1,39 @@
+# Example configuration.
+#
+# Copy to `config.toml` next to the binary, or point `WEBHOOK_REDIRECT_CONFIG` at it.
+#
+# Every key below can also be supplied by an environment variable
+# (`WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE`), by a file in `$WEBHOOK_REDIRECT_SECRETS_DIR`
+# (`webhook__target_base`), or by `WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE_FILE=/path`. Supplying
+# one key through two of those three is refused at boot rather than resolved by precedence.
+
+# Optional. Shown with its defaults.
+[server]
+host = "127.0.0.1"
+port = 8080
+
+# Optional. Shown with its defaults.
+#
+# Installed once per process, so this is the one block a configuration reload cannot apply.
+[telemetry]
+log_level = "info"
+# sentry_dsn = "https://key@sentry.example.com/1"
+
+# Required. The Cloudflare Access service token injected into every forwarded request.
+#
+# Both belong in a mounted secret rather than here; see `WEBHOOK_REDIRECT_SECRETS_DIR` in the
+# README.
+[cloudflare]
+client_id = "your-client-id"
+client_secret = "your-client-secret"
+
+# Required.
+[webhook]
+# The Cloudflare Access protected service every allowed path is joined onto.
+target_base = "https://your-protected-service.com"
+
+# Required. Path regex to the methods allowed on it. Patterns are anchored: `/webhook/.*`
+# matches `/webhook/github` but not `/api/webhook/github`.
+[webhook.paths]
+"/webhook/.*" = ["ALL"]
+"/api/public/.*" = ["GET", "POST"]
