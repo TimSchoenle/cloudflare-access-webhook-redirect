@@ -23,21 +23,39 @@ async fn redirect(
     path: web::Path<String>,
     web_hook_data: web::Data<WebHookData>,
 ) -> core::result::Result<HttpResponse, actix_web::Error> {
-    // Only allow specific paths
-    info!("Received {} request for path: {}", request.method(), path);
-    if !web_hook_data.is_allowed_path(&path, request.method()) {
-        debug!("Path not allowed: {}", path);
+    let method = request.method();
+
+    // The allow list is the only gate in front of the Cloudflare Access credentials, so both
+    // verdicts are logged at the same level: at the default level every request leaves exactly
+    // one line saying whether it was forwarded or turned away. Passing the allow list is not by
+    // itself proof that the request reached the target, so the failures below say so as well.
+    if !web_hook_data.is_allowed_path(&path, method) {
+        info!(
+            "Rejected {} request for path '{}': no allowed path matches this method, responding 404",
+            method, path
+        );
         return Ok(HttpResponse::NotFound().finish());
     }
 
     // Craft target url
     let target_url = web_hook_data.get_target_url(path.as_str()).map_err(|e| {
-        error!("Failed to join URL: {}", e);
+        error!(
+            "Not forwarding allowed {} request for path '{}': failed to join the target URL: {}",
+            method, path, e
+        );
         actix_web::error::ErrorBadRequest(e)
     })?;
 
     // Convert body
-    let body = ActixToReqwestConverter::convert_body(&mut payload).await?;
+    let body = ActixToReqwestConverter::convert_body(&mut payload)
+        .await
+        .map_err(|e| {
+            error!(
+                "Not forwarding allowed {} request for path '{}': failed to read the body: {}",
+                method, path, e
+            );
+            e
+        })?;
 
     // Convert headers
     let mut target_headers: reqwest::header::HeaderMap =
@@ -51,33 +69,63 @@ async fn redirect(
     );
 
     // Query params
-    let params = Query::<HashMap<String, String>>::from_query(request.query_string())?;
+    let params =
+        Query::<HashMap<String, String>>::from_query(request.query_string()).map_err(|e| {
+            error!(
+                "Not forwarding allowed {} request for path '{}': failed to parse the query string: {}",
+                method, path, e
+            );
+            e
+        })?;
 
     // Redirect request
+    info!(
+        "Forwarding {} request for path '{}' to {}",
+        method, path, target_url
+    );
     let response = ReqwestBuilder::new(
         web_hook_data.client(),
         target_url,
         body,
         target_headers,
         params.0,
-        request.method(),
+        method,
     )
     .build()
     .map_err(|e| {
-        error!("Failed to build request: {}", e);
+        error!(
+            "Failed to build the forwarded {} request for path '{}': {}",
+            method, path, e
+        );
         actix_web::error::ErrorBadRequest(e)
     })?
     .send()
     .await
     .map_err(|e| {
-        error!("Failed to send request: {}", e);
+        error!(
+            "Failed to send the forwarded {} request for path '{}' to the target: {}",
+            method, path, e
+        );
         actix_web::error::ErrorBadRequest(e)
     })?;
 
     // Parse reqwest response
-    let converted_response = ReqwestToActixConverter::convert_response(response).await?;
+    let converted_response = ReqwestToActixConverter::convert_response(response)
+        .await
+        .map_err(|e| {
+            error!(
+                "Forwarded {} request for path '{}', but the target response could not be relayed: {}",
+                method, path, e
+            );
+            e
+        })?;
 
-    debug!("Return response with code {}", converted_response.status());
+    debug!(
+        "Forwarded {} request for path '{}', target responded {}",
+        method,
+        path,
+        converted_response.status()
+    );
     Ok(converted_response)
 }
 
