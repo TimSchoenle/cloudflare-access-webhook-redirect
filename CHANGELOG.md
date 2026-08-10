@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v1.0.0...v1.1.0) (2026-08-10)
+
+
+### Features
+
+* **logging:** state the forwarding verdict for every request ([#408](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/408)) ([61665ab](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/61665ab45eba42b6a57f1e19a4fe0297e7a4c24e))
+
 ## [1.0.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v0.3.22...v1.0.0) (2026-08-09)
 
 
