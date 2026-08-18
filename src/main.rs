@@ -18,13 +18,27 @@ extern crate tracing;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let boot = cloudflare_access_webhook_redirect::config::load_watched::<Config>()?;
+    let boot = match cloudflare_access_webhook_redirect::config::load_watched::<Config>() {
+        Ok(boot) => boot,
+        // Nothing is installed yet, so this is stderr rather than a log line — and it is the one
+        // moment the report is worth the most. A boot that fails on a missing or doubly-supplied
+        // key says which key; the explanation says which files and variables were read looking
+        // for it, which is the half that turns a failed deploy into a fixed mount path.
+        Err(error) => {
+            if let Ok(explanation) = cloudflare_access_webhook_redirect::config::explain() {
+                eprintln!("{explanation}");
+            }
+            return Err(error.into());
+        }
+    };
 
     // Both are process-global and installed once, which is why `telemetry.*` is the one block
     // a configuration reload cannot apply.
     setup_tracing(boot.value.telemetry())?;
     // Prevents the process from exiting until all events are sent
     let _sentry = setup_sentry(boot.value.telemetry());
+
+    log_config_sources();
 
     let shutdown = install_shutdown();
 
@@ -60,6 +74,19 @@ async fn serve(config: Arc<Config>, shutdown: CancellationToken) -> Result<()> {
     Server::new(config.server().host().to_string(), *config.server().port())
         .run_until_stopped(web_hook_data, shutdown)
         .await
+}
+
+/// Log which layer supplied each configuration key, once, at boot.
+///
+/// At `debug` because it is a dozen lines an operator only wants when something is wrong, and
+/// never at a lower bar than the log they are already reading. It carries no configuration
+/// value — only the names of the files and variables — so it is safe at any level, and a report
+/// that cannot be assembled is not worth failing a boot the configuration itself survived.
+fn log_config_sources() {
+    match cloudflare_access_webhook_redirect::config::explain() {
+        Ok(explanation) => debug!("configuration sources:\n{explanation}"),
+        Err(error) => debug!("could not explain the configuration sources: {error}"),
+    }
 }
 
 fn setup_tracing(telemetry: &TelemetryConfig) -> Result<()> {

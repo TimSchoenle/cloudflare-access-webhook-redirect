@@ -11,7 +11,17 @@ use tracing::Level;
 const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 
 /// Observability settings.
+///
+/// `Serialize` is the schema generator's, not the service's — see [`ServerConfig`]. Neither
+/// field serialises as it deserialises: [`Level`] has no `Serialize` at all, and
+/// [`SecretString`] refuses to have one, which is the point of the type.
+///
+/// [`ServerConfig`]: crate::config::ServerConfig
 #[derive(Debug, Clone, Deserialize, Getters)]
+#[cfg_attr(
+    feature = "config-schema",
+    derive(serde::Serialize, terrace_config::schema::Describe)
+)]
 #[getset(get = "pub")]
 pub struct TelemetryConfig {
     /// Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`).
@@ -22,11 +32,21 @@ pub struct TelemetryConfig {
         default = "TelemetryConfig::default_log_level",
         deserialize_with = "deserialize_level_from_string"
     )]
+    #[cfg_attr(
+        feature = "config-schema",
+        serde(serialize_with = "serialize_level_as_written")
+    )]
     log_level: Level,
     /// Sentry DSN. Error reporting is disabled when absent.
     ///
     /// A [`SecretString`]: a DSN carries the project key that authorises event submission.
-    #[serde(default)]
+    // Below the doc comment on purpose: `config.example.toml` is generated from the whole of
+    // that comment, and how this crate serialises a field is not an operator's business.
+    // `skip_serializing` costs the generated table nothing either way — `#[config(secret)]`
+    // renders `<redacted>` in place of whatever the value is, so the only thing left out is the
+    // one thing that must not reach a documentation file.
+    #[serde(default, skip_serializing)]
+    #[cfg_attr(feature = "config-schema", config(secret))]
     sentry_dsn: Option<SecretString>,
 }
 
@@ -51,6 +71,19 @@ where
 {
     let string: String = Deserialize::deserialize(deserializer)?;
     Level::from_str(&string).map_err(serde::de::Error::custom)
+}
+
+/// Renders a [`Level`] the way the configuration file spells it.
+///
+/// [`Level`]'s own `Display` is uppercase, and a `Default` column reading `INFO` documents a
+/// value an operator would then copy — correctly, since parsing folds case, but nowhere else in
+/// the reference is a value written in a spelling the examples do not use.
+#[cfg(feature = "config-schema")]
+fn serialize_level_as_written<S>(level: &Level, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    serializer.serialize_str(&level.to_string().to_lowercase())
 }
 
 #[cfg(test)]

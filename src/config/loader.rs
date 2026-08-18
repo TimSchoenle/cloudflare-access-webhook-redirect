@@ -8,6 +8,7 @@
 use serde::de::DeserializeOwned;
 use terrace_config::Terrace;
 
+pub use terrace_config::explain::Explanation;
 pub use terrace_config::{Error as ConfigError, Loaded, Sources};
 
 /// The prefix every configuration variable carries.
@@ -48,4 +49,21 @@ pub fn load<T: DeserializeOwned>() -> Result<T, ConfigError> {
 /// As [`load`].
 pub fn load_watched<T: DeserializeOwned>() -> Result<Loaded<T>, ConfigError> {
     terrace().load_watched()
+}
+
+/// Report which layer supplied each key, re-reading them at the moment it is called.
+///
+/// The question a boot log cannot otherwise answer. [`Config`](crate::config::Config) is full of
+/// [`SecretString`](secrecy::SecretString), so no layer of it is ever logged as a value — which
+/// leaves "the rotated secret is not being picked up" with nothing to go on. An
+/// [`Explanation`] holds no configuration value at all, only the names of the files and
+/// variables each key arrived from, so it is safe in a log that the values can never enter.
+///
+/// It does not fail for the reason it is being run: a configuration [`load`] refuses because one
+/// key was supplied twice still explains, and reports that key with both of its sources.
+///
+/// # Errors
+/// Returns [`ConfigError`] if a file-backed source cannot be read.
+pub fn explain() -> Result<Explanation, ConfigError> {
+    terrace().explain()
 }

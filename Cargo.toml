@@ -11,6 +11,23 @@ path = "src/lib.rs"
 path = "src/main.rs"
 name = "cloudflare-access-webhook-redirect"
 
+# The generator behind the README's settings table and `config.example.toml`. An example rather
+# than a binary: it is a documentation tool, and shipping it in the image would mean the release
+# build carrying `terrace-config/schema` for something no container ever runs.
+[[example]]
+name = "config-schema"
+required-features = ["config-schema"]
+
+[features]
+default = []
+# Describes the configuration surface instead of only loading it, which is what
+# `.github/workflows/docs.yaml` renders the settings table and `config.example.toml` from.
+#
+# Off by default because the release image never runs the generator: leaving it on would compile
+# the `Describe` derive and serde's serialiser for every config struct into a binary that only
+# ever deserialises them.
+config-schema = ["terrace-config/schema"]
+
 [dependencies]
 anyhow = { version = "1.0.100", features = ["backtrace"] }
 thiserror = "2.0.0"
@@ -20,7 +37,12 @@ tracing-actix-web = "0.7.19"
 # Layered configuration: struct defaults, TOML, environment, secrets directory, `_FILE`
 # indirection — plus the supervisor that rebuilds the service when a mounted file changes.
 # Pinned by tag: a branch dependency lets `cargo update` move across arbitrary commits.
-terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.2.0", features = ["full"] }
+#
+# Named features rather than `full`, which is `loader + reload + schema + explain`: `schema` is a
+# documentation tool and belongs behind this crate's own `config-schema` feature, not in the
+# image. What is left is what the service does at runtime — load, reload, and say where each
+# value came from.
+terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.5.0", features = ["loader", "reload", "explain"] }
 serde = "1.0.209"
 serde_json = "1.0.145"
 reqwest = { version = "0.13.0", features = ["json", "query"] }
@@ -37,9 +59,13 @@ sentry = { version = "0.47.0", features = ["anyhow", "debug-images", "reqwest", 
 
 [dev-dependencies]
 http = "=1.5.0"
-# `figment::Jail` builds the config files and environment a test needs and restores both
-# afterwards, which is how the config tests avoid `env::set_var`. Same figment
-# `terrace-config` resolves, plus its `test` feature.
+# The loader's own test harness: a jail whose `config`, `secret` and `env_key` methods derive
+# every name from the `Terrace` they were built over, so a test cannot keep passing against a
+# variable the loader no longer reads. Deliberately outside `full`, so it is asked for here.
+terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.5.0", features = ["testing"] }
+# Still direct for the per-block deserialisation tests, which extract one `[telemetry]` or
+# `[webhook]` table and never touch the layering the harness exists for. Same figment
+# `terrace-config` resolves.
 figment = { version = "=0.10.19", features = ["test"] }
 serde_test = "=1.0.177"
 lazy_static = "=1.5.0"
