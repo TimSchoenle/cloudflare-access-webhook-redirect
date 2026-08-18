@@ -6,7 +6,15 @@ const DEFAULT_HOST: &str = "127.0.0.1";
 const DEFAULT_PORT: u16 = 8080;
 
 /// Where the proxy binds its listener.
+///
+/// `Serialize` is the schema generator's, not the service's: `with_defaults_from` reads the
+/// `Default` column out of a serialised value, and this is one of the two blocks that has
+/// defaults to report.
 #[derive(Debug, Clone, Deserialize, Getters)]
+#[cfg_attr(
+    feature = "config-schema",
+    derive(serde::Serialize, terrace_config::schema::Describe)
+)]
 #[getset(get = "pub")]
 pub struct ServerConfig {
     /// Bind address. Containers usually want `0.0.0.0`.

@@ -1,39 +1,98 @@
-# Example configuration.
+# Configuration for a service reading WEBHOOK_REDIRECT_-prefixed keys.
 #
-# Copy to `config.toml` next to the binary, or point `WEBHOOK_REDIRECT_CONFIG` at it.
+# Generated from the configuration type, so it lists every key that type can carry and nothing
+# else. Each key shows the value it already has, commented out: a commented key and a deleted key
+# mean the same thing to the loader, so uncomment one only to change it. A key that is not
+# commented out has no default, and nothing loads until something supplies it.
 #
-# Every key below can also be supplied by an environment variable
-# (`WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE`), by a file in `$WEBHOOK_REDIRECT_SECRETS_DIR`
-# (`webhook__target_base`), or by `WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE_FILE=/path`. Supplying
-# one key through two of those three is refused at boot rather than resolved by precedence.
+# Three layers can supply any key below, and all three win over this file: the environment
+# variable named above the key, a file named by that variable plus `_FILE`, and a key-named file
+# in the secrets directory. A secret belongs in one of those — this file is usually committed.
+#
+# Read before this file exists:
+#
+#   WEBHOOK_REDIRECT_CONFIG — config, default `config.toml`
+#     Names the TOML layer: a file, or a directory whose `*.toml` files are all merged in name
+#     order.
+#
+#   WEBHOOK_REDIRECT_SECRETS_DIR — secrets dir
+#     Names a directory of key-named files — a mounted Kubernetes `Secret` volume. Each file
+#     supplies the key its name spells.
 
-# Optional. Shown with its defaults.
 [server]
-host = "127.0.0.1"
-port = 8080
+# Bind address. Containers usually want `0.0.0.0`.
+# Type: String
+# Also from: WEBHOOK_REDIRECT_SERVER__HOST, WEBHOOK_REDIRECT_SERVER__HOST_FILE=/path/to/file,
+#   server__host in the secrets directory
+# host = "127.0.0.1"
 
-# Optional. Shown with its defaults.
-#
-# Installed once per process, so this is the one block a configuration reload cannot apply.
+# Bind port.
+# Type: u16
+# Also from: WEBHOOK_REDIRECT_SERVER__PORT, WEBHOOK_REDIRECT_SERVER__PORT_FILE=/path/to/file,
+#   server__port in the secrets directory
+# port = 8080
+
 [telemetry]
-log_level = "info"
-# sentry_dsn = "https://key@sentry.example.com/1"
-
-# Required. The Cloudflare Access service token injected into every forwarded request.
+# Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`).
 #
-# Both belong in a mounted secret rather than here; see `WEBHOOK_REDIRECT_SECRETS_DIR` in the
-# README.
+# Parsed here rather than in `main` so an unusable value fails the boot with a
+# configuration error naming the key, instead of after the subscriber is installed.
+# Type: Level
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL,
+#   WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL_FILE=/path/to/file, telemetry__log_level in the secrets
+#   directory
+# log_level = "info"
+
+# Sentry DSN. Error reporting is disabled when absent.
+#
+# A [`SecretString`]: a DSN carries the project key that authorises event submission.
+# Type: SecretString
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN_FILE=/path/to/file, telemetry__sentry_dsn in the
+#   secrets directory
+# Secret: the value below is a placeholder.
+# sentry_dsn = "<secret>"
+
 [cloudflare]
-client_id = "your-client-id"
-client_secret = "your-client-secret"
+# `CF-Access-Client-Id` header value.
+# Type: SecretString
+# Also from: WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_ID,
+#   WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_ID_FILE=/path/to/file, cloudflare__client_id in the
+#   secrets directory
+# Required: nothing loads until this key is supplied.
+# Secret: the value below is a placeholder.
+client_id = "<secret>"
 
-# Required.
+# `CF-Access-Client-Secret` header value.
+# Type: SecretString
+# Also from: WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_SECRET,
+#   WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_SECRET_FILE=/path/to/file, cloudflare__client_secret in
+#   the secrets directory
+# Required: nothing loads until this key is supplied.
+# Secret: the value below is a placeholder.
+client_secret = "<secret>"
+
 [webhook]
-# The Cloudflare Access protected service every allowed path is joined onto.
-target_base = "https://your-protected-service.com"
+# Base URL of the Cloudflare Access protected service every allowed path is joined onto.
+# Type: Url
+# Also from: WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE,
+#   WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE_FILE=/path/to/file, webhook__target_base in the secrets
+#   directory
+# Required: nothing loads until this key is supplied.
+target_base = "<value>"
 
-# Required. Path regex to the methods allowed on it. Patterns are anchored: `/webhook/.*`
-# matches `/webhook/github` but not `/api/webhook/github`.
-[webhook.paths]
-"/webhook/.*" = ["ALL"]
-"/api/public/.*" = ["GET", "POST"]
+# Path regex to the methods allowed on it.
+#
+# A table rather than the packed string the environment layer forced, so a pattern
+# containing the old separators is no longer unspellable:
+#
+# ```toml
+# [webhook.paths]
+# "/webhook/.*" = ["ALL"]
+# "/api/public/.*" = ["GET", "POST"]
+# ```
+# Type: HashMap<String, HashSet<AllowedMethod>>
+# Also from: WEBHOOK_REDIRECT_WEBHOOK__PATHS, WEBHOOK_REDIRECT_WEBHOOK__PATHS_FILE=/path/to/file,
+#   webhook__paths in the secrets directory
+# Required: nothing loads until this key is supplied.
+paths = {}

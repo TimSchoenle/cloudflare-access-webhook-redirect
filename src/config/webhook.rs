@@ -9,6 +9,7 @@ use std::str::FromStr;
 
 /// The upstream and the paths allowed to reach it.
 #[derive(Debug, Clone, Deserialize, Getters)]
+#[cfg_attr(feature = "config-schema", derive(terrace_config::schema::Describe))]
 #[getset(get = "pub")]
 pub struct WebhookConfig {
     /// Base URL of the Cloudflare Access protected service every allowed path is joined onto.
