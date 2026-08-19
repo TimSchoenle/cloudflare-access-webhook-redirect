@@ -12,8 +12,13 @@ name: Docs
 # The contract is the same idea aimed at a deployment rather than a person: it is what the chart
 # repository validates a rendered configuration against. Committing it makes a prefix change or a
 # renamed key visible as a diff in the pull request that made it, one step before the container
-# build would catch it against the image's labels. The Dockerfile's `LABEL` block is checked here
-# too, and only checked — pasting it is deliberate, for the reason the step gives.
+# build would catch it against the image's labels. The Dockerfile's `LABEL` region rides along
+# with it: the two are one generator run, and separating them is the one arrangement in which they
+# can disagree.
+#
+# The writing is `just regenerate` — the same string a developer types — and the checking is
+# `TimSchoenle/actions/actions/rust/config-contract`. Deliberately not the same tool: a checker
+# that shares its implementation with the writer only ever proves the writer is self-consistent.
 #
 # On a pull request it renders and commits the result to the branch. The case that matters most
 # is the release-please pull request: that commit is the one which changes `version` in
@@ -86,17 +91,23 @@ jobs:
       - name: Install stable toolchain
         uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
 
-      - name: Regenerate config.example.toml
-        run: cargo run --quiet --features config-schema --example config-schema -- --format toml > config.example.toml
+      # The recipes under `justfile` are what a developer runs before pushing, so CI runs them
+      # rather than a second spelling of the same cargo invocation. A generated file that only
+      # ever came out right on a runner is a generated file nobody can reproduce.
+      - name: Install just
+        uses: taiki-e/install-action@288e746965032cfcc232e09af2daf5f23c14d780 # v2.86.1
+        with:
+          tool: just
 
-      # The committed contract, so a key rename or a prefix change shows up as a diff in the pull
-      # request that made it rather than as a label mismatch in a container build later. No
-      # `--revision` or `--created`: they would make this file differ on every run and the diff
-      # meaningless.
-      - name: Regenerate the committed configuration contract
-        run: |
-          mkdir -p docs
-          cargo run --quiet --features config-schema --example config-schema -- --format contract > docs/config.contract.json
+      - name: Regenerate config.example.toml
+        run: just render toml > config.example.toml
+
+      # The committed contract and the Dockerfile's `LABEL` region, so a key rename or a prefix
+      # change shows up as a diff in the pull request that made it rather than as a label mismatch
+      # in a container build later. No `--revision` or `--created`: they would make the document
+      # differ on every run and the diff meaningless.
+      - name: Regenerate the configuration contract
+        run: just regenerate
 
       - name: Collect README variables
         id: variables
@@ -128,29 +139,19 @@ jobs:
 
       # A third commit, for the same reason the second is separate: the contract moves when the
       # configuration surface moves, which is not when the README's prose does.
+      #
+      # The Dockerfile is in the same commit as the document rather than one of its own. The
+      # region and the document are one generator run over one source tree, and a branch carrying
+      # one without the other is a branch whose image advertises a contract it does not publish.
+      # Both paths are named rather than left to default to `.`, so nothing else a step left dirty
+      # in the workspace can ride along in a commit that claims to be about the contract.
       - name: Commit the configuration contract
         id: contract
         uses: TimSchoenle/actions/actions/common/commit-changes@76719ba61e9b9cf1ffafdc3cb895308055a7f3bd # tag=actions-common-commit-changes-v1.3.2
         with:
           commit_message: 'docs: regenerate the configuration contract'
-          file_pattern: 'docs/config.contract.json'
+          file_pattern: 'docs/config.contract.json Dockerfile'
           token: ${{ steps.generate_token.outputs.token }}
-
-      # Checked rather than rewritten, and it is the one generated thing here that is not
-      # committed for the author. The Dockerfile's `LABEL` block is hand-written because a `LABEL`
-      # key cannot be interpolated, so a prefix change has to be pasted in deliberately — a job
-      # that quietly edited the Dockerfile would be a job that quietly changed what the image
-      # claims about itself.
-      #
-      # This is the cheap half of the check. The real one reads the built image in `build.yaml`;
-      # this one catches the same mistake a step earlier, in the diff that made it.
-      #
-      # The expected block is written outside the working tree, so it cannot be picked up as a
-      # stray file by anything that looks at the workspace after this step.
-      - name: Verify the Dockerfile's contract labels are current
-        run: |
-          cargo run --quiet --features config-schema --example config-schema -- --format dockerfile > "${RUNNER_TEMP}/expected-labels.txt"
-          bash .github/scripts/verify-dockerfile-labels.sh "${RUNNER_TEMP}/expected-labels.txt" Dockerfile
 
       - name: Summarise
         env:
@@ -172,9 +173,9 @@ jobs:
             echo "config.example.toml already matched the schema." >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ "${CONTRACT_COMMITTED}" = "true" ]; then
-            echo "docs/config.contract.json regenerated: ${CONTRACT_URL}" >> "$GITHUB_STEP_SUMMARY"
+            echo "The configuration contract and the Dockerfile's LABEL region were regenerated: ${CONTRACT_URL}" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "docs/config.contract.json already matched the schema." >> "$GITHUB_STEP_SUMMARY"
+            echo "The configuration contract and the Dockerfile's LABEL region already matched the schema." >> "$GITHUB_STEP_SUMMARY"
           fi
 
   verify:
@@ -201,6 +202,13 @@ jobs:
       - name: Install stable toolchain
         uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
 
+      # The same recipe the render job writes `config.example.toml` with, so this job cannot fail
+      # a file that `just` would have produced identically.
+      - name: Install just
+        uses: taiki-e/install-action@288e746965032cfcc232e09af2daf5f23c14d780 # v2.86.1
+        with:
+          tool: just
+
       - name: Collect README variables
         id: variables
         run: echo "json=$(bash .github/scripts/readme-variables.sh)" >> "$GITHUB_OUTPUT"
@@ -216,25 +224,22 @@ jobs:
 
       - name: Verify config.example.toml is current
         run: |
-          cargo run --quiet --features config-schema --example config-schema -- --format toml > config.example.toml
+          just render toml > config.example.toml
           git diff --exit-code -- config.example.toml
 
-      # The reverse gate. Regenerating and diffing means a renamed key or a changed prefix cannot
-      # reach `master` while the committed contract still describes the old surface — which is what
-      # the chart repository would otherwise vendor.
-      - name: Verify the configuration contract is current
-        run: |
-          mkdir -p docs
-          cargo run --quiet --features config-schema --example config-schema -- --format contract > docs/config.contract.json
-          # `--intent-to-add` before the diff, so a contract that is *missing* fails here as well as
-          # one that is stale. Without it a deleted `docs/config.contract.json` would be regenerated
-          # as an untracked file, `git diff` would have nothing to say about a path it does not
-          # track, and the gate would pass with no contract committed at all — which is the one
-          # failure mode a regenerate-and-diff check has, and a silent one.
-          git add --intent-to-add docs/config.contract.json
-          git diff --exit-code -- docs/config.contract.json
-
-      - name: Verify the Dockerfile's contract labels are current
-        run: |
-          cargo run --quiet --features config-schema --example config-schema -- --format dockerfile > "${RUNNER_TEMP}/expected-labels.txt"
-          bash .github/scripts/verify-dockerfile-labels.sh "${RUNNER_TEMP}/expected-labels.txt" Dockerfile
+      # The reverse gate, for the contract document and for the Dockerfile's `LABEL` region at
+      # once: a renamed key or a changed prefix cannot reach `master` while either still describes
+      # the old surface — which is what the chart repository would otherwise vendor, and what an
+      # image would otherwise advertise.
+      #
+      # It renders its own copy rather than diffing against a file this job wrote, so a document
+      # that is *missing* is a finding rather than a path `git diff` has nothing to say about.
+      #
+      # `image` is empty, so the two checks that need one are skipped and this job stays the cheap
+      # half: it reports a renamed key without waiting for a container build. The expensive half
+      # is `build.yaml`, which runs the same action against the image it just built.
+      - name: Verify the configuration contract
+        uses: TimSchoenle/actions/actions/rust/config-contract@99c83581b3486a8a9f28e43226b8f02025fcdf9a # tag=actions-rust-config-contract-v1.1.0
+        with:
+          features: config-schema
+          image: ''

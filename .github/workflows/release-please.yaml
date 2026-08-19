@@ -290,6 +290,13 @@ jobs:
       # per platform, because labels live in each manifest's own config blob — a differing base or
       # a per-platform build argument can leave one architecture carrying them and another not.
       #
+      # The one call site the `rust/config-contract` action cannot take over, and the reason
+      # `verify-contract-labels.sh` is still here. The action inspects a **local** image with
+      # `docker inspect`; this walks a pushed manifest list with `crane`, reading each platform's
+      # config blob out of the registry without pulling a layer. Handing it to the action would
+      # mean pulling every platform to learn what `crane` already reads — and a loop over
+      # platforms is not something one action step can express anyway.
+      #
       # Two traps, both silent, both handled here:
       #
       #  - `crane config` reports `.config.Labels`, where `docker inspect` reports `.Config.Labels`.
