@@ -22,6 +22,12 @@
 # One deliberate difference from the Rust original: every violation is reported before exiting,
 # rather than failing on the first. A build that names one missing label and hides two is a second
 # round trip through CI for no reason.
+#
+# It has exactly one caller left. Everywhere an image is *local* — the pull request build, and the
+# two source-only gates in `docs.yaml` — the check is
+# `TimSchoenle/actions/actions/rust/config-contract`, which does the same comparison and two more
+# besides. What keeps this file alive is `release-please.yaml`, which walks a pushed manifest list
+# with `crane config --platform` and never pulls an image for the action to inspect.
 
 set -euo pipefail
 

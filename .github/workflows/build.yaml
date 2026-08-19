@@ -167,20 +167,34 @@ jobs:
             VERSION=test
           cache-from: type=gha,scope=build-${{ matrix.arch }}
 
-      # The checkpoint the whole scheme rests on. The `LABEL` block in the Dockerfile is
-      # hand-written — a `LABEL` key cannot be interpolated, and `--label` on the command line
-      # cannot reach a file produced inside a builder stage — so this is the only thing that makes
-      # it true.
+      # The checkpoint the whole scheme rests on. The `LABEL` region in the Dockerfile is
+      # generated and pasted — a `LABEL` key cannot be interpolated, and `--label` on the command
+      # line cannot reach a file produced inside a builder stage — so this is the only thing that
+      # makes it true.
       #
-      # It reads the built image, not the Dockerfile. `docker inspect` reports the label map under
-      # `.Config.Labels`; `crane config` spells the same thing `.config.Labels`, and reading the
-      # wrong one yields `null`. The script fails closed on `null` rather than treating it as
-      # nothing to compare.
-      - name: Verify the image carries its contract labels
-        run: |
-          docker inspect --format '{{json .Config.Labels}}' "${IMAGE}" > labels.json
-          bash .github/scripts/verify-contract-labels.sh \
-            labels.json contract-out/contract.labels "the ${{ matrix.arch }} image"
+      # The toolchain is here rather than at the top of the job because only this step needs it:
+      # the action renders the labels from `src/config.rs` itself rather than trusting the file
+      # the build wrote, which is what lets it check the Dockerfile's region and the committed
+      # document in the same pass as the image.
+      - name: Install stable toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          # This job builds and loads a runtime image, and a restored cache is writable by any
+          # branch: caching here is a path from a poisoned entry into a runtime artefact, which is
+          # what zizmor's `cache-poisoning` audit flags. The only thing compiled is the contract
+          # generator, so there is almost nothing to save.
+          cache: false
+
+      # It reads the built image, not the Dockerfile: a source diff cannot see a base image that
+      # overrode a label, a `LABEL` line deleted on a branch nobody diffed, or a build argument
+      # that silently failed to interpolate. `image` is the local tag the build above loaded, so
+      # nothing is pulled — and the same run also compares the Dockerfile's marked region and the
+      # committed document against what the types produce.
+      - name: Verify the configuration contract
+        uses: TimSchoenle/actions/actions/rust/config-contract@99c83581b3486a8a9f28e43226b8f02025fcdf9a # tag=actions-rust-config-contract-v1.1.0
+        with:
+          features: config-schema
+          image: ${{ env.IMAGE }}
 
       # The cross-check the dropped hash label would have bought. Both copies of the document are
       # here at once, which makes this free, and it is the one failure nothing downstream can see:

@@ -114,13 +114,21 @@ LABEL org.opencontainers.image.version="${version}" \
 # the `docker build` command line cannot reach a file produced inside a builder stage without
 # running the generator a second time on the host.
 #
-# So this is hand-written, and nothing in the Dockerfile can enforce it. It is
-# `--format dockerfile` output pasted verbatim, and what makes it true is the CI step that reads
-# these back off the **built image** and compares them with `--format labels` — a source diff
-# cannot see a base image that overrode a label or a line deleted on a branch nobody diffed.
+# So this is generated and pasted, and nothing in the Dockerfile can enforce it. `just regenerate`
+# writes the region below from the same generator CI checks it with; what makes it *true* is the
+# step that reads these back off the **built image** and compares them with `--format labels` — a
+# source diff cannot see a base image that overrode a label or a line deleted on a branch nobody
+# diffed.
+#
+# The markers are the crate's own, and they are what both halves cut on. The region between them
+# is compared whole, so a fourth label added tomorrow is inside it rather than one line past the
+# end of a three-line window — which is what a `grep -A2` or a line count would have compared, and
+# would have passed.
+# terrace-config:labels:begin
 LABEL dev.terrace.config.contract.version="1" \
       dev.terrace.config.contract.path="/config/contract.json" \
       dev.terrace.config.prefix="WEBHOOK_REDIRECT_"
+# terrace-config:labels:end
 
 COPY --from=env  /etc/passwd /etc/passwd
 COPY --from=env  /etc/group /etc/group

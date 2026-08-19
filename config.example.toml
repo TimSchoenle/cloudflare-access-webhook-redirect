@@ -96,3 +96,4 @@ target_base = "<value>"
 #   webhook__paths in the secrets directory
 # Required: nothing loads until this key is supplied.
 paths = {}
+

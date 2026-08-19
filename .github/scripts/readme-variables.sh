@@ -62,6 +62,10 @@ json_body() {
 
 # The generator, once per rendering it produces. Both are Markdown tables destined for the
 # template, so both are read through `json_body`.
+#
+# `markdown-keys` rather than `markdown`: since terrace-config v0.9.0 the latter is both tables at
+# once, and this template places them in different sections — the loader's variables beside the
+# prose about the five layers, the keys in the settings reference below it.
 schema() {
     cargo run --quiet --features config-schema --example config-schema -- --format "$1"
 }
@@ -75,7 +79,7 @@ image="$(field "${release_workflow}" 's/^ *DOCKER_REPO: *\([^ ]*\) *$/\1/p' 'DOC
     '^[0-9a-z][0-9a-z._/-]*$')"
 
 config_loader="$(schema markdown-loader | json_body)"
-config_keys="$(schema markdown | json_body)"
+config_keys="$(schema markdown-keys | json_body)"
 
 printf '{"version":"%s","tag":"v%s","repo":"%s","image":"%s","config_loader":"%s","config_keys":"%s"}\n' \
     "${version}" "${version}" "${repo}" "${image}" "${config_loader}" "${config_keys}"
