@@ -144,8 +144,9 @@ jobs:
       #
       # This is the cheap half of the check. The real one reads the built image in `build.yaml`;
       # this one catches the same mistake a step earlier, in the diff that made it.
-      # Written outside the working tree: everything in it is either committed above or a stale
-      # file the next step would have to explain.
+      #
+      # The expected block is written outside the working tree, so it cannot be picked up as a
+      # stray file by anything that looks at the workspace after this step.
       - name: Verify the Dockerfile's contract labels are current
         run: |
           cargo run --quiet --features config-schema --example config-schema -- --format dockerfile > "${RUNNER_TEMP}/expected-labels.txt"
@@ -225,6 +226,12 @@ jobs:
         run: |
           mkdir -p docs
           cargo run --quiet --features config-schema --example config-schema -- --format contract > docs/config.contract.json
+          # `--intent-to-add` before the diff, so a contract that is *missing* fails here as well as
+          # one that is stale. Without it a deleted `docs/config.contract.json` would be regenerated
+          # as an untracked file, `git diff` would have nothing to say about a path it does not
+          # track, and the gate would pass with no contract committed at all — which is the one
+          # failure mode a regenerate-and-diff check has, and a silent one.
+          git add --intent-to-add docs/config.contract.json
           git diff --exit-code -- docs/config.contract.json
 
       - name: Verify the Dockerfile's contract labels are current
