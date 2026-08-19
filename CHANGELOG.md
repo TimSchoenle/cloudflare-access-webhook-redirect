@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v1.2.0...v1.2.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **ci:** qualify the contract's image reference with docker.io ([#418](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/418)) ([45dcf8d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/45dcf8d5a1b0b5f52e7d07931a7b0432ccb58326))
+
+
+### Miscellaneous
+
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.3.2 ([#415](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/415)) ([6946d0b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/6946d0be25c4b69b98cc6292835cf27d28b12b59))
+
 ## [1.2.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v1.1.0...v1.2.0) (2026-08-19)
 
 
