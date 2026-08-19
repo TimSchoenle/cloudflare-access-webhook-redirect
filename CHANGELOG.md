@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v1.1.0...v1.2.0) (2026-08-19)
+
+
+### Features
+
+* **config:** generate the configuration reference from the type ([#413](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/413)) ([0a4e2f4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0a4e2f44e1c05bd232c49e89af8930b9c1b9a144))
+* **config:** publish the configuration contract on the image ([#416](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/416)) ([d2027c0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/d2027c01da033f3812378055698f9b8f84dcd13e))
+
+
+### Miscellaneous
+
+* **deps:** update github/codeql-action action to v4.37.7 ([#411](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/411)) ([4611ab7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/4611ab7c6ea969fab76adb4374c096a58ae99486))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.38 ([#351](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/351)) ([b9ffce7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b9ffce7be460912fe244542d5472854ea772ea73))
+
 ## [1.1.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v1.0.0...v1.1.0) (2026-08-10)
 
 
