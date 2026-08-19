@@ -362,9 +362,14 @@ jobs:
       # The bytes are the ones the generator wrote, with nothing added afterwards. There is no
       # digest field to fill in — the attachment to a digest *is* the tie between image and
       # document.
+      #
+      # The reference is spelled out with its registry. `oras` does not apply Docker's implicit
+      # `docker.io` default: it reads the first segment of a bare `user/repo` as a registry
+      # hostname and tries to resolve it in DNS. Everything else in this job — buildx, crane,
+      # cosign — defaults the registry itself, which is why this is the only place it is written.
       - name: Attach the configuration contract to the image
         env:
-          REFERENCE: ${{ env.DOCKER_REPO }}@${{ steps.manifest.outputs.digest }}
+          REFERENCE: docker.io/${{ env.DOCKER_REPO }}@${{ steps.manifest.outputs.digest }}
         run: |
           cd /tmp
           oras attach --artifact-type application/vnd.terrace.config-schema.v1+json \
@@ -376,8 +381,8 @@ jobs:
       # `refs/heads/master`, not a tag-triggered `release.yml`.
       - name: Sign the configuration contract
         env:
-          REPO: ${{ env.DOCKER_REPO }}
-          REFERENCE: ${{ env.DOCKER_REPO }}@${{ steps.manifest.outputs.digest }}
+          REPO: docker.io/${{ env.DOCKER_REPO }}
+          REFERENCE: docker.io/${{ env.DOCKER_REPO }}@${{ steps.manifest.outputs.digest }}
         run: |
           discovered="$(oras discover \
             --artifact-type application/vnd.terrace.config-schema.v1+json \
