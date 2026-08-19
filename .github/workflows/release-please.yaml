@@ -384,17 +384,34 @@ jobs:
           REPO: docker.io/${{ env.DOCKER_REPO }}
           REFERENCE: docker.io/${{ env.DOCKER_REPO }}@${{ steps.manifest.outputs.digest }}
         run: |
-          discovered="$(oras discover \
-            --artifact-type application/vnd.terrace.config-schema.v1+json \
-            --format json "${REFERENCE}")"
+          # Polled rather than read once. Docker Hub's referrers index is eventually consistent:
+          # the attach above returns as soon as the referrer manifest is stored, but
+          # `/v2/.../referrers/<digest>` keeps answering with an empty index for seconds
+          # afterwards. Reading it a single time immediately after attaching is a coin flip, and
+          # losing it fails the release over a contract that is in fact attached.
+          referrer=""
+          discovered=""
+          for attempt in 1 2 3 4 5 6; do
+            if [ "${attempt}" -gt 1 ]; then
+              sleep $(( (attempt - 1) * 5 ))
+            fi
 
-          # `.manifests` is the shape oras 1.3 emits; `.referrers` is accepted so a version bump
-          # that renames the field fails visibly here rather than signing nothing.
-          referrer="$(printf '%s' "${discovered}" \
-            | jq -r 'first((.manifests // .referrers // [])[].digest) // empty')"
+            discovered="$(oras discover \
+              --artifact-type application/vnd.terrace.config-schema.v1+json \
+              --format json "${REFERENCE}")"
+
+            # `.referrers` is the shape oras 1.3 emits; `.manifests` is accepted so a version bump
+            # that renames the field fails visibly here rather than signing nothing.
+            referrer="$(printf '%s' "${discovered}" \
+              | jq -r 'first((.referrers // .manifests // [])[].digest) // empty')"
+
+            if [ -n "${referrer}" ]; then
+              break
+            fi
+          done
 
           if [ -z "${referrer}" ]; then
-            echo "::error::No configuration-contract referrer found on ${REFERENCE} after attaching it."
+            echo "::error::No configuration-contract referrer found on ${REFERENCE} within 75s of attaching it."
             printf '%s\n' "${discovered}"
             exit 1
           fi
