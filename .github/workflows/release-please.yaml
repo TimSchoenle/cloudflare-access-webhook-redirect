@@ -138,6 +138,38 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+      # Reuses the layers the push above already produced, so this is a layer export rather than a
+      # second build. `docker-release` needs the document to attach to the digest and the labels to
+      # check the index against, and it has no toolchain to generate either.
+      - name: Export the generated configuration contract
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          target: contract
+          outputs: type=local,dest=contract-out
+          # The build arguments the `builder` chain this target depends on consumes, with the same
+          # values the push above used. Anything different would change those layers' cache key and
+          # turn a layer export into a full recompile — including the Sentry upload, which is why
+          # its two arguments are here even though this target does not upload anything.
+          build-args: |
+            SENTRY_ORG=${{ secrets.SENTRY_ORG }}
+            SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
+            VERSION=${{ needs.release-please.outputs.tag_name }}
+          cache-from: type=gha,scope=release-${{ matrix.arch }}
+
+      # Per architecture rather than once, so `docker-release` can prove both architectures embed
+      # the same document before it attaches one of them to the index that covers both.
+      - name: Upload the configuration contract
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: contract-${{ matrix.arch }}
+          path: |
+            contract-out/contract.json
+            contract-out/contract.labels
+          if-no-files-found: error
+          retention-days: 1
+
   docker-release:
     environment:
       name: release
@@ -157,8 +189,30 @@ jobs:
         with:
           egress-policy: audit
 
+      # The scripts that check the index below live in the repository, so this job needs it. The
+      # triggering commit is the release commit, which is the source the images were built from.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      # Reads the per-platform config blobs out of the manifest list. `docker buildx imagetools`
+      # cannot do this per platform, and `--load` cannot take an index, which is why the label
+      # check for a multi-platform build happens here rather than before the push.
+      - name: Install Crane
+        uses: imjasonh/setup-crane@feee3b6bb0d4c68370f256a4502498c9227e5c6b # v0.7
+
+      # Pinned to the version `terrace-config`'s contract plan names. When the chart repository's
+      # consuming side lands it will pin one too, and the two should be reconciled then — a
+      # difference in `oras` versions across the attach and the fetch is the kind of thing that
+      # surfaces as an unexplained referrer mismatch.
+      - name: Install ORAS
+        uses: oras-project/setup-oras@1d808f7d7f6995cc68b7bf507bfe5c5446e1dc9d # v2.0.1
+        with:
+          version: 1.3.0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
@@ -205,6 +259,91 @@ jobs:
           digest=$(docker buildx imagetools inspect "${REFERENCE}" --format '{{json .Manifest}}' | jq -r '.digest')
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
 
+      - name: Download the configuration contracts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: /tmp/contracts
+          pattern: contract-*
+
+      # Both architectures generate the document from the same source tree with no revision or
+      # timestamp threaded in, so they must agree byte for byte. If they ever did not, one of them
+      # is describing a configuration surface the other image does not have, and attaching either
+      # to an index covering both would publish a claim that is false for one architecture.
+      - name: Verify both architectures generated the same contract
+        run: |
+          mapfile -t contracts < <(find /tmp/contracts -name contract.json | sort)
+          if [ "${#contracts[@]}" -lt 2 ]; then
+            echo "::error::Expected a contract from each architecture, found ${#contracts[@]}."
+            exit 1
+          fi
+          for contract in "${contracts[@]:1}"; do
+            if ! cmp "${contracts[0]}" "${contract}"; then
+              echo "::error::The architectures generated different configuration contracts."
+              exit 1
+            fi
+          done
+          cp "${contracts[0]}" /tmp/contract.json
+          cp "$(dirname "${contracts[0]}")/contract.labels" /tmp/contract.labels
+          echo "Both architectures generated an identical contract ($(wc -c < /tmp/contract.json) bytes)."
+
+      # The gate everything below is allowed to trust. It reads the index that was actually pushed,
+      # per platform, because labels live in each manifest's own config blob — a differing base or
+      # a per-platform build argument can leave one architecture carrying them and another not.
+      #
+      # Two traps, both silent, both handled here:
+      #
+      #  - `crane config` reports `.config.Labels`, where `docker inspect` reports `.Config.Labels`.
+      #    Reading the wrong one yields `null`; the script fails closed on `null` rather than
+      #    treating it as nothing to compare.
+      #  - `crane config` against an index without `--platform` does not fail loudly in every
+      #    version, so the platform is always passed. The list is derived from the index rather than
+      #    hardcoded, so it cannot drift from the build matrix — and the `unknown/unknown` entries
+      #    that `provenance` and `sbom` add as attestations are filtered out, since they are not
+      #    images and carry no config blob to inspect.
+      - name: Verify every platform carries its contract labels
+        env:
+          REFERENCE: ${{ env.DOCKER_REPO }}@${{ steps.manifest.outputs.digest }}
+        run: |
+          set -euo pipefail
+          platforms="$(crane manifest "${REFERENCE}" \
+            | jq -r '.manifests[]
+                     | select(.platform.os != null and .platform.os != "unknown")
+                     | select(.platform.architecture != "unknown")
+                     | "\(.platform.os)/\(.platform.architecture)"' \
+            | sort -u)"
+
+          if [ -z "${platforms}" ]; then
+            echo "::error::No image platforms found in ${REFERENCE}; nothing was verified."
+            exit 1
+          fi
+
+          echo "Verifying: $(echo "${platforms}" | tr '\n' ' ')"
+          status=0
+          for platform in ${platforms}; do
+            crane config --platform "${platform}" "${REFERENCE}" \
+              | jq -c '.config.Labels' > "labels.json"
+            if ! bash .github/scripts/verify-contract-labels.sh \
+                   labels.json /tmp/contract.labels "the ${platform} image"; then
+              status=1
+            fi
+
+            # The same cross-check the pull-request build makes, repeated against what was actually
+            # published: the copy embedded in this platform's filesystem is the document being
+            # attached below. A stale in-image copy is the one failure nothing downstream can see.
+            #
+            # Both outcomes are reported rather than aborting the loop, so a run says what is wrong
+            # with every platform instead of only the first.
+            if ! crane export --platform "${platform}" "${REFERENCE}" - \
+                 | tar -xOf - config/contract.json > from-image.json; then
+              echo "::error::Could not read /config/contract.json out of the ${platform} image, so the embedded copy could not be compared."
+              status=1
+            elif ! cmp from-image.json /tmp/contract.json; then
+              echo "::error::/config/contract.json in the ${platform} image is not the document being attached."
+              status=1
+            fi
+          done
+          exit "${status}"
+
       - name: Sign the images with GitHub OIDC Token
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
@@ -215,6 +354,48 @@ jobs:
             images+="${tag}@${DIGEST} "
           done
           cosign sign --yes ${images}
+
+      # Attached to the digest rather than to a tag: the referrer's subject is the exact build a
+      # chart pins, so the contract cannot be for a different image than the one being deployed. A
+      # tag can be moved; this cannot.
+      #
+      # The bytes are the ones the generator wrote, with nothing added afterwards. There is no
+      # digest field to fill in — the attachment to a digest *is* the tie between image and
+      # document.
+      - name: Attach the configuration contract to the image
+        env:
+          REFERENCE: ${{ env.DOCKER_REPO }}@${{ steps.manifest.outputs.digest }}
+        run: |
+          cd /tmp
+          oras attach --artifact-type application/vnd.terrace.config-schema.v1+json \
+            "${REFERENCE}" contract.json:application/json
+
+      # Keyless, against this workflow's identity. A chart repository vendoring the contract
+      # verifies that identity against a regexp it pins, so the workflow file and the ref this runs
+      # from are part of the contract's trust story: this is `release-please.yaml` on
+      # `refs/heads/master`, not a tag-triggered `release.yml`.
+      - name: Sign the configuration contract
+        env:
+          REPO: ${{ env.DOCKER_REPO }}
+          REFERENCE: ${{ env.DOCKER_REPO }}@${{ steps.manifest.outputs.digest }}
+        run: |
+          discovered="$(oras discover \
+            --artifact-type application/vnd.terrace.config-schema.v1+json \
+            --format json "${REFERENCE}")"
+
+          # `.manifests` is the shape oras 1.3 emits; `.referrers` is accepted so a version bump
+          # that renames the field fails visibly here rather than signing nothing.
+          referrer="$(printf '%s' "${discovered}" \
+            | jq -r 'first((.manifests // .referrers // [])[].digest) // empty')"
+
+          if [ -z "${referrer}" ]; then
+            echo "::error::No configuration-contract referrer found on ${REFERENCE} after attaching it."
+            printf '%s\n' "${discovered}"
+            exit 1
+          fi
+
+          cosign sign --yes "${REPO}@${referrer}"
+          echo "Signed the configuration contract at ${referrer}." >> "$GITHUB_STEP_SUMMARY"
 
   sentry-release:
     environment:

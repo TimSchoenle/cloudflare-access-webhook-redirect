@@ -53,6 +53,32 @@ RUN --mount=type=secret,id=sentry_token \
 RUN strip --strip-all /out/app && \
     upx --best --lzma /out/app
 
+# The configuration contract: every key this image's binary reads, in the shape a deployment can
+# validate against. On the builder image so no toolchain is added, and behind `config-schema` so
+# the release binary still never links the schema machinery.
+FROM builder AS contract-builder
+
+# One stage, one source tree, one compiled generator — so the document and the labels that
+# advertise it are two renderings of the same thing rather than two opinions produced at different
+# times. That matters more here than it looks: a `LABEL` key cannot be interpolated from anything,
+# so the block in `runtime` below is hand-written, and `contract.labels` is what CI checks the
+# built image against.
+#
+# `--release` reuses the profile the stage above already compiled. No `--locked`: `.dockerignore`
+# keeps `Cargo.lock` out of the build context.
+RUN cargo run --quiet --release --target "$(cat /rust-target)" \
+        --features config-schema --example config-schema \
+        -- --format contract > /out/contract.json && \
+    cargo run --quiet --release --target "$(cat /rust-target)" \
+        --features config-schema --example config-schema \
+        -- --format labels > /out/contract.labels
+
+# The two generated files and nothing else, so one `--output type=local` against this target puts
+# them on the host. Exporting `contract-builder` itself would write the entire Rust toolchain to
+# disk to retrieve ten kilobytes of JSON.
+FROM scratch AS contract
+COPY --from=contract-builder /out/contract.json /out/contract.labels /
+
 FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS env
 
 # mailcap is used for content type (MIME type) detection
@@ -83,10 +109,28 @@ LABEL org.opencontainers.image.version="${version}" \
       org.opencontainers.image.vendor="${vendor}" \
       org.opencontainers.image.title="cloudflare-access-webhook-redirect"
 
+# How a deployment discovers the contract below. All three are constants for this service, which
+# is why they are a plain `LABEL` block: there is nothing to interpolate, and feeding `--label` on
+# the `docker build` command line cannot reach a file produced inside a builder stage without
+# running the generator a second time on the host.
+#
+# So this is hand-written, and nothing in the Dockerfile can enforce it. It is
+# `--format dockerfile` output pasted verbatim, and what makes it true is the CI step that reads
+# these back off the **built image** and compares them with `--format labels` — a source diff
+# cannot see a base image that overrode a label or a line deleted on a branch nobody diffed.
+LABEL dev.terrace.config.contract.version="1" \
+      dev.terrace.config.contract.path="/config/contract.json" \
+      dev.terrace.config.prefix="WEBHOOK_REDIRECT_"
+
 COPY --from=env  /etc/passwd /etc/passwd
 COPY --from=env  /etc/group /etc/group
 COPY --from=env  /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=env  /usr/share/zoneinfo /usr/share/zoneinfo
+
+# The offline copy. The registry artifact is what a chart fetches, because it costs no layer pull;
+# this is what makes the image self-describing where there is no registry at all — a `docker save`
+# tarball, an air-gapped mirror, a future initContainer reading it in-cluster.
+COPY --from=contract-builder /out/contract.json /config/contract.json
 
 WORKDIR /app
 COPY --from=builder --chmod=555 /out/app ./app
