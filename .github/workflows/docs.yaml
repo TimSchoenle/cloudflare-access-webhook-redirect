@@ -120,7 +120,7 @@ jobs:
       # commit API re-reads the branch head, so this lands on top of the one above.
       - name: Commit config.example.toml
         id: example
-        uses: TimSchoenle/actions/actions/common/commit-changes@0a6ad3014d13b1baa2e6ab1966603fe88ed5887b # tag=actions-common-commit-changes-v1.3.1
+        uses: TimSchoenle/actions/actions/common/commit-changes@76719ba61e9b9cf1ffafdc3cb895308055a7f3bd # tag=actions-common-commit-changes-v1.3.2
         with:
           commit_message: 'docs: regenerate config.example.toml'
           file_pattern: 'config.example.toml'
@@ -130,7 +130,7 @@ jobs:
       # configuration surface moves, which is not when the README's prose does.
       - name: Commit the configuration contract
         id: contract
-        uses: TimSchoenle/actions/actions/common/commit-changes@0a6ad3014d13b1baa2e6ab1966603fe88ed5887b # tag=actions-common-commit-changes-v1.3.1
+        uses: TimSchoenle/actions/actions/common/commit-changes@76719ba61e9b9cf1ffafdc3cb895308055a7f3bd # tag=actions-common-commit-changes-v1.3.2
         with:
           commit_message: 'docs: regenerate the configuration contract'
           file_pattern: 'docs/config.contract.json'
