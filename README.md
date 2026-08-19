@@ -140,10 +140,10 @@ Docker selects the matching architecture automatically, so no platform flag is r
 
 Every example below pulls the floating `latest` tag, which is right for a deployment that should
 follow releases and wrong for one where an unattended restart must not change the running
-version. Pin the release instead — `v1.1.0` is the current one:
+version. Pin the release instead — `v1.2.0` is the current one:
 
 ```
-timmi6790/cloudflare-access-webhook-redirect:v1.1.0
+timmi6790/cloudflare-access-webhook-redirect:v1.2.0
 ```
 
 Either way the tag is signed with [cosign](https://docs.sigstore.dev/) under this repository's
