@@ -140,10 +140,10 @@ Docker selects the matching architecture automatically, so no platform flag is r
 
 Every example below pulls the floating `latest` tag, which is right for a deployment that should
 follow releases and wrong for one where an unattended restart must not change the running
-version. Pin the release instead — `v1.2.0` is the current one:
+version. Pin the release instead — `v1.2.1` is the current one:
 
 ```
-timmi6790/cloudflare-access-webhook-redirect:v1.2.0
+timmi6790/cloudflare-access-webhook-redirect:v1.2.1
 ```
 
 Either way the tag is signed with [cosign](https://docs.sigstore.dev/) under this repository's
@@ -356,6 +356,7 @@ column. [`config.example.toml`](config.example.toml) is the same surface as a fi
 | `webhook.target_base` | `Url` | `WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE` | — | required | Base URL of the Cloudflare Access protected service every allowed path is joined onto. |
 | `webhook.paths` | `HashMap<String, HashSet<AllowedMethod>>` | `WEBHOOK_REDIRECT_WEBHOOK__PATHS` | — | required | Path regex to the methods allowed on it. |
 
+
 `webhook.paths` is a table, so it is the one setting the environment layer cannot express in
 practice — the spelling in its `Environment` cell is mechanical, and a regex-keyed table has no
 scalar form. It comes from the TOML file:
@@ -377,6 +378,7 @@ the environment:
 |---|---|---|---|
 | `WEBHOOK_REDIRECT_CONFIG` | config | `config.toml` | Names the TOML layer: a file, or a directory whose `*.toml` files are all merged in name order. |
 | `WEBHOOK_REDIRECT_SECRETS_DIR` | secrets dir | — | Names a directory of key-named files — a mounted Kubernetes `Secret` volume. Each file supplies the key its name spells. |
+
 
 ### Reloading
 
