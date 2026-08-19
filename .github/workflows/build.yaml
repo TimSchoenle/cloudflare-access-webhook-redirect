@@ -150,6 +150,56 @@ jobs:
           cache-from: type=gha,scope=build-${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=build-${{ matrix.arch }}
 
+      # One export, reusing the layers the build above already produced, so this costs a layer
+      # export and nothing else. The `contract` stage holds only the two generated files —
+      # exporting the builder stage itself would write the whole Rust toolchain to the runner.
+      - name: Export the generated configuration contract
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          target: contract
+          outputs: type=local,dest=contract-out
+          # The same value the build above passed. `VERSION` is the only build argument the
+          # `builder` chain this target depends on consumes, and a different value would change
+          # those layers' cache key — turning a layer export into a full recompile.
+          build-args: |
+            VERSION=test
+          cache-from: type=gha,scope=build-${{ matrix.arch }}
+
+      # The checkpoint the whole scheme rests on. The `LABEL` block in the Dockerfile is
+      # hand-written — a `LABEL` key cannot be interpolated, and `--label` on the command line
+      # cannot reach a file produced inside a builder stage — so this is the only thing that makes
+      # it true.
+      #
+      # It reads the built image, not the Dockerfile. `docker inspect` reports the label map under
+      # `.Config.Labels`; `crane config` spells the same thing `.config.Labels`, and reading the
+      # wrong one yields `null`. The script fails closed on `null` rather than treating it as
+      # nothing to compare.
+      - name: Verify the image carries its contract labels
+        run: |
+          docker inspect --format '{{json .Config.Labels}}' "${IMAGE}" > labels.json
+          bash .github/scripts/verify-contract-labels.sh \
+            labels.json contract-out/contract.labels "the ${{ matrix.arch }} image"
+
+      # The cross-check the dropped hash label would have bought. Both copies of the document are
+      # here at once, which makes this free, and it is the one failure nothing downstream can see:
+      # a chart reads the registry copy, so an image embedding a *stale* file would never be
+      # caught anywhere else.
+      #
+      # `FROM scratch` has no shell, but `docker cp` does not need one — it reads the container's
+      # filesystem without starting it.
+      - name: Verify the embedded contract matches the exported one
+        run: |
+          container="$(docker create "${IMAGE}")"
+          docker cp "${container}:/config/contract.json" from-image.json
+          docker rm "${container}" > /dev/null
+          if ! cmp from-image.json contract-out/contract.json; then
+            echo "::error::/config/contract.json in the ${{ matrix.arch }} image is not the document this build generated."
+            exit 1
+          fi
+          echo "The ${{ matrix.arch }} image's embedded contract matches the exported one."
+
       - name: Test Docker image runs
         run: |
           # `webhook.paths` is a table, so it comes from the config file the image reads at

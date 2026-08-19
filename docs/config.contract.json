@@ -1,0 +1,311 @@
+{
+  "terrace_contract": 1,
+  "app": {
+    "name": "cloudflare-access-webhook-redirect",
+    "version": "v1.1.0",
+    "source": "https://github.com/TimSchoenle/cloudflare-access-webhook-redirect"
+  },
+  "schema": {
+    "schema_version": 1,
+    "dialect": {
+      "prefix": "WEBHOOK_REDIRECT_",
+      "nesting_separator": "__",
+      "indirection_suffix": "_FILE"
+    },
+    "loader": [
+      {
+        "env": "WEBHOOK_REDIRECT_CONFIG",
+        "role": "config",
+        "docs": "Names the TOML layer: a file, or a directory whose `*.toml` files are all merged in name order.",
+        "default": "config.toml"
+      },
+      {
+        "env": "WEBHOOK_REDIRECT_SECRETS_DIR",
+        "role": "secrets_dir",
+        "docs": "Names a directory of key-named files — a mounted Kubernetes `Secret` volume. Each file supplies the key its name spells.",
+        "default": null
+      }
+    ],
+    "keys": [
+      {
+        "path": "server.host",
+        "env": "WEBHOOK_REDIRECT_SERVER__HOST",
+        "env_file": "WEBHOOK_REDIRECT_SERVER__HOST_FILE",
+        "secrets_file": "server__host",
+        "docs": "Bind address. Containers usually want `0.0.0.0`.",
+        "ty": "String",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "text",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "127.0.0.1",
+        "default_value": "127.0.0.1",
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "server.port",
+        "env": "WEBHOOK_REDIRECT_SERVER__PORT",
+        "env_file": "WEBHOOK_REDIRECT_SERVER__PORT_FILE",
+        "secrets_file": "server__port",
+        "docs": "Bind port.",
+        "ty": "u16",
+        "values": [],
+        "constraint": {
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*\\+?[0-9]+\\s*$",
+          "type": "string"
+        },
+        "text_form": "integer",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "8080",
+        "default_value": 8080,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.log_level",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL_FILE",
+        "secrets_file": "telemetry__log_level",
+        "docs": "Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`).\n\nParsed here rather than in `main` so an unusable value fails the boot with a\nconfiguration error naming the key, instead of after the subscriber is installed.",
+        "ty": "Level",
+        "values": [],
+        "text_form": "unknown",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "info",
+        "default_value": "info",
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry_dsn",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN_FILE",
+        "secrets_file": "telemetry__sentry_dsn",
+        "docs": "Sentry DSN. Error reporting is disabled when absent.\n\nA [`SecretString`]: a DSN carries the project key that authorises event submission.",
+        "ty": "SecretString",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "text",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": null,
+        "default_value": null,
+        "note": null,
+        "required": false,
+        "secret": true,
+        "reserved": false
+      },
+      {
+        "path": "cloudflare.client_id",
+        "env": "WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_ID",
+        "env_file": "WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_ID_FILE",
+        "secrets_file": "cloudflare__client_id",
+        "docs": "`CF-Access-Client-Id` header value.",
+        "ty": "SecretString",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "text",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": null,
+        "default_value": null,
+        "note": null,
+        "required": true,
+        "secret": true,
+        "reserved": false
+      },
+      {
+        "path": "cloudflare.client_secret",
+        "env": "WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_SECRET",
+        "env_file": "WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_SECRET_FILE",
+        "secrets_file": "cloudflare__client_secret",
+        "docs": "`CF-Access-Client-Secret` header value.",
+        "ty": "SecretString",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "text",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": null,
+        "default_value": null,
+        "note": null,
+        "required": true,
+        "secret": true,
+        "reserved": false
+      },
+      {
+        "path": "webhook.target_base",
+        "env": "WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE",
+        "env_file": "WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE_FILE",
+        "secrets_file": "webhook__target_base",
+        "docs": "Base URL of the Cloudflare Access protected service every allowed path is joined onto.",
+        "ty": "Url",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "unknown",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": null,
+        "default_value": null,
+        "note": null,
+        "required": true,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "webhook.paths",
+        "env": "WEBHOOK_REDIRECT_WEBHOOK__PATHS",
+        "env_file": "WEBHOOK_REDIRECT_WEBHOOK__PATHS_FILE",
+        "secrets_file": "webhook__paths",
+        "docs": "Path regex to the methods allowed on it.\n\nA table rather than the packed string the environment layer forced, so a pattern\ncontaining the old separators is no longer unspellable:\n\n```toml\n[webhook.paths]\n\"/webhook/.*\" = [\"ALL\"]\n\"/api/public/.*\" = [\"GET\", \"POST\"]\n```",
+        "ty": "HashMap<String, HashSet<AllowedMethod>>",
+        "values": [],
+        "constraint": {
+          "additionalProperties": {
+            "type": "array",
+            "uniqueItems": true
+          },
+          "type": "object"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*[\\[\\{][\\s\\S]*[\\]\\}]\\s*$",
+          "type": "string"
+        },
+        "text_form": "structured",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": null,
+        "default_value": null,
+        "note": null,
+        "required": true,
+        "secret": false,
+        "reserved": false
+      }
+    ]
+  },
+  "json_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "cloudflare": {
+        "additionalProperties": false,
+        "properties": {
+          "client_id": {
+            "description": "`CF-Access-Client-Id` header value.",
+            "type": "string",
+            "writeOnly": true
+          },
+          "client_secret": {
+            "description": "`CF-Access-Client-Secret` header value.",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "server": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "default": "127.0.0.1",
+            "description": "Bind address. Containers usually want `0.0.0.0`.",
+            "type": "string"
+          },
+          "port": {
+            "default": 8080,
+            "description": "Bind port.",
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "telemetry": {
+        "additionalProperties": false,
+        "properties": {
+          "log_level": {
+            "default": "info",
+            "description": "Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`).\n\nParsed here rather than in `main` so an unusable value fails the boot with a\nconfiguration error naming the key, instead of after the subscriber is installed."
+          },
+          "sentry_dsn": {
+            "description": "Sentry DSN. Error reporting is disabled when absent.\n\nA [`SecretString`]: a DSN carries the project key that authorises event submission.",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "webhook": {
+        "additionalProperties": false,
+        "properties": {
+          "paths": {
+            "additionalProperties": {
+              "type": "array",
+              "uniqueItems": true
+            },
+            "description": "Path regex to the methods allowed on it.\n\nA table rather than the packed string the environment layer forced, so a pattern\ncontaining the old separators is no longer unspellable:\n\n```toml\n[webhook.paths]\n\"/webhook/.*\" = [\"ALL\"]\n\"/api/public/.*\" = [\"GET\", \"POST\"]\n```",
+            "type": "object"
+          },
+          "target_base": {
+            "description": "Base URL of the Cloudflare Access protected service every allowed path is joined onto.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "title": "cloudflare-access-webhook-redirect configuration",
+    "type": "object"
+  },
+  "external": {
+    "env": [],
+    "ignore": [
+      "HOSTNAME",
+      "KUBERNETES_*",
+      "TZ"
+    ],
+    "unknown": "reject"
+  }
+}

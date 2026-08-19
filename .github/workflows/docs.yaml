@@ -1,13 +1,19 @@
 name: Docs
 
-# `README.md` and `config.example.toml` are generated. This workflow is what makes that claim
-# true in both directions.
+# `README.md`, `config.example.toml` and `docs/config.contract.json` are generated. This workflow
+# is what makes that claim true in both directions.
 #
-# Both come from `Config` by way of `cargo run --example config-schema`: the README's settings
-# tables through `.github/templates/README.md.hbs`, and the example file directly. Adding a
+# All three come from `Config` by way of `cargo run --example config-schema`: the README's settings
+# tables through `.github/templates/README.md.hbs`, and the other two directly. Adding a
 # configuration key is therefore a change to one Rust struct, and the documentation follows on
 # its own — the failure this replaces is a table that still describes the key that was renamed
 # three releases ago.
+#
+# The contract is the same idea aimed at a deployment rather than a person: it is what the chart
+# repository validates a rendered configuration against. Committing it makes a prefix change or a
+# renamed key visible as a diff in the pull request that made it, one step before the container
+# build would catch it against the image's labels. The Dockerfile's `LABEL` block is checked here
+# too, and only checked — pasting it is deliberate, for the reason the step gives.
 #
 # On a pull request it renders and commits the result to the branch. The case that matters most
 # is the release-please pull request: that commit is the one which changes `version` in
@@ -83,6 +89,15 @@ jobs:
       - name: Regenerate config.example.toml
         run: cargo run --quiet --features config-schema --example config-schema -- --format toml > config.example.toml
 
+      # The committed contract, so a key rename or a prefix change shows up as a diff in the pull
+      # request that made it rather than as a label mismatch in a container build later. No
+      # `--revision` or `--created`: they would make this file differ on every run and the diff
+      # meaningless.
+      - name: Regenerate the committed configuration contract
+        run: |
+          mkdir -p docs
+          cargo run --quiet --features config-schema --example config-schema -- --format contract > docs/config.contract.json
+
       - name: Collect README variables
         id: variables
         # Invoked through `bash` rather than executed: the repository is authored on Windows,
@@ -111,12 +126,39 @@ jobs:
           file_pattern: 'config.example.toml'
           token: ${{ steps.generate_token.outputs.token }}
 
+      # A third commit, for the same reason the second is separate: the contract moves when the
+      # configuration surface moves, which is not when the README's prose does.
+      - name: Commit the configuration contract
+        id: contract
+        uses: TimSchoenle/actions/actions/common/commit-changes@0a6ad3014d13b1baa2e6ab1966603fe88ed5887b # tag=actions-common-commit-changes-v1.3.1
+        with:
+          commit_message: 'docs: regenerate the configuration contract'
+          file_pattern: 'docs/config.contract.json'
+          token: ${{ steps.generate_token.outputs.token }}
+
+      # Checked rather than rewritten, and it is the one generated thing here that is not
+      # committed for the author. The Dockerfile's `LABEL` block is hand-written because a `LABEL`
+      # key cannot be interpolated, so a prefix change has to be pasted in deliberately — a job
+      # that quietly edited the Dockerfile would be a job that quietly changed what the image
+      # claims about itself.
+      #
+      # This is the cheap half of the check. The real one reads the built image in `build.yaml`;
+      # this one catches the same mistake a step earlier, in the diff that made it.
+      # Written outside the working tree: everything in it is either committed above or a stale
+      # file the next step would have to explain.
+      - name: Verify the Dockerfile's contract labels are current
+        run: |
+          cargo run --quiet --features config-schema --example config-schema -- --format dockerfile > "${RUNNER_TEMP}/expected-labels.txt"
+          bash .github/scripts/verify-dockerfile-labels.sh "${RUNNER_TEMP}/expected-labels.txt" Dockerfile
+
       - name: Summarise
         env:
           README_COMMITTED: ${{ steps.readme.outputs.changes_detected }}
           README_URL: ${{ steps.readme.outputs.commit_url }}
           EXAMPLE_COMMITTED: ${{ steps.example.outputs.changes_detected }}
           EXAMPLE_URL: ${{ steps.example.outputs.commit_url }}
+          CONTRACT_COMMITTED: ${{ steps.contract.outputs.changes_detected }}
+          CONTRACT_URL: ${{ steps.contract.outputs.commit_url }}
         run: |
           if [ "${README_COMMITTED}" = "true" ]; then
             echo "README.md re-rendered: ${README_URL}" >> "$GITHUB_STEP_SUMMARY"
@@ -127,6 +169,11 @@ jobs:
             echo "config.example.toml regenerated: ${EXAMPLE_URL}" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "config.example.toml already matched the schema." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "${CONTRACT_COMMITTED}" = "true" ]; then
+            echo "docs/config.contract.json regenerated: ${CONTRACT_URL}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "docs/config.contract.json already matched the schema." >> "$GITHUB_STEP_SUMMARY"
           fi
 
   verify:
@@ -170,3 +217,17 @@ jobs:
         run: |
           cargo run --quiet --features config-schema --example config-schema -- --format toml > config.example.toml
           git diff --exit-code -- config.example.toml
+
+      # The reverse gate. Regenerating and diffing means a renamed key or a changed prefix cannot
+      # reach `master` while the committed contract still describes the old surface — which is what
+      # the chart repository would otherwise vendor.
+      - name: Verify the configuration contract is current
+        run: |
+          mkdir -p docs
+          cargo run --quiet --features config-schema --example config-schema -- --format contract > docs/config.contract.json
+          git diff --exit-code -- docs/config.contract.json
+
+      - name: Verify the Dockerfile's contract labels are current
+        run: |
+          cargo run --quiet --features config-schema --example config-schema -- --format dockerfile > "${RUNNER_TEMP}/expected-labels.txt"
+          bash .github/scripts/verify-dockerfile-labels.sh "${RUNNER_TEMP}/expected-labels.txt" Dockerfile
