@@ -116,7 +116,8 @@ jobs:
         id: config
         run: |
           set -euo pipefail
-          echo "json=$(bash .github/scripts/readme-variables.sh)" >> "$GITHUB_OUTPUT"
+          json="$(bash .github/scripts/readme-variables.sh)"
+          echo "json=${json}" >> "$GITHUB_OUTPUT"
 
       # The other half, and the merge. `branch` is pinned to the default branch rather than left
       # to default to `github.ref_name`, which on a pull request is `<number>/merge`: the badge
@@ -227,7 +228,8 @@ jobs:
         id: config
         run: |
           set -euo pipefail
-          echo "json=$(bash .github/scripts/readme-variables.sh)" >> "$GITHUB_OUTPUT"
+          json="$(bash .github/scripts/readme-variables.sh)"
+          echo "json=${json}" >> "$GITHUB_OUTPUT"
 
       - name: Collect the README payload
         id: variables
