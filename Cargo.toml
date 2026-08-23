@@ -2,6 +2,11 @@
 name = "cloudflare-access-webhook-redirect"
 version = "1.2.1"
 edition = "2024"
+# Read by `.github/workflows/docs.yaml` into the rendered README, which is why they are here and
+# not only in the repository's GitHub metadata: a description edited in the web UI would change
+# the README with no commit behind it.
+description = "Reverse proxy exposing chosen paths of a Cloudflare Access protected service, with the service token injected."
+license = "GPL-3.0-only"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]

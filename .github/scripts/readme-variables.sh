@@ -1,21 +1,25 @@
 #!/usr/bin/env bash
 #
-# Emits the variable payload for `.github/templates/README.md.hbs` as strict JSON on stdout.
+# Emits the half of `.github/templates/README.md.hbs`'s payload that no shared action can derive,
+# as strict JSON on stdout. `readme-variables` merges it over the repository, release, toolchain
+# and documentation facts it reads for itself.
 #
 # Every value here is read from something that is already the truth somewhere else, so that the
 # README cannot disagree with the thing it documents:
 #
-#   version, tag    `[package] version` in Cargo.toml — the numbers the release pull request
-#                   changes, so that commit carries the matching README with it
 #   image           `DOCKER_REPO` in .github/workflows/release-please.yaml — the repository the
 #                   release actually pushes to
-#   repo            this repository, for the badges and issue links
 #   config_loader   the two variables the loader reads, as a Markdown table
 #   config_keys     every configuration key, as a Markdown table
 #
 # The last two come from `cargo run --example config-schema`, which walks the `Config` type. A
 # key added to that type reaches the README without the README being edited, and a key removed
 # from it cannot be left behind.
+#
+# `version`, `tag` and `repo` used to be here and are gone. They are what `readme-variables` reads
+# out of `Cargo.toml` and the event, and a same-named key in this object replaces the one it
+# derived — `repo` in particular would have flattened an object carrying the slug, the URL, the
+# description and the licence into a bare string.
 #
 # Run it yourself to see what CI will render with:
 #
@@ -25,10 +29,7 @@
 # and a script that only runs on the CI runner is a script nobody checks their edit against.
 set -euo pipefail
 
-manifest="Cargo.toml"
 release_workflow=".github/workflows/release-please.yaml"
-
-repo="TimSchoenle/cloudflare-access-webhook-redirect"
 
 # Reads `<key><separator><value>` from a file and rejects anything that would need JSON escaping.
 # Every field read this way is a version string or an image path, so the accepted alphabet is the
@@ -70,16 +71,11 @@ schema() {
     cargo run --quiet --features config-schema --example config-schema -- --format "$1"
 }
 
-# Only `[package]` keys can match the manifest expression: a dependency's version sits inside an
-# inline table (`figment = { version = "0.10", … }`) and never starts a line, so anchoring is
-# enough.
-version="$(field "${manifest}" 's/^version = "\([^"]*\)".*/\1/p' 'version' \
-    '^[0-9A-Za-z][0-9A-Za-z.+-]*$')"
 image="$(field "${release_workflow}" 's/^ *DOCKER_REPO: *\([^ ]*\) *$/\1/p' 'DOCKER_REPO' \
     '^[0-9a-z][0-9a-z._/-]*$')"
 
 config_loader="$(schema markdown-loader | json_body)"
 config_keys="$(schema markdown-keys | json_body)"
 
-printf '{"version":"%s","tag":"v%s","repo":"%s","image":"%s","config_loader":"%s","config_keys":"%s"}\n' \
-    "${version}" "${version}" "${repo}" "${image}" "${config_loader}" "${config_keys}"
+printf '{"image":"%s","config_loader":"%s","config_keys":"%s"}\n' \
+    "${image}" "${config_loader}" "${config_keys}"
