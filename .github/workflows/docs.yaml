@@ -109,11 +109,26 @@ jobs:
       - name: Regenerate the configuration contract
         run: just regenerate
 
-      - name: Collect README variables
+      # The half of the payload no shared action can derive: the published image name and the two
+      # configuration tables. Invoked through `bash` rather than executed: the repository is
+      # authored on Windows, where git does not record the executable bit.
+      - name: Generate the configuration payload
+        id: config
+        run: |
+          set -euo pipefail
+          json="$(bash .github/scripts/readme-variables.sh)"
+          echo "json=${json}" >> "$GITHUB_OUTPUT"
+
+      # The other half, and the merge. `branch` is pinned to the default branch rather than left
+      # to default to `github.ref_name`, which on a pull request is `<number>/merge`: the badge
+      # and permalink URLs would then differ between this job and `verify`, and every merge would
+      # fail the gate for a reason absent from the diff.
+      - name: Collect the README payload
         id: variables
-        # Invoked through `bash` rather than executed: the repository is authored on Windows,
-        # where git does not record the executable bit.
-        run: echo "json=$(bash .github/scripts/readme-variables.sh)" >> "$GITHUB_OUTPUT"
+        uses: TimSchoenle/actions/actions/common/readme-variables@b5b5c9e047f00ffa00b7772536c8bdb4f158f706 # tag=actions-common-readme-variables-v1.1.0
+        with:
+          branch: ${{ github.event.repository.default_branch }}
+          extra: ${{ steps.config.outputs.json }}
 
       - name: Render and commit the README
         id: readme
@@ -121,7 +136,7 @@ jobs:
         with:
           template: .github/templates/README.md.hbs
           output: README.md
-          variables: ${{ steps.variables.outputs.json }}
+          variables: ${{ steps.variables.outputs.variables }}
           token: ${{ steps.generate_token.outputs.token }}
           commit_message: 'docs: render README from template'
 
@@ -209,9 +224,19 @@ jobs:
         with:
           tool: just
 
-      - name: Collect README variables
+      - name: Generate the configuration payload
+        id: config
+        run: |
+          set -euo pipefail
+          json="$(bash .github/scripts/readme-variables.sh)"
+          echo "json=${json}" >> "$GITHUB_OUTPUT"
+
+      - name: Collect the README payload
         id: variables
-        run: echo "json=$(bash .github/scripts/readme-variables.sh)" >> "$GITHUB_OUTPUT"
+        uses: TimSchoenle/actions/actions/common/readme-variables@b5b5c9e047f00ffa00b7772536c8bdb4f158f706 # tag=actions-common-readme-variables-v1.1.0
+        with:
+          branch: ${{ github.event.repository.default_branch }}
+          extra: ${{ steps.config.outputs.json }}
 
       # Writes nothing; fails with the first differing line when README.md is stale.
       - name: Verify README.md is current
@@ -219,7 +244,7 @@ jobs:
         with:
           template: .github/templates/README.md.hbs
           output: README.md
-          variables: ${{ steps.variables.outputs.json }}
+          variables: ${{ steps.variables.outputs.variables }}
           check: true
 
       - name: Verify config.example.toml is current
