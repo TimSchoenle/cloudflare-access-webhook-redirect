@@ -99,10 +99,42 @@ jobs:
       - name: Run Clippy
         uses: TimSchoenle/actions/actions/rust/clippy@dcfb46a6a17ad8565db74057ce60278953056ad5 # tag=actions-rust-clippy-v1.1.9
 
+  doc:
+    name: Doc
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required to checkout the code
+    env:
+      # The rustdoc lints in `Cargo.toml` only run under `rustdoc`, never under `cargo check` or
+      # `cargo clippy`, which is why this job exists separately from `check` and `clippy`.
+      RUSTDOCFLAGS: '-D warnings'
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install stable toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+
+      # One feature set is enough here: nothing in the crate documentation is behind a `cfg`, so
+      # `--all-features` renders every page there is. `config-schema` only adds the generator.
+      - name: Render the documentation
+        run: cargo doc --all-features --no-deps
+
+      # `cargo nextest`, which the `test` job runs, does not run doctests.
+      - name: Run the doctests
+        run: cargo test --doc --all-features
+
   docker-build-test:
     name: Docker Build and Test (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
-    needs: check
+    needs: [check, doc]
     permissions:
       contents: read # Required to checkout the code
       security-events: write # Required to upload Trivy scan results

@@ -27,13 +27,14 @@ const PREFIX: &str = "WEBHOOK_REDIRECT_";
 /// Both names are spelled out even though `Terrace::new(PREFIX)` derives exactly these: they
 /// are the documented operator surface, and a variable that exists only as a derivation inside
 /// a dependency is one the README cannot be held to.
+#[must_use]
 pub fn terrace() -> Terrace {
     Terrace::new(PREFIX)
         .config_var("WEBHOOK_REDIRECT_CONFIG")
         .secrets_dir_var("WEBHOOK_REDIRECT_SECRETS_DIR")
 }
 
-/// Load a typed config.
+/// Loads a typed config.
 ///
 /// # Errors
 /// Returns [`ConfigError`] if a required value is missing, a value fails to parse, a
@@ -43,7 +44,7 @@ pub fn load<T: DeserializeOwned>() -> Result<T, ConfigError> {
     terrace().load()
 }
 
-/// Load a typed config together with everything a reload needs to load it again.
+/// Loads a typed config together with everything a reload needs to load it again.
 ///
 /// # Errors
 /// As [`load`].
@@ -51,10 +52,10 @@ pub fn load_watched<T: DeserializeOwned>() -> Result<Loaded<T>, ConfigError> {
     terrace().load_watched()
 }
 
-/// Report which layer supplied each key, re-reading them at the moment it is called.
+/// Reports which layer supplied each key, re-reading them at the moment it is called.
 ///
 /// The question a boot log cannot otherwise answer. [`Config`](crate::config::Config) is full of
-/// [`SecretString`](secrecy::SecretString), so no layer of it is ever logged as a value — which
+/// [`SecretString`](secrecy::SecretString), so no layer of it is ever logged as a value. That
 /// leaves "the rotated secret is not being picked up" with nothing to go on. An
 /// [`Explanation`] holds no configuration value at all, only the names of the files and
 /// variables each key arrived from, so it is safe in a log that the values can never enter.

@@ -133,7 +133,7 @@ lists every recipe:
 
 ```bash
 cargo run                 # reads ./config.toml
-just verify               # fmt, clippy, test
+just verify               # fmt, clippy, test, doc
 just render toml          # config.example.toml, as the docs job writes it
 ```
 
@@ -247,8 +247,8 @@ Issues and pull requests are welcome. Commits follow
 [Conventional Commits](https://www.conventionalcommits.org/), which is what release-please reads
 to cut a release.
 
-`just` with no arguments lists the recipes. `just verify` is the fmt, clippy and test a pull
-request runs anyway. After changing anything under `src/config/`, run `just regenerate`: it
+`just` with no arguments lists the recipes. `just verify` is the fmt, clippy, test and doc a
+pull request runs anyway. After changing anything under `src/config/`, run `just regenerate`: it
 rewrites `docs/config.contract.json` and the `Dockerfile`'s `LABEL` region from the types, and CI
 fails a branch whose generated files do not match what those types produce. This README is one of
 them.

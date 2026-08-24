@@ -432,7 +432,6 @@ dependencies = [
  "figment",
  "getset",
  "http 1.5.0",
- "lazy_static",
  "regex",
  "reqwest",
  "secrecy",

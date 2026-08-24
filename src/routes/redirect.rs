@@ -1,3 +1,5 @@
+//! The forwarding handler, and the one gate in front of the Cloudflare Access credentials.
+
 use crate::converter::{ActixToReqwestConverter, ReqwestToActixConverter};
 use crate::data::WebHookData;
 use actix_web::http::Method;
@@ -6,6 +8,10 @@ use actix_web::{HttpRequest, HttpResponse, web};
 use reqwest::{Body, Client, RequestBuilder, Url};
 use std::collections::HashMap;
 
+/// Registers the five methods that can be forwarded against every path.
+///
+/// The pattern is `{tail:.*}`, so this claims whatever `health_check` did not; register it last.
+/// A method outside these five is refused by actix before [`redirect`] sees it.
 pub fn get_config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("{tail:.*}")
@@ -17,6 +23,12 @@ pub fn get_config(cfg: &mut web::ServiceConfig) {
     );
 }
 
+/// Forwards one request to `webhook.target_base` with the Cloudflare Access token attached.
+///
+/// Answers `404` when the allow list does not admit the path and method together, and `400` for
+/// every failure after that: a body that cannot be read, a query string that cannot be parsed, a
+/// URL that will not join, an upstream that refuses, a response that cannot be relayed. The
+/// upstream's own status is passed through untouched when it does answer.
 async fn redirect(
     mut payload: web::Payload,
     request: HttpRequest,
@@ -129,6 +141,11 @@ async fn redirect(
     Ok(converted_response)
 }
 
+/// One forwarded request, assembled from the inbound one.
+///
+/// The method decides what comes with it. All five carry the headers and the query string; only
+/// `POST`, `PUT` and `PATCH` carry the body, so a `GET` or `DELETE` that arrived with one has it
+/// dropped here.
 struct ReqwestBuilder<'a> {
     client: &'a Client,
     url: Url,
@@ -142,6 +159,8 @@ struct ReqwestBuilder<'a> {
 }
 
 impl<'a> ReqwestBuilder<'a> {
+    /// Collects the parts. [`build`](ReqwestBuilder::build) decides which of them the method
+    /// actually carries.
     pub fn new(
         client: &'a Client,
         url: Url,
@@ -170,6 +189,11 @@ impl<'a> ReqwestBuilder<'a> {
         self.include_params = true;
     }
 
+    /// Assembles the request, attaching the body and the query string the method calls for.
+    ///
+    /// # Errors
+    /// Returns [`Error::InvalidRoute`](crate::error::Error::InvalidRoute) for a method outside the
+    /// five [`get_config`] registers, which no routed request can reach.
     pub fn build(mut self) -> crate::Result<RequestBuilder> {
         let mut request = match *self.method {
             Method::GET => {
@@ -266,8 +290,8 @@ mod tests {
                 client,
                 target,
                 allowed_paths,
-                SecretString::new(Box::from("access-id")),
-                SecretString::new(Box::from("access-secret")),
+                &SecretString::new(Box::from("access-id")),
+                &SecretString::new(Box::from("access-secret")),
             )
             .unwrap();
 

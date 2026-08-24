@@ -1,7 +1,7 @@
 //! Logging and error-reporting settings.
 //!
-//! Both are installed process-globally, once, before the reloadable runtime exists — so this is
-//! the one block a configuration reload cannot apply. Changing it still needs a restart.
+//! Both are installed process-globally, once, before the reloadable runtime exists. That makes
+//! this the one block a configuration reload cannot apply. Changing it still needs a restart.
 
 use secrecy::SecretString;
 use serde::{Deserialize, Deserializer};
@@ -12,7 +12,7 @@ const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 
 /// Observability settings.
 ///
-/// `Serialize` is the schema generator's, not the service's — see [`ServerConfig`]. Neither
+/// `Serialize` is the schema generator's, not the service's. See [`ServerConfig`]. Neither
 /// field serialises as it deserialises: [`Level`] has no `Serialize` at all, and
 /// [`SecretString`] refuses to have one, which is the point of the type.
 ///
@@ -42,7 +42,7 @@ pub struct TelemetryConfig {
     /// A [`SecretString`]: a DSN carries the project key that authorises event submission.
     // Below the doc comment on purpose: `config.example.toml` is generated from the whole of
     // that comment, and how this crate serialises a field is not an operator's business.
-    // `skip_serializing` costs the generated table nothing either way — `#[config(secret)]`
+    // `skip_serializing` costs the generated table nothing either way: `#[config(secret)]`
     // renders `<redacted>` in place of whatever the value is, so the only thing left out is the
     // one thing that must not reach a documentation file.
     #[serde(default, skip_serializing)]
@@ -79,6 +79,10 @@ where
 /// value an operator would then copy — correctly, since parsing folds case, but nowhere else in
 /// the reference is a value written in a spelling the examples do not use.
 #[cfg(feature = "config-schema")]
+#[expect(
+    clippy::trivially_copy_pass_by_ref,
+    reason = "serde's serialize_with hands the field by reference; the signature is not ours"
+)]
 fn serialize_level_as_written<S>(level: &Level, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
@@ -125,7 +129,7 @@ mod tests {
         let error = deserialize("log_level = \"chatty\"").expect_err("not a level");
 
         assert!(
-            error.to_string().contains("log_level"),
+            error.contains("log_level"),
             "the error must name the key: {error}"
         );
     }

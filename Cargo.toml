@@ -78,9 +78,35 @@ terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = 
 # `terrace-config` resolves.
 figment = { version = "=0.10.19", features = ["test"] }
 serde_test = "=1.0.177"
-lazy_static = "=1.5.0"
 wiremock = "=0.6.5"
 
 [profile.release]
 lto = true
 codegen-units = 1
+
+# Declared on the workspace even though there is one member, so a second crate added here cannot
+# be held to a looser standard than this one.
+[lints]
+workspace = true
+
+[workspace.lints.rust]
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Already inside `pedantic`. Named again so the next reader can see they are deliberate rather
+# than swept in with the group.
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+doc_markdown = "warn"
+too_long_first_doc_paragraph = "warn"
+doc_link_with_quotes = "warn"
+doc_broken_link = "warn"
+doc_include_without_cfg = "warn"
+
+[workspace.lints.rustdoc]
+# Denied rather than warned: a broken link renders as the literal `[`Foo`]` text, so it is
+# invisible to the person reading the page and visible only to the person who wrote it.
+broken_intra_doc_links = "deny"
+private_intra_doc_links = "warn"
+unescaped_backticks = "warn"

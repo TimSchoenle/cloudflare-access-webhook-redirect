@@ -39,19 +39,30 @@ where
 /// A method a path may be proxied with, or [`AllowedMethod::ALL`] for every one of them.
 ///
 /// Deserialised through [`FromStr`] rather than by variant name, so `"get"` and `"GET"` are the
-/// same value — operators write these by hand.
+/// same value. Operators write these by hand.
+///
+/// Every forwarded request keeps its query string. Whether it keeps its body depends on which of
+/// these it is.
 #[derive(Debug, serde::Deserialize, Eq, PartialEq, Hash, Clone)]
 #[serde(try_from = "String")]
 pub enum AllowedMethod {
+    /// Every method, so any other entry in the same list is ignored.
     ALL,
+    /// Forwarded without its body.
     GET,
+    /// Forwarded with its body.
     POST,
+    /// Forwarded with its body.
     PUT,
+    /// Forwarded with its body.
     PATCH,
+    /// Forwarded without its body.
     DELETE,
 }
 
 impl AllowedMethod {
+    /// The uppercase spelling, `"ALL"` included.
+    #[must_use]
     pub fn name(&self) -> &str {
         match self {
             AllowedMethod::ALL => "ALL",
@@ -75,7 +86,7 @@ impl FromStr for AllowedMethod {
             "PUT" => Ok(AllowedMethod::PUT),
             "PATCH" => Ok(AllowedMethod::PATCH),
             "DELETE" => Ok(AllowedMethod::DELETE),
-            _ => Err(Error::custom(format!("Unknown method: {}", value))),
+            _ => Err(Error::custom(&format!("Unknown method: {value}"))),
         }
     }
 }
@@ -128,6 +139,8 @@ impl TryFrom<HashSet<AllowedMethod>> for AllowedPath {
     }
 }
 
+/// [`AllowedMethod::ALL`] is the one input this refuses: it stands for a set, and actix has no
+/// method that means every method.
 impl TryFrom<AllowedMethod> for actix_web::http::Method {
     type Error = Error;
 
@@ -139,7 +152,7 @@ impl TryFrom<AllowedMethod> for actix_web::http::Method {
         }
 
         actix_web::http::Method::from_str(value.name()).map_err(|e| {
-            Error::custom(format!(
+            Error::custom(&format!(
                 "Can't convert method to actix_web::http::Method: {} | {}",
                 e,
                 value.name()
@@ -163,7 +176,7 @@ mod tests_try_from {
                 assert_eq!(result.unwrap(), expected);
             }
             None => {
-                assert!(result.is_err(), "Expected error, got: {:?}", result);
+                assert!(result.is_err(), "Expected error, got: {result:?}");
             }
         }
     }
@@ -363,7 +376,7 @@ mod tests_deserialize {
         .expect_err("FETCH is not a method");
 
         assert!(
-            error.to_string().contains("FETCH"),
+            error.contains("FETCH"),
             "the error must name the value: {error}"
         );
     }
@@ -381,7 +394,7 @@ mod tests_deserialize {
         .expect_err("not a URL");
 
         assert!(
-            error.to_string().contains("target_base"),
+            error.contains("target_base"),
             "the error must name the key: {error}"
         );
     }

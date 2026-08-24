@@ -10,6 +10,7 @@ use tokio_util::sync::CancellationToken;
 ///
 /// `SIGTERM` matters as much as `SIGINT` here: it is what a container runtime and a Kubernetes
 /// pod eviction send, and dropping it would mean every graceful shutdown ends as a kill.
+#[must_use]
 pub fn install_shutdown() -> CancellationToken {
     let token = CancellationToken::new();
 
