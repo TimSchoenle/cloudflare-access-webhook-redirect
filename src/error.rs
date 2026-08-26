@@ -18,6 +18,11 @@ pub enum Error {
     /// The filesystem watcher backing configuration reloads could not be installed.
     #[error(transparent)]
     Watch(#[from] terrace_config::reload::WatchError),
+    /// `telemetry.sentry` is switched on but unusable — no DSN, a DSN that does not parse, or a
+    /// sample rate outside `0.0..=1.0`. Carries the message rather than a wrapped SDK error: the
+    /// three are configuration mistakes, and the text names the key that has to change.
+    #[error("Sentry error: {0}")]
+    Sentry(String),
     #[error("{0}")]
     Custom(String),
 }

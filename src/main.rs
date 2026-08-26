@@ -1,17 +1,13 @@
 use std::sync::Arc;
 
 use cloudflare_access_webhook_redirect::Result;
-use cloudflare_access_webhook_redirect::config::{Config, TelemetryConfig};
+use cloudflare_access_webhook_redirect::config::Config;
 use cloudflare_access_webhook_redirect::data::WebHookData;
 use cloudflare_access_webhook_redirect::error::Error;
 use cloudflare_access_webhook_redirect::server::Server;
 use cloudflare_access_webhook_redirect::shutdown::install_shutdown;
-use secrecy::ExposeSecret;
-use sentry::ClientInitGuard;
+use cloudflare_access_webhook_redirect::telemetry;
 use tokio_util::sync::CancellationToken;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::{Layer, filter};
 
 #[macro_use]
 extern crate tracing;
@@ -32,11 +28,23 @@ async fn main() -> Result<()> {
         }
     };
 
-    // Both are process-global and installed once, which is why `telemetry.*` is the one block
-    // a configuration reload cannot apply.
-    setup_tracing(boot.value.telemetry())?;
-    // Prevents the process from exiting until all events are sent
-    let _sentry = setup_sentry(boot.value.telemetry());
+    // The subscriber and the Sentry client are process-global and installed once, which is why
+    // `telemetry.*` is the one block a configuration reload cannot apply. The guard is bound for
+    // the rest of `main`: dropping it closes the client, and with it the flush that gets the last
+    // events of a terminating process out.
+    let telemetry_guard = telemetry::init(boot.value.telemetry())?;
+
+    // After the subscriber exists, or the line goes nowhere — and "is Sentry actually on in this
+    // pod" is the first question an operator asks.
+    if telemetry_guard.reporting() {
+        let sentry = boot.value.telemetry().sentry();
+        info!(
+            traces_sample_rate = sentry.traces_sample_rate(),
+            http_transactions = sentry.http_transactions(),
+            send_default_pii = sentry.send_default_pii(),
+            "Sentry reporting enabled"
+        );
+    }
 
     log_config_sources();
 
@@ -86,33 +94,5 @@ fn log_config_sources() {
     match cloudflare_access_webhook_redirect::config::explain() {
         Ok(explanation) => debug!("configuration sources:\n{explanation}"),
         Err(error) => debug!("could not explain the configuration sources: {error}"),
-    }
-}
-
-fn setup_tracing(telemetry: &TelemetryConfig) -> Result<()> {
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::fmt::layer()
-                .with_filter(filter::LevelFilter::from_level(*telemetry.log_level())),
-        )
-        .init();
-
-    Ok(())
-}
-
-fn setup_sentry(telemetry: &TelemetryConfig) -> Option<ClientInitGuard> {
-    match telemetry.sentry_dsn() {
-        Some(dsn) => Some(sentry::init((
-            dsn.expose_secret(),
-            sentry::ClientOptions {
-                release: sentry::release_name!(),
-                attach_stacktrace: true,
-                ..Default::default()
-            },
-        ))),
-        None => {
-            info!("telemetry.sentry_dsn not set, skipping Sentry setup");
-            None
-        }
     }
 }

@@ -12,5 +12,6 @@ pub mod error;
 mod routes;
 pub mod server;
 pub mod shutdown;
+pub mod telemetry;
 
 pub type Result<T> = anyhow::Result<T, Error>;

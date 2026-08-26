@@ -11,12 +11,14 @@
 
 mod cloudflare;
 mod loader;
+mod sentry;
 mod server;
 mod telemetry;
 mod webhook;
 
 pub use cloudflare::CloudFlareConfig;
 pub use loader::{ConfigError, Explanation, Loaded, Sources, explain, load, load_watched, terrace};
+pub use sentry::{SentryConfig, SentryLevel};
 pub use server::ServerConfig;
 pub use telemetry::TelemetryConfig;
 pub use webhook::{AllowedMethod, WebhookConfig};
@@ -50,7 +52,7 @@ pub struct Config {
 
 #[cfg(test)]
 mod tests {
-    use super::{AllowedMethod, Config, terrace};
+    use super::{AllowedMethod, Config, SentryLevel, terrace};
     use secrecy::ExposeSecret;
     use std::collections::HashSet;
     use terrace_config::explain::Layer;
@@ -94,7 +96,7 @@ target_base = "https://example.com/"
             assert_eq!(config.server().host(), "127.0.0.1");
             assert_eq!(config.server().port(), &8080);
             assert_eq!(config.telemetry().log_level(), &tracing::Level::INFO);
-            assert!(config.telemetry().sentry_dsn().is_none());
+            assert!(!config.telemetry().sentry().enabled());
 
             assert_eq!(config.cloudflare().client_id().expose_secret(), "client_id");
             assert_eq!(
@@ -124,6 +126,40 @@ target_base = "https://example.com/"
 
             assert_eq!(config.server().host(), "0.0.0.0");
             assert_eq!(config.server().port(), &9090);
+            Ok(())
+        });
+    }
+
+    /// `[telemetry.sentry]` is the only block two levels deep, which is one deeper than every
+    /// other key this crate configures: the loader has to reach
+    /// `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__*`, and a DSN mounted as a file has to outrank the
+    /// environment the same way a Cloudflare credential does.
+    #[test]
+    fn the_nested_sentry_keys_resolve_through_the_dialect() {
+        harness().run(|jail| {
+            jail.config(CONFIG)?;
+            jail.env_key("telemetry.sentry.enabled", true);
+            jail.env_key("telemetry.sentry.traces_sample_rate", "0.25");
+            jail.env_key("telemetry.sentry.capture_level", "warn");
+            jail.secret_key("telemetry.sentry.dsn", "https://key@sentry.example/42\n")?;
+
+            let config: Config = jail.load()?;
+            let sentry = config.telemetry().sentry();
+
+            assert!(sentry.enabled());
+            assert_eq!(
+                sentry
+                    .dsn()
+                    .as_ref()
+                    .expect("the mounted DSN is read")
+                    .expose_secret(),
+                "https://key@sentry.example/42"
+            );
+            assert_eq!(sentry.traces_sample_rate(), 0.25);
+            assert_eq!(sentry.capture_level(), SentryLevel::Warn);
+            // Untouched keys in a block that was partly supplied still take their own defaults.
+            assert_eq!(sentry.environment(), "production");
+            assert!(sentry.http_transactions());
             Ok(())
         });
     }
