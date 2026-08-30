@@ -330,12 +330,50 @@ jobs:
           pattern: trivy-sarif-*
           merge-multiple: true
 
-      # `sarif_file` accepts a directory: every SARIF file in it becomes one run of a single
-      # analysis under a single category, which is exactly the shape this job exists to produce.
+      # Handing `upload-sarif` a directory would upload one SARIF *run* per file, and it refuses
+      # more than one run per category, so the two runs are folded into one here. Rules are unioned
+      # by id and every result's `ruleIndex` is rebased onto that union. Results identical across
+      # both scans collapse to one, because a package the two images share is one vulnerability
+      # rather than two; anything that genuinely differs by architecture differs in its message or
+      # location and survives. `properties` records both images instead of silently keeping the
+      # first one's name.
+      #
+      # A merged run cannot say which architecture a finding came from. That costs nothing today:
+      # the runtime stage is `FROM scratch`, so there is no package database to scan and both
+      # scans come back with zero rules and zero results. What findings could appear come from the
+      # binary, which is built from the same `Cargo.lock` on both architectures.
+      - name: Combine the per-architecture Trivy results
+        run: |
+          mapfile -t sarifs < <(find trivy-sarif -name '*.sarif' | sort)
+          # One per leg of the `docker-build-test` matrix. Fewer means an upload was lost, and
+          # publishing a partial scan as if it covered everything is worse than failing here.
+          if [ "${#sarifs[@]}" -ne 2 ]; then
+            echo "::error::Expected one Trivy SARIF file per architecture, found ${#sarifs[@]}."
+            exit 1
+          fi
+
+          jq -s '
+            ([ .[] | .runs[0].tool.driver.rules // [] ] | add | unique_by(.id)) as $rules
+            | ([ .[] | .runs[0].results // [] ] | add
+                 | map(. as $result
+                       | if $result.ruleId
+                         then .ruleIndex = ($rules | map(.id) | index($result.ruleId))
+                         else . end)
+                 | unique) as $results
+            | ([ .[] | .runs[0].properties.imageName ]) as $images
+            | .[0]
+            | .runs = [ .runs[0]
+                        | .tool.driver.rules = $rules
+                        | .results = $results
+                        | .properties = { scannedImages: $images } ]
+          ' "${sarifs[@]}" > trivy-combined.sarif
+
+          echo "Combined ${#sarifs[@]} scans into $(jq '.runs[0].results | length' trivy-combined.sarif) result(s)."
+
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
         with:
-          sarif_file: trivy-sarif
+          sarif_file: trivy-combined.sarif
           category: trivy
 
   dependency-review:
