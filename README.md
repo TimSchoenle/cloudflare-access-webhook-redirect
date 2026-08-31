@@ -61,7 +61,7 @@ Mount it at `/app/config.toml`, which is where the image looks:
 docker run --rm -p 8080:8080 \
   -e WEBHOOK_REDIRECT_SERVER__HOST=0.0.0.0 \
   -v "$(pwd)/config.toml:/app/config.toml:ro" \
-  timmi6790/cloudflare-access-webhook-redirect:v1.2.1
+  timmi6790/cloudflare-access-webhook-redirect:v1.3.0
 ```
 
 `server.host` defaults to `127.0.0.1`, which inside a container answers nothing from outside it.
@@ -102,7 +102,7 @@ That is what the environment variable above overrides.
 ## Installation
 
 ```bash
-docker pull timmi6790/cloudflare-access-webhook-redirect:v1.2.1
+docker pull timmi6790/cloudflare-access-webhook-redirect:v1.3.0
 ```
 
 Images cover `linux/amd64` and `linux/arm64` in one manifest list, so Docker picks the
