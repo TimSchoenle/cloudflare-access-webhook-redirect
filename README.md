@@ -201,7 +201,6 @@ column. [`config.example.toml`](config.example.toml) is the same surface as a fi
 | `webhook.target_base` | `Url` | `WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE` | — | required | Base URL of the Cloudflare Access protected service every allowed path is joined onto. |
 | `webhook.paths` | `HashMap<String, HashSet<AllowedMethod>>` | `WEBHOOK_REDIRECT_WEBHOOK__PATHS` | — | required | Path regex to the methods allowed on it. |
 
-
 `webhook.paths` is the one setting the environment layer cannot express in practice. The spelling
 in its `Environment` cell is mechanical, and a regex-keyed table has no scalar form, so it comes
 from the TOML file:
@@ -223,7 +222,6 @@ environment:
 |---|---|---|---|
 | `WEBHOOK_REDIRECT_CONFIG` | config | `config.toml` | Names the TOML layer: a file, or a directory whose `*.toml` files are all merged in name order. |
 | `WEBHOOK_REDIRECT_SECRETS_DIR` | secrets dir | — | Names a directory of key-named files — a mounted Kubernetes `Secret` volume. Each file supplies the key its name spells. |
-
 
 ### Reloading
 
