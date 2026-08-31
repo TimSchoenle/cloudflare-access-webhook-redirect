@@ -31,7 +31,7 @@ async fn wait_for_signal() {
     match signal(SignalKind::terminate()) {
         Ok(mut terminate) => {
             tokio::select! {
-                _ = wait_for_ctrl_c() => {},
+                () = wait_for_ctrl_c() => {},
                 _ = terminate.recv() => {},
             }
         }
