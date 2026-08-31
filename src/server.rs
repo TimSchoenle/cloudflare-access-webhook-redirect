@@ -1,6 +1,8 @@
 use crate::Result;
 use crate::data::WebHookData;
 use crate::routes::{health_check, redirect};
+use crate::telemetry;
+use actix_web::middleware::Condition;
 use actix_web::{App, HttpServer, web};
 use derive_new::new;
 use tokio_util::sync::CancellationToken;
@@ -31,9 +33,21 @@ impl Server {
         );
 
         let web_hook_data = web::Data::new(web_hook_data);
+        // Resolved once, outside the factory: what it reports is a property of the client
+        // installed at boot, while the factory runs once per worker thread. `Condition` rather
+        // than an `Option`, which actix cannot wrap — the middleware value exists either way and
+        // is simply never invoked while the condition is false.
+        let sentry = telemetry::actix_middleware();
+        let reporting = sentry.is_some();
+        let sentry = sentry.unwrap_or_default();
         let server = HttpServer::new(move || {
             App::new()
                 .wrap(TracingLogger::default())
+                // Registered last and therefore outermost, which is the load-bearing half: the
+                // per-request hub has to be bound before anything else runs, or breadcrumbs from
+                // concurrently served requests all land on the main hub and every issue arrives
+                // with a trail belonging to whoever else was in flight.
+                .wrap(Condition::new(reporting, sentry.clone()))
                 .app_data(web_hook_data.clone())
                 .configure(health_check::get_config)
                 .configure(redirect::get_config)

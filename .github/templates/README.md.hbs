@@ -218,9 +218,25 @@ what the liveness and readiness probes in [docs/INSTALLATION.md](docs/INSTALLATI
 process exits once in-flight requests have drained. A configuration reload stops the previous
 generation through a child of that token, which is what lets the next one bind the same address.
 
-`telemetry.sentry_dsn` turns on Sentry reporting with backtraces attached. It and
-`telemetry.log_level` are the two keys a reload cannot apply: the tracing subscriber and the
-Sentry client are installed once per process, before the reloadable runtime exists.
+`telemetry.sentry.enabled`, with a DSN, turns on Sentry error reporting and performance tracing.
+It is off by default: a DSN is an egress destination for whatever a log line happens to carry, so
+turning it on is a decision made once per deployment. Enabled without a usable DSN fails the boot
+rather than starting a reporter that reports nowhere.
+
+On, the proxy captures `error` records as issues and keeps `info` and above as breadcrumbs — both
+thresholds are keys — installs the SDK's panic hook, and opens one transaction per request. A
+request arriving with a `sentry-trace` header is continued rather than restarted, and the header
+is rewritten onto the forwarded request, so one webhook delivery reads as a single trace across
+the caller, this proxy and the service behind Cloudflare Access. The `traces_sample_rate` key
+decides only whether the proxy starts traces of its *own*, and defaults to `0.0`.
+
+Two limits are worth knowing. The Sentry layer sits under `telemetry.log_level`, so a record that
+level drops is never reported either. And `telemetry.sentry.send_default_pii` is off and worth
+leaving off: every header this proxy receives is forwarded upstream, so the header set of a
+webhook delivery routinely carries the caller's own signing secret.
+
+The whole of `telemetry.*` is what a reload cannot apply: the tracing subscriber and the Sentry
+client are installed once per process, before the reloadable runtime exists.
 
 The image publishes the configuration surface it was built from. Three `dev.terrace.config.*`
 labels name the prefix and the contract path, `/config/contract.json` holds the document, and the

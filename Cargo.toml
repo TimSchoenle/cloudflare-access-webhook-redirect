@@ -65,7 +65,36 @@ secrecy = { version = "0.10.3", features = ["serde"] }
 regex = "1.12.2"
 getset = "0.1.6"
 derive-new = "0.7.0"
-sentry = { version = "0.47.0", features = ["anyhow", "debug-images", "reqwest", "backtrace"] }
+# Error reporting and performance tracing, off unless an operator turns `[telemetry.sentry]` on
+# (`src/telemetry.rs`). One crate rather than three: `sentry` re-exports `sentry-tracing` and
+# `sentry-actix` under `sentry::integrations::*`, so the three versions cannot drift.
+#
+# `default-features = false` and then back on by name, because three of the defaults are separate
+# Sentry products this service does not use — `logs`, `metrics` and `release-health` — and each
+# one is an egress channel that would exist with no key in the settings table describing it.
+#
+# `contexts` is deliberately off, and it is a default. It adds an OS/host/runtime tag block by
+# pulling `os_info`, which carries a fifteen-crate `objc2` tree for its macOS support into
+# `Cargo.lock` for platforms no image here targets. What it would report — kernel version, arch,
+# rustc version — is a constant of the image the release tag already names.
+#
+# What is on: `backtrace`/`debug-images` (stack traces and the module list that symbolicates
+# them), `panic` (the hook that turns a panic into an issue), `transport` (`reqwest` +
+# `native-tls`, which is the client and the TLS stack the proxy itself already builds, so the
+# sender adds nothing to the graph), and the two integrations: `tracing` for the subscriber layer
+# that feeds issues and breadcrumbs, and `actix` for the per-request hub and the request
+# transaction.
+#
+# `anyhow` is gone with them, and was never used: `crate::Result` is `Result<T, crate::Error>`
+# through an alias, and nothing here captures an `anyhow::Error`.
+sentry = { version = "0.49.1", default-features = false, features = [
+    "actix",
+    "backtrace",
+    "debug-images",
+    "panic",
+    "tracing",
+    "transport",
+] }
 
 [dev-dependencies]
 http = "=1.5.0"

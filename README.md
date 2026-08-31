@@ -180,7 +180,22 @@ column. [`config.example.toml`](config.example.toml) is the same surface as a fi
 | `server.host` | `String` | `WEBHOOK_REDIRECT_SERVER__HOST` | `127.0.0.1` | — | Bind address. Containers usually want `0.0.0.0`. |
 | `server.port` | `u16` | `WEBHOOK_REDIRECT_SERVER__PORT` | `8080` | — | Bind port. |
 | `telemetry.log_level` | `Level` | `WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL` | `info` | — | Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`). |
-| `telemetry.sentry_dsn` | `SecretString` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN` | unset | secret | Sentry DSN. Error reporting is disabled when absent. |
+| `telemetry.sentry.enabled` | `bool` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENABLED` | `false` | — | Initialise the Sentry client. `false` installs no client, no panic hook, no `tracing` layer and no HTTP middleware, so every other key here is inert and nothing is sent anywhere. |
+| `telemetry.sentry.dsn` | `SecretString` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DSN` | unset | secret | Ingest URL, `https://<key>@<host>/<project>`. |
+| `telemetry.sentry.environment` | `String` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENVIRONMENT` | `production` | — | Environment tag on every event, such as `production` or `staging`. |
+| `telemetry.sentry.release` | `String` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__RELEASE` | unset | — | Release tag on every event. Defaults to the crate name and version the binary was built from, which is what makes a regression attributable to a deploy. |
+| `telemetry.sentry.server_name` | `String` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SERVER_NAME` | unset | — | Host tag on every event. Left unset, Sentry reports none: the hostname of a replica is infrastructure detail that `send_default_pii` would otherwise gate. |
+| `telemetry.sentry.sample_rate` | `f32` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SAMPLE_RATE` | `1` | — | Fraction of captured events actually sent, `0.0`-`1.0`. A blunt volume cap — it drops whole issues, not repetitions of one — so leave it at `1.0` unless quota forces it. |
+| `telemetry.sentry.traces_sample_rate` | `f32` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__TRACES_SAMPLE_RATE` | `0` | — | Fraction of traces this proxy **starts** that are recorded, `0.0`-`1.0`. |
+| `telemetry.sentry.capture_level` | `SentryLevel` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__CAPTURE_LEVEL` | `error` | — | Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`, `info`, `debug` or `trace`. |
+| `telemetry.sentry.breadcrumb_level` | `SentryLevel` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__BREADCRUMB_LEVEL` | `info` | — | Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next issue. Same spellings as `capture_level`; records at or above it become issues instead. |
+| `telemetry.sentry.max_breadcrumbs` | `usize` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__MAX_BREADCRUMBS` | `100` | — | How many breadcrumbs one event carries. |
+| `telemetry.sentry.attach_stacktraces` | `bool` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ATTACH_STACKTRACES` | `true` | — | Attach a stack trace to events that carry none of their own. |
+| `telemetry.sentry.send_default_pii` | `bool` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SEND_DEFAULT_PII` | `false` | — | Send personally identifying data with every event: the client IP, the full request header set, and request bodies of a known content type. |
+| `telemetry.sentry.http_transactions` | `bool` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__HTTP_TRANSACTIONS` | `true` | — | Record one Sentry transaction per request, named by the method and the matched path. |
+| `telemetry.sentry.span_attributes` | `bool` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SPAN_ATTRIBUTES` | `false` | — | Copy `tracing` span fields onto the Sentry span as attributes. Off: the request span this proxy opens carries the full request path, and a transaction is stored under a longer retention than a log line. |
+| `telemetry.sentry.shutdown_timeout_secs` | `u64` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SHUTDOWN_TIMEOUT_SECS` | `2` | — | How long process exit waits for queued events to drain. |
+| `telemetry.sentry.debug` | `bool` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DEBUG` | `false` | — | Print the SDK's own diagnostics to stderr. For proving a DSN works, not for running. |
 | `cloudflare.client_id` | `SecretString` | `WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_ID` | — | required, secret | `CF-Access-Client-Id` header value. |
 | `cloudflare.client_secret` | `SecretString` | `WEBHOOK_REDIRECT_CLOUDFLARE__CLIENT_SECRET` | — | required, secret | `CF-Access-Client-Secret` header value. |
 | `webhook.target_base` | `Url` | `WEBHOOK_REDIRECT_WEBHOOK__TARGET_BASE` | — | required | Base URL of the Cloudflare Access protected service every allowed path is joined onto. |
@@ -232,9 +247,25 @@ what the liveness and readiness probes in [docs/INSTALLATION.md](docs/INSTALLATI
 process exits once in-flight requests have drained. A configuration reload stops the previous
 generation through a child of that token, which is what lets the next one bind the same address.
 
-`telemetry.sentry_dsn` turns on Sentry reporting with backtraces attached. It and
-`telemetry.log_level` are the two keys a reload cannot apply: the tracing subscriber and the
-Sentry client are installed once per process, before the reloadable runtime exists.
+`telemetry.sentry.enabled`, with a DSN, turns on Sentry error reporting and performance tracing.
+It is off by default: a DSN is an egress destination for whatever a log line happens to carry, so
+turning it on is a decision made once per deployment. Enabled without a usable DSN fails the boot
+rather than starting a reporter that reports nowhere.
+
+On, the proxy captures `error` records as issues and keeps `info` and above as breadcrumbs — both
+thresholds are keys — installs the SDK's panic hook, and opens one transaction per request. A
+request arriving with a `sentry-trace` header is continued rather than restarted, and the header
+is rewritten onto the forwarded request, so one webhook delivery reads as a single trace across
+the caller, this proxy and the service behind Cloudflare Access. The `traces_sample_rate` key
+decides only whether the proxy starts traces of its *own*, and defaults to `0.0`.
+
+Two limits are worth knowing. The Sentry layer sits under `telemetry.log_level`, so a record that
+level drops is never reported either. And `telemetry.sentry.send_default_pii` is off and worth
+leaving off: every header this proxy receives is forwarded upstream, so the header set of a
+webhook delivery routinely carries the caller's own signing secret.
+
+The whole of `telemetry.*` is what a reload cannot apply: the tracing subscriber and the Sentry
+client are installed once per process, before the reloadable runtime exists.
 
 The image publishes the configuration surface it was built from. Three `dev.terrace.config.*`
 labels name the prefix and the contract path, `/config/contract.json` holds the document, and the
@@ -253,7 +284,7 @@ release attaches the same bytes to the image digest as a cosign-signed OCI refer
 | Document | Purpose |
 | --- | --- |
 | [Installation](docs/INSTALLATION.md) | Running the published image: a container, Compose, a Kubernetes Deployment, or the Helm chart. |
-| [Migrating from the environment-only configuration](docs/MIGRATION.md) | The mapping from the environment variables releases before 1.0.0 read to the keys 1.0.0 reads. |
+| [Migrating a configuration forward](docs/MIGRATION.md) | Every rename the configuration surface has been through, newest first, and what to write instead. |
 | [docs/config.contract.json](docs/config.contract.json) | — |
 
 ## Contributing
