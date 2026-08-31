@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.3.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v1.2.1...v1.3.0) (2026-08-31)
+
+
+### Features
+
+* **config:** take terrace-config v0.9.0 and the shared contract check ([#420](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/420)) ([a1d4eee](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/a1d4eee067681a9b131e749bf57d0c11addf5653))
+
+
+### Documentation
+
+* render the README from the standard payload ([#424](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/424)) ([eaa77a5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/eaa77a5d3224a9b6275df705180f2c5f62c94234))
+
+
+### Miscellaneous
+
+* **deps:** update rust crate actix-web to v4.15.0 ([#428](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/428)) ([463a059](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/463a0599e57b8fc2f55523f6aee7bdcf0c3858b5))
+* **deps:** update timschoenle/actions/actions/rust/clippy to vactions-rust-clippy-v1.1.10 ([#437](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/437)) ([bc5e0a1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/bc5e0a18f57887f271e8afc77160735a3a5cdb7e))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.39 ([#422](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/422)) ([0e6aeb0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0e6aeb0f8d5649fc1483311c666cce642e6a7357))
+
 ## [1.2.1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v1.2.0...v1.2.1) (2026-08-19)
 
 
