@@ -1,6 +1,6 @@
 [package]
 name = "cloudflare-access-webhook-redirect"
-version = "1.3.0"
+version = "2.0.0"
 edition = "2024"
 # Read by `.github/workflows/docs.yaml` into the rendered README, which is why they are here and
 # not only in the repository's GitHub metadata: a description edited in the web UI would change
