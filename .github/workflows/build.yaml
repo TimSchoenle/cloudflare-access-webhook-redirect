@@ -31,7 +31,7 @@ jobs:
           egress-policy: audit
 
       - name: Run Check
-        uses: TimSchoenle/actions/actions/rust/cargo-check@5798c7bd8d1d98a0c7360114e91a0ac3b86bf145 # tag=actions-rust-cargo-check-v1.1.5
+        uses: TimSchoenle/actions/actions/rust/cargo-check@e16a1e466faf8ec751b26289c1898143a253269f # tag=actions-rust-cargo-check-v1.1.6
 
   coverage:
     name: Coverage
