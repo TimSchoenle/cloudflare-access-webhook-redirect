@@ -62,6 +62,12 @@ pub enum SentryLevel {
     feature = "config-schema",
     derive(serde::Serialize, terrace_config::schema::Describe)
 )]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "a settings block is a flat list of switches an operator writes by name, so the \
+              lint's remedy — folding pairs of them into two-variant enums — would change the \
+              TOML surface to quiet a lint about the shape of the Rust struct"
+)]
 pub struct SentryConfig {
     /// Initialise the Sentry client. `false` installs no client, no panic hook, no `tracing`
     /// layer and no HTTP middleware, so every other key here is inert and nothing is sent
@@ -261,8 +267,19 @@ mod tests {
     fn traces_are_not_started_by_default() {
         let config = deserialize("").unwrap();
 
-        assert_eq!(config.traces_sample_rate(), 0.0);
-        assert_eq!(config.sample_rate(), 1.0);
+        // Compared with a tolerance rather than `assert_eq!`, because `clippy::float_cmp` is on
+        // and it is right in general. Both sides here are the literal defaults, so any tolerance
+        // at all is enough to tell them from the value the assertion is guarding against.
+        assert!(
+            config.traces_sample_rate().abs() < f32::EPSILON,
+            "no trace is started by default: {}",
+            config.traces_sample_rate()
+        );
+        assert!(
+            (config.sample_rate() - 1.0).abs() < f32::EPSILON,
+            "every captured event is sent by default: {}",
+            config.sample_rate()
+        );
     }
 
     #[test]
@@ -278,7 +295,7 @@ mod tests {
         let error = deserialize("capture_level = \"chatty\"").expect_err("not a level");
 
         assert!(
-            error.to_string().contains("capture_level"),
+            error.contains("capture_level"),
             "the error must name the key: {error}"
         );
     }

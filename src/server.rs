@@ -1,3 +1,8 @@
+//! The listener.
+//!
+//! One [`Server`] per generation of the runtime. Routing is `crate::routes` and the signal it
+//! stops on is [`shutdown`](crate::shutdown); binding and draining are here.
+
 use crate::Result;
 use crate::data::WebHookData;
 use crate::routes::{health_check, redirect};
@@ -8,6 +13,9 @@ use derive_new::new;
 use tokio_util::sync::CancellationToken;
 use tracing_actix_web::TracingLogger;
 
+/// One generation of the listener, bound to `server.host` and `server.port`.
+///
+/// A reload constructs a new one, so the address is fixed for the life of a listener.
 #[derive(new)]
 pub struct Server {
     host: String,
@@ -15,11 +23,15 @@ pub struct Server {
 }
 
 impl Server {
-    /// Serve until `shutdown` is cancelled — by a termination signal, or by the reload
-    /// supervisor because the configuration changed and this generation is being replaced.
+    /// Serves until `shutdown` is cancelled.
     ///
-    /// Returns only once the listener has stopped and in-flight requests have drained, which
-    /// is what lets the next generation bind the same address.
+    /// Cancellation reaches it from a termination signal, or from the reload supervisor
+    /// replacing this generation. Returns only once the listener has stopped and in-flight
+    /// requests have drained, which is what lets the next generation bind the same address.
+    ///
+    /// # Errors
+    /// Returns [`Error::IoError`](crate::error::Error::IoError) if the address is already taken or
+    /// the process may not bind it, and if the running listener stops with an error of its own.
     pub async fn run_until_stopped(
         &self,
         web_hook_data: WebHookData,

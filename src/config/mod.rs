@@ -155,7 +155,13 @@ target_base = "https://example.com/"
                     .expose_secret(),
                 "https://key@sentry.example/42"
             );
-            assert_eq!(sentry.traces_sample_rate(), 0.25);
+            // With a tolerance rather than `assert_eq!`: `clippy::float_cmp` is on, and what this
+            // asserts is that the environment layer reached the key at all, not a bit pattern.
+            assert!(
+                (sentry.traces_sample_rate() - 0.25).abs() < f32::EPSILON,
+                "the environment supplied the nested rate: {}",
+                sentry.traces_sample_rate()
+            );
             assert_eq!(sentry.capture_level(), SentryLevel::Warn);
             // Untouched keys in a block that was partly supplied still take their own defaults.
             assert_eq!(sentry.environment(), "production");

@@ -84,9 +84,9 @@ dockerfile-labels:
     mv "$rewritten" "{{ dockerfile }}"
     echo "wrote the LABEL region in {{ dockerfile }}"
 
-[doc('Format, lint and test — what a pull request is going to run anyway')]
+[doc('Format, lint, test and document — what a pull request is going to run anyway')]
 [group('check')]
-verify: fmt lint test
+verify: fmt lint test doc
 
 [group('check')]
 fmt:
@@ -99,3 +99,14 @@ lint:
 [group('check')]
 test:
     cargo test --all-features
+
+# `cargo test` runs the doctests; `cargo nextest`, which CI's test job uses, does not. The rustdoc
+# lints in Cargo.toml only fire under rustdoc, so `clippy` above never sees them either.
+
+[doc('Render the documentation with warnings as errors, and run the doctests')]
+[group('check')]
+doc:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    RUSTDOCFLAGS='-D warnings' cargo doc --all-features --no-deps
+    cargo test --doc --all-features

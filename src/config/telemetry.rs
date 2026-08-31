@@ -1,7 +1,7 @@
 //! Logging and error-reporting settings.
 //!
-//! Both are installed process-globally, once, before the reloadable runtime exists — so this is
-//! the one block a configuration reload cannot apply. Changing it still needs a restart.
+//! Both are installed process-globally, once, before the reloadable runtime exists. That makes
+//! this the one block a configuration reload cannot apply. Changing it still needs a restart.
 
 use crate::config::SentryConfig;
 use serde::{Deserialize, Deserializer};
@@ -12,9 +12,8 @@ const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 
 /// Observability settings.
 ///
-/// `Serialize` is the schema generator's, not the service's — see [`ServerConfig`]. Neither
-/// field serialises as it deserialises: [`Level`] has no `Serialize` at all, and
-/// [`SecretString`] refuses to have one, which is the point of the type.
+/// `Serialize` is the schema generator's, not the service's. See [`ServerConfig`]. [`Level`]
+/// does not serialise as it deserialises, because it has no `Serialize` at all.
 ///
 /// [`ServerConfig`]: crate::config::ServerConfig
 #[derive(Debug, Clone, Deserialize, Getters)]
@@ -72,6 +71,10 @@ where
 /// value an operator would then copy — correctly, since parsing folds case, but nowhere else in
 /// the reference is a value written in a spelling the examples do not use.
 #[cfg(feature = "config-schema")]
+#[expect(
+    clippy::trivially_copy_pass_by_ref,
+    reason = "serde's serialize_with hands the field by reference; the signature is not ours"
+)]
 fn serialize_level_as_written<S>(level: &Level, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
@@ -118,7 +121,7 @@ mod tests {
         let error = deserialize("log_level = \"chatty\"").expect_err("not a level");
 
         assert!(
-            error.to_string().contains("log_level"),
+            error.contains("log_level"),
             "the error must name the key: {error}"
         );
     }

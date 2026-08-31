@@ -8,24 +8,38 @@ use reqwest::header::HeaderValue;
 use secrecy::{ExposeSecret, SecretString};
 use std::collections::{HashMap, HashSet};
 
+/// Everything a forwarded request needs, built once per configuration generation.
+///
+/// Both credentials are [`HeaderValue`]s by this point rather than secrets: they are parsed in
+/// [`new`](WebHookData::new), so a token holding a byte no header may carry fails the boot instead
+/// of every request.
 #[derive(Getters, Debug)]
 #[getset(get = "pub")]
 pub struct WebHookData {
+    /// Rebuilt on every reload, so a rotated credential also costs a fresh connection pool.
     client: Client,
     #[getset(skip)]
     target_host: Url,
+    /// The only gate in front of the two credentials below.
     allowed_paths: AllowedPaths,
+    /// Sent as `CF-Access-Client-Id` on every forwarded request.
     access_id: HeaderValue,
+    /// Sent as `CF-Access-Client-Secret` on every forwarded request.
     access_secret: HeaderValue,
 }
 
 impl WebHookData {
+    /// Parses both credentials into the header values they are sent as.
+    ///
+    /// # Errors
+    /// Returns [`Error::Custom`] if either credential holds a byte that cannot appear in an HTTP
+    /// header value.
     pub fn new(
         client: Client,
         target_host: Url,
         allowed_paths: AllowedPaths,
-        access_id: SecretString,
-        access_secret: SecretString,
+        access_id: &SecretString,
+        access_secret: &SecretString,
     ) -> Result<Self> {
         let access_id = HeaderValue::from_str(access_id.expose_secret())
             .map_err(|_| Error::custom("Failed to map access id to header value"))?;
@@ -40,38 +54,93 @@ impl WebHookData {
         })
     }
 
+    /// Joins `path` onto `webhook.target_base`.
+    ///
+    /// Resolved as a relative reference, so a leading `/` replaces the base's path rather than
+    /// extending it.
+    ///
+    /// # Errors
+    /// Returns [`Error::Custom`] if the two do not join into a valid URL.
+    ///
+    /// # Examples
+    /// ```
+    /// # use cloudflare_access_webhook_redirect::data::{AllowedPaths, WebHookData};
+    /// # use reqwest::{Client, Url};
+    /// # use secrecy::SecretString;
+    /// # use std::collections::HashMap;
+    /// # let data = WebHookData::new(
+    /// #     Client::new(),
+    /// #     Url::parse("https://host/prefix/")?,
+    /// #     AllowedPaths::new(HashMap::new())?,
+    /// #     &SecretString::new(Box::from("id")),
+    /// #     &SecretString::new(Box::from("secret")),
+    /// # )?;
+    /// assert_eq!(data.get_target_url("/webhook")?.as_str(), "https://host/webhook");
+    /// assert_eq!(
+    ///     data.get_target_url("webhook")?.as_str(),
+    ///     "https://host/prefix/webhook"
+    /// );
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
+    /// ```
     pub fn get_target_url(&self, path: &str) -> Result<Url> {
         self.target_host
             .join(path)
-            .map_err(|e| Error::custom(format!("Failed to join URL: {}", e)))
+            .map_err(|e| Error::custom(&format!("Failed to join URL: {e}")))
     }
 
+    /// Whether `path` matches an allowed pattern that also admits `method`.
+    #[must_use]
     pub fn is_allowed_path(&self, path: &str, method: &actix_web::http::Method) -> bool {
         self.allowed_paths.is_allowed(path, method)
     }
 }
 
+/// The allow list, compiled.
+///
+/// Each pattern is wrapped in `^` and `$`. The wrapping is textual and groups nothing, so a
+/// top-level alternation escapes it: `/a|/b` compiles to `^/a|/b$`, which admits every path
+/// starting `/a` and every path ending `/b`. Write the alternation as `(?:/a|/b)`.
+///
+/// One path may match several patterns, and it is forwarded if any one of them admits the method.
+///
+/// # Examples
+/// ```
+/// use cloudflare_access_webhook_redirect::data::{AllowedPath, AllowedPaths};
+/// use std::collections::{HashMap, HashSet};
+/// # use actix_web::http::Method;
+///
+/// let list = AllowedPaths::new(HashMap::from([(
+///     "/test/".to_string(),
+///     AllowedPath::new(true, HashSet::new()),
+/// )]))?;
+///
+/// assert!(list.is_allowed("/test/", &Method::GET));
+/// assert!(!list.is_allowed("/d/test/d", &Method::GET));
+/// # Ok::<(), cloudflare_access_webhook_redirect::error::Error>(())
+/// ```
 #[derive(Getters, Debug)]
 #[getset(get = "pub")]
 pub struct AllowedPaths {
+    /// Every anchored pattern, matched against a path in one pass.
     allowed_paths: RegexSet,
+    /// What each pattern admits, keyed by the pattern as anchoring rewrote it.
     allowed_methods: HashMap<String, AllowedPath>,
 }
 
 impl AllowedPaths {
-    /// Escape regex keys with ^ and $. This is required or otherwise our input /test/ will also match /d/test/d.
+    /// Wraps each pattern in `^` and `$`, skipping an end that already has one.
     fn escape_regexes(paths: HashMap<String, AllowedPath>) -> HashMap<String, AllowedPath> {
         paths
             .into_iter()
             .map(|(mut k, v)| {
                 // Escape start of the regex
                 if !k.starts_with('^') {
-                    k = format!("^{}", k);
+                    k = format!("^{k}");
                 }
 
                 // Escape end of the regex
                 if !k.ends_with('$') {
-                    k = format!("{}$", k);
+                    k = format!("{k}$");
                 }
 
                 (k, v)
@@ -79,6 +148,10 @@ impl AllowedPaths {
             .collect()
     }
 
+    /// Anchors every key of `allowed_methods` and compiles them into one [`RegexSet`].
+    ///
+    /// # Errors
+    /// Returns [`Error::Regex`] if a `webhook.paths` key is not a valid regular expression.
     pub fn new(allowed_methods: HashMap<String, AllowedPath>) -> Result<Self> {
         let allowed_methods = AllowedPaths::escape_regexes(allowed_methods);
         let allowed_paths = RegexSet::new(allowed_methods.keys())?;
@@ -89,24 +162,34 @@ impl AllowedPaths {
         })
     }
 
+    /// Whether any anchored pattern matches `path` and admits `method`.
+    #[must_use]
     pub fn is_allowed(&self, path: &str, method: &actix_web::http::Method) -> bool {
         let matches = self.allowed_paths.matches(path);
         matches
             .into_iter()
-            .map(|i| self.allowed_paths.patterns().get(i).unwrap())
+            .filter_map(|i| self.allowed_paths.patterns().get(i))
             .filter_map(|p| self.allowed_methods.get(p))
             .any(|p| p.is_allowed(method))
     }
 }
 
+/// The methods one pattern admits.
+///
+/// The two fields are independent. `["ALL", "GET"]` sets `all` and still lists `GET`, and `all`
+/// decides the answer on its own.
 #[derive(new, Getters, Debug)]
 #[getset(get = "pub")]
 pub struct AllowedPath {
+    /// Set by the `ALL` entry, after which no method is refused.
     all: bool,
+    /// The methods named one by one. `ALL` is not among them.
     methods: HashSet<actix_web::http::Method>,
 }
 
 impl AllowedPath {
+    /// Whether `method` is admitted, which every method is once `all` is set.
+    #[must_use]
     pub fn is_allowed(&self, method: &actix_web::http::Method) -> bool {
         self.all || self.methods.contains(method)
     }
@@ -116,14 +199,14 @@ impl AllowedPath {
 mod tests_webhook_data {
     use crate::config::AllowedMethod;
     use crate::data::WebHookData;
-    use lazy_static::lazy_static;
     use reqwest::Client;
     use reqwest::Url;
     use secrecy::SecretString;
     use std::collections::{HashMap, HashSet};
+    use std::sync::LazyLock;
 
-    lazy_static! {
-        static ref ALL_HTTP_METHODS: Vec<actix_web::http::Method> = vec![
+    static ALL_HTTP_METHODS: LazyLock<Vec<actix_web::http::Method>> = LazyLock::new(|| {
+        vec![
             actix_web::http::Method::GET,
             actix_web::http::Method::POST,
             actix_web::http::Method::PUT,
@@ -133,8 +216,8 @@ mod tests_webhook_data {
             actix_web::http::Method::OPTIONS,
             actix_web::http::Method::TRACE,
             actix_web::http::Method::PATCH,
-        ];
-    }
+        ]
+    });
     pub struct TestWebHookData {
         client: Client,
         target_host: Url,
@@ -169,8 +252,8 @@ mod tests_webhook_data {
                 test_web_hook_data.client,
                 test_web_hook_data.target_host,
                 test_web_hook_data.allowed_paths.clone().try_into().unwrap(),
-                test_web_hook_data.access_id,
-                test_web_hook_data.access_secret,
+                &test_web_hook_data.access_id,
+                &test_web_hook_data.access_secret,
             )
             .unwrap()
         }
@@ -342,7 +425,7 @@ mod tests_allowed_paths {
         map
     }
 
-    fn verify_map(map: HashMap<String, AllowedPath>) {
+    fn verify_map(map: &HashMap<String, AllowedPath>) {
         for key in map.keys() {
             // Assert correct ends and starts
             assert!(key.starts_with('^'));
@@ -357,7 +440,7 @@ mod tests_allowed_paths {
     fn verify_paths(paths: Vec<&str>) {
         let input = create_map(paths);
         let converted = AllowedPaths::escape_regexes(input);
-        verify_map(converted);
+        verify_map(&converted);
     }
 
     #[test]

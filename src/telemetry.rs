@@ -8,13 +8,13 @@
 //! combination fails the boot rather than being logged and ignored.
 //!
 //! Three sinks, all fed from the one client [`init`] installs:
-//! - **`tracing`** — [`sentry_layer`] turns records into issues and breadcrumbs, under the
+//! - **`tracing`** — `sentry_layer` turns records into issues and breadcrumbs, under the
 //!   thresholds in [`SentryConfig`].
 //! - **panics** — the SDK's own hook, added by `sentry::init`.
 //! - **HTTP** — [`actix_middleware`], mounted by [`Server`].
 //!
-//! The extern crate is always spelled `::sentry`; the bare path is ambiguous with
-//! [`crate::config::sentry`].
+//! The extern crate is always spelled `::sentry`; the bare path is ambiguous with this crate's
+//! own `config::sentry`, the private module behind [`SentryConfig`].
 //!
 //! [`Server`]: crate::server::Server
 
