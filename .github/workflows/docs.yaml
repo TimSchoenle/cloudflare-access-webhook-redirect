@@ -146,7 +146,7 @@ jobs:
       # commit API re-reads the branch head, so this lands on top of the one above.
       - name: Commit config.example.toml
         id: example
-        uses: TimSchoenle/actions/actions/common/commit-changes@76719ba61e9b9cf1ffafdc3cb895308055a7f3bd # tag=actions-common-commit-changes-v1.3.2
+        uses: TimSchoenle/actions/actions/common/commit-changes@57e5492e68be560bddac3c6fc9ba0a944cfee961 # tag=actions-common-commit-changes-v1.3.3
         with:
           commit_message: 'docs: regenerate config.example.toml'
           file_pattern: 'config.example.toml'
@@ -162,7 +162,7 @@ jobs:
       # in the workspace can ride along in a commit that claims to be about the contract.
       - name: Commit the configuration contract
         id: contract
-        uses: TimSchoenle/actions/actions/common/commit-changes@76719ba61e9b9cf1ffafdc3cb895308055a7f3bd # tag=actions-common-commit-changes-v1.3.2
+        uses: TimSchoenle/actions/actions/common/commit-changes@57e5492e68be560bddac3c6fc9ba0a944cfee961 # tag=actions-common-commit-changes-v1.3.3
         with:
           commit_message: 'docs: regenerate the configuration contract'
           file_pattern: 'docs/config.contract.json Dockerfile'
