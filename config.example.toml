@@ -43,15 +43,157 @@
 #   directory
 # log_level = "info"
 
-# Sentry DSN. Error reporting is disabled when absent.
+[telemetry.sentry]
+# Initialise the Sentry client. `false` installs no client, no panic hook, no `tracing`
+# layer and no HTTP middleware, so every other key here is inert and nothing is sent
+# anywhere.
+# Type: bool
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENABLED,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENABLED_FILE=/path/to/file, telemetry__sentry__enabled in
+#   the secrets directory
+# enabled = false
+
+# Ingest URL, `https://<key>@<host>/<project>`.
 #
-# A [`SecretString`]: a DSN carries the project key that authorises event submission.
+# A [`SecretString`]: the embedded key is a bearer credential for the project's ingest
+# endpoint. Absent while `enabled` is set fails the boot rather than reporting nowhere.
 # Type: SecretString
-# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN,
-#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN_FILE=/path/to/file, telemetry__sentry_dsn in the
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DSN,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DSN_FILE=/path/to/file, telemetry__sentry__dsn in the
 #   secrets directory
 # Secret: the value below is a placeholder.
-# sentry_dsn = "<secret>"
+# dsn = "<secret>"
+
+# Environment tag on every event, such as `production` or `staging`.
+#
+# Has a default rather than being optional so the field is never empty when the SDK's own
+# defaults run: an unset `environment` is the one field they would fill from
+# `SENTRY_ENVIRONMENT`, which is a second configuration channel that bypasses the layered
+# loader and its shadow-key rejection. `release` and `dsn` are always set for the same
+# reason.
+# Type: String
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENVIRONMENT,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENVIRONMENT_FILE=/path/to/file,
+#   telemetry__sentry__environment in the secrets directory
+# environment = "production"
+
+# Release tag on every event. Defaults to the crate name and version the binary was built
+# from, which is what makes a regression attributable to a deploy.
+# Type: String
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__RELEASE,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__RELEASE_FILE=/path/to/file, telemetry__sentry__release in
+#   the secrets directory
+# Unset by default: the value below is only the shape.
+# release = "<value>"
+
+# Host tag on every event. Left unset, Sentry reports none: the hostname of a replica is
+# infrastructure detail that `send_default_pii` would otherwise gate.
+# Type: String
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SERVER_NAME,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SERVER_NAME_FILE=/path/to/file,
+#   telemetry__sentry__server_name in the secrets directory
+# Unset by default: the value below is only the shape.
+# server_name = "<value>"
+
+# Fraction of captured events actually sent, `0.0`-`1.0`. A blunt volume cap — it drops
+# whole issues, not repetitions of one — so leave it at `1.0` unless quota forces it.
+# Type: f32
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SAMPLE_RATE,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SAMPLE_RATE_FILE=/path/to/file,
+#   telemetry__sentry__sample_rate in the secrets directory
+# sample_rate = 1.0
+
+# Fraction of traces this proxy **starts** that are recorded, `0.0`-`1.0`.
+#
+# `0.0` (the default) means it starts none of its own. It does **not** mean the proxy is
+# absent from a trace: a request arriving with a `sentry-trace` header already sampled is
+# continued regardless, which is what keeps one webhook delivery readable across the
+# caller, this hop and the Cloudflare Access protected service behind it.
+# Type: f32
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__TRACES_SAMPLE_RATE,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__TRACES_SAMPLE_RATE_FILE=/path/to/file,
+#   telemetry__sentry__traces_sample_rate in the secrets directory
+# traces_sample_rate = 0.0
+
+# Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`,
+# `info`, `debug` or `trace`.
+#
+# Bounded from above by `telemetry.log_level`: the Sentry layer sits under the same filter
+# the console log does, so a record that level drops is never reported either.
+# Type: SentryLevel
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__CAPTURE_LEVEL,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__CAPTURE_LEVEL_FILE=/path/to/file,
+#   telemetry__sentry__capture_level in the secrets directory
+# capture_level = "error"
+
+# Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next
+# issue. Same spellings as `capture_level`; records at or above it become issues instead.
+# Type: SentryLevel
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__BREADCRUMB_LEVEL,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__BREADCRUMB_LEVEL_FILE=/path/to/file,
+#   telemetry__sentry__breadcrumb_level in the secrets directory
+# breadcrumb_level = "info"
+
+# How many breadcrumbs one event carries.
+# Type: usize
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__MAX_BREADCRUMBS,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__MAX_BREADCRUMBS_FILE=/path/to/file,
+#   telemetry__sentry__max_breadcrumbs in the secrets directory
+# max_breadcrumbs = 100
+
+# Attach a stack trace to events that carry none of their own.
+# Type: bool
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ATTACH_STACKTRACES,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ATTACH_STACKTRACES_FILE=/path/to/file,
+#   telemetry__sentry__attach_stacktraces in the secrets directory
+# attach_stacktraces = true
+
+# Send personally identifying data with every event: the client IP, the full request header
+# set, and request bodies of a known content type.
+#
+# **Off, and worth leaving off.** Every header this proxy receives is forwarded to a
+# Cloudflare Access protected service, so the header set of a webhook delivery routinely
+# carries the caller's own signing secret — which is exactly what a crash report does not
+# need in order to be actionable.
+# Type: bool
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SEND_DEFAULT_PII,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SEND_DEFAULT_PII_FILE=/path/to/file,
+#   telemetry__sentry__send_default_pii in the secrets directory
+# send_default_pii = false
+
+# Record one Sentry transaction per request, named by the method and the matched path.
+#
+# Whether a started transaction is *kept* is `traces_sample_rate`'s decision. This is the
+# switch for a deployment that should stay out of traces entirely while still reporting
+# errors.
+# Type: bool
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__HTTP_TRANSACTIONS,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__HTTP_TRANSACTIONS_FILE=/path/to/file,
+#   telemetry__sentry__http_transactions in the secrets directory
+# http_transactions = true
+
+# Copy `tracing` span fields onto the Sentry span as attributes. Off: the request span this
+# proxy opens carries the full request path, and a transaction is stored under a longer
+# retention than a log line.
+# Type: bool
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SPAN_ATTRIBUTES,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SPAN_ATTRIBUTES_FILE=/path/to/file,
+#   telemetry__sentry__span_attributes in the secrets directory
+# span_attributes = false
+
+# How long process exit waits for queued events to drain.
+# Type: u64
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SHUTDOWN_TIMEOUT_SECS,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SHUTDOWN_TIMEOUT_SECS_FILE=/path/to/file,
+#   telemetry__sentry__shutdown_timeout_secs in the secrets directory
+# shutdown_timeout_secs = 2
+
+# Print the SDK's own diagnostics to stderr. For proving a DSN works, not for running.
+# Type: bool
+# Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DEBUG,
+#   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DEBUG_FILE=/path/to/file, telemetry__sentry__debug in the
+#   secrets directory
+# debug = false
 
 [cloudflare]
 # `CF-Access-Client-Id` header value.

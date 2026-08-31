@@ -71,7 +71,7 @@ async fn redirect(
 
     // Convert headers
     let mut target_headers: reqwest::header::HeaderMap =
-        ActixToReqwestConverter::convert_headers(request.headers(), 2);
+        ActixToReqwestConverter::convert_headers(request.headers(), 3);
 
     // Add Cloudflare Access headers
     target_headers.append("CF-Access-Client-Id", web_hook_data.access_id().clone());
@@ -79,6 +79,10 @@ async fn redirect(
         "CF-Access-Client-Secret",
         web_hook_data.access_secret().clone(),
     );
+
+    // Continue this hop's trace at the target, so one webhook delivery reads as a single trace
+    // rather than as two unrelated ones. Empty, and so a no-op, unless Sentry is on.
+    propagate_trace(&mut target_headers);
 
     // Query params
     let params =
@@ -139,6 +143,23 @@ async fn redirect(
         converted_response.status()
     );
     Ok(converted_response)
+}
+
+/// Overwrite the trace-continuation headers of the forwarded request with this hop's.
+///
+/// Overwrite rather than append: the inbound value is the *caller's* claim about the trace, and
+/// the span the target should continue is the one the middleware opened here. Appending would
+/// leave the target a header with two values, which it reads as malformed.
+fn propagate_trace(headers: &mut reqwest::header::HeaderMap) {
+    for (name, value) in crate::telemetry::trace_headers() {
+        let (Ok(name), Ok(value)) = (
+            reqwest::header::HeaderName::from_bytes(name.as_bytes()),
+            reqwest::header::HeaderValue::from_str(&value),
+        ) else {
+            continue;
+        };
+        headers.insert(name, value);
+    }
 }
 
 /// One forwarded request, assembled from the inbound one.

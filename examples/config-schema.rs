@@ -48,7 +48,7 @@ use std::process::ExitCode;
 use cloudflare_access_webhook_redirect::config::{Config, ServerConfig, TelemetryConfig, terrace};
 use serde::Serialize;
 use terrace_config::schema::cli::Cli;
-use terrace_config::schema::{App, Docs, External, JsonSchema, TomlExample};
+use terrace_config::schema::{App, Docs, External, ExternalVar, JsonSchema, TomlExample};
 
 /// The `$id` the generated JSON Schema carries.
 const SCHEMA_ID: &str =
@@ -119,8 +119,43 @@ fn main() -> ExitCode {
                 // worth doing if something is expected to resolve a zone name. Nothing in this
                 // service reads `TZ` itself, so it has no owner to declare — an ignore is the
                 // honest instrument rather than a `var` claiming this binary consults it.
-                .ignore("TZ"),
+                .ignore("TZ")
+                // The three the Sentry SDK reads for itself, and the reason this list is no
+                // longer only ignores. `telemetry.sentry` supplies the DSN, the release and the
+                // environment through the loader, so the SDK's `SENTRY_*` fallbacks never fire —
+                // but its transport consults these regardless of what the client options say,
+                // and there is no field to close them with. Declared rather than ignored:
+                // something in this image genuinely reads them, and a `var` is what makes a
+                // chart setting one a checked spelling rather than a free-form pass.
+                .vars(sentry_transport_vars()),
         )
     })
     .main(schema)
+}
+
+/// The variables the Sentry transport reads directly, whatever `ClientOptions` says.
+///
+/// Only consulted while `telemetry.sentry.enabled` is set, but a contract describes the image
+/// rather than one deployment of it, so they are declared unconditionally.
+///
+/// `SSL_VERIFY` is here because it is reachable, not because it is a good idea: the SDK reads it
+/// last and unconditionally, so a `false` turns off certificate verification for event submission
+/// and nothing in this crate can override it. Documenting the variable is what gives a reviewer
+/// something to see; the alternative is a chart that sets it and a contract that never mentions
+/// it.
+fn sentry_transport_vars() -> [ExternalVar; 3] {
+    [
+        ExternalVar::new("HTTP_PROXY")
+            .owner("the Sentry SDK")
+            .docs("Proxy for event submission over HTTP. Read only while `telemetry.sentry.enabled` is set.")
+            .ty("String"),
+        ExternalVar::new("HTTPS_PROXY")
+            .owner("the Sentry SDK")
+            .docs("Proxy for event submission over HTTPS; falls back to `HTTP_PROXY`. Read only while `telemetry.sentry.enabled` is set.")
+            .ty("String"),
+        ExternalVar::new("SSL_VERIFY")
+            .owner("the Sentry SDK")
+            .docs("`false` submits events without verifying the ingest endpoint's certificate. Leave unset.")
+            .ty("bool"),
+    ]
 }

@@ -100,11 +100,38 @@
         "reserved": false
       },
       {
-        "path": "telemetry.sentry_dsn",
-        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN",
-        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY_DSN_FILE",
-        "secrets_file": "telemetry__sentry_dsn",
-        "docs": "Sentry DSN. Error reporting is disabled when absent.\n\nA [`SecretString`]: a DSN carries the project key that authorises event submission.",
+        "path": "telemetry.sentry.enabled",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENABLED",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENABLED_FILE",
+        "secrets_file": "telemetry__sentry__enabled",
+        "docs": "Initialise the Sentry client. `false` installs no client, no panic hook, no `tracing`\nlayer and no HTTP middleware, so every other key here is inert and nothing is sent\nanywhere.",
+        "ty": "bool",
+        "values": [],
+        "constraint": {
+          "type": "boolean"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(true|false)\\s*$",
+          "type": "string"
+        },
+        "text_form": "boolean",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "false",
+        "default_value": false,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.dsn",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DSN",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DSN_FILE",
+        "secrets_file": "telemetry__sentry__dsn",
+        "docs": "Ingest URL, `https://<key>@<host>/<project>`.\n\nA [`SecretString`]: the embedded key is a bearer credential for the project's ingest\nendpoint. Absent while `enabled` is set fails the boot rather than reporting nowhere.",
         "ty": "SecretString",
         "values": [],
         "constraint": {
@@ -120,6 +147,352 @@
         "note": null,
         "required": false,
         "secret": true,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.environment",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENVIRONMENT",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENVIRONMENT_FILE",
+        "secrets_file": "telemetry__sentry__environment",
+        "docs": "Environment tag on every event, such as `production` or `staging`.\n\nHas a default rather than being optional so the field is never empty when the SDK's own\ndefaults run: an unset `environment` is the one field they would fill from\n`SENTRY_ENVIRONMENT`, which is a second configuration channel that bypasses the layered\nloader and its shadow-key rejection. `release` and `dsn` are always set for the same\nreason.",
+        "ty": "String",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "text",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "production",
+        "default_value": "production",
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.release",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__RELEASE",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__RELEASE_FILE",
+        "secrets_file": "telemetry__sentry__release",
+        "docs": "Release tag on every event. Defaults to the crate name and version the binary was built\nfrom, which is what makes a regression attributable to a deploy.",
+        "ty": "String",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "text",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": null,
+        "default_value": null,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.server_name",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SERVER_NAME",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SERVER_NAME_FILE",
+        "secrets_file": "telemetry__sentry__server_name",
+        "docs": "Host tag on every event. Left unset, Sentry reports none: the hostname of a replica is\ninfrastructure detail that `send_default_pii` would otherwise gate.",
+        "ty": "String",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "text",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": null,
+        "default_value": null,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.sample_rate",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SAMPLE_RATE",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SAMPLE_RATE_FILE",
+        "secrets_file": "telemetry__sentry__sample_rate",
+        "docs": "Fraction of captured events actually sent, `0.0`-`1.0`. A blunt volume cap — it drops\nwhole issues, not repetitions of one — so leave it at `1.0` unless quota forces it.",
+        "ty": "f32",
+        "values": [],
+        "constraint": {
+          "type": "number"
+        },
+        "text_form": "unknown",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "1",
+        "default_value": 1.0,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.traces_sample_rate",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__TRACES_SAMPLE_RATE",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__TRACES_SAMPLE_RATE_FILE",
+        "secrets_file": "telemetry__sentry__traces_sample_rate",
+        "docs": "Fraction of traces this proxy **starts** that are recorded, `0.0`-`1.0`.\n\n`0.0` (the default) means it starts none of its own. It does **not** mean the proxy is\nabsent from a trace: a request arriving with a `sentry-trace` header already sampled is\ncontinued regardless, which is what keeps one webhook delivery readable across the\ncaller, this hop and the Cloudflare Access protected service behind it.",
+        "ty": "f32",
+        "values": [],
+        "constraint": {
+          "type": "number"
+        },
+        "text_form": "unknown",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "0",
+        "default_value": 0.0,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.capture_level",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__CAPTURE_LEVEL",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__CAPTURE_LEVEL_FILE",
+        "secrets_file": "telemetry__sentry__capture_level",
+        "docs": "Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`,\n`info`, `debug` or `trace`.\n\nBounded from above by `telemetry.log_level`: the Sentry layer sits under the same filter\nthe console log does, so a record that level drops is never reported either.",
+        "ty": "SentryLevel",
+        "values": [],
+        "text_form": "unknown",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "error",
+        "default_value": "error",
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.breadcrumb_level",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__BREADCRUMB_LEVEL",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__BREADCRUMB_LEVEL_FILE",
+        "secrets_file": "telemetry__sentry__breadcrumb_level",
+        "docs": "Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next\nissue. Same spellings as `capture_level`; records at or above it become issues instead.",
+        "ty": "SentryLevel",
+        "values": [],
+        "text_form": "unknown",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "info",
+        "default_value": "info",
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.max_breadcrumbs",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__MAX_BREADCRUMBS",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__MAX_BREADCRUMBS_FILE",
+        "secrets_file": "telemetry__sentry__max_breadcrumbs",
+        "docs": "How many breadcrumbs one event carries.",
+        "ty": "usize",
+        "values": [],
+        "constraint": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*\\+?[0-9]+\\s*$",
+          "type": "string"
+        },
+        "text_form": "integer",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "100",
+        "default_value": 100,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.attach_stacktraces",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ATTACH_STACKTRACES",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ATTACH_STACKTRACES_FILE",
+        "secrets_file": "telemetry__sentry__attach_stacktraces",
+        "docs": "Attach a stack trace to events that carry none of their own.",
+        "ty": "bool",
+        "values": [],
+        "constraint": {
+          "type": "boolean"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(true|false)\\s*$",
+          "type": "string"
+        },
+        "text_form": "boolean",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "true",
+        "default_value": true,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.send_default_pii",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SEND_DEFAULT_PII",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SEND_DEFAULT_PII_FILE",
+        "secrets_file": "telemetry__sentry__send_default_pii",
+        "docs": "Send personally identifying data with every event: the client IP, the full request header\nset, and request bodies of a known content type.\n\n**Off, and worth leaving off.** Every header this proxy receives is forwarded to a\nCloudflare Access protected service, so the header set of a webhook delivery routinely\ncarries the caller's own signing secret — which is exactly what a crash report does not\nneed in order to be actionable.",
+        "ty": "bool",
+        "values": [],
+        "constraint": {
+          "type": "boolean"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(true|false)\\s*$",
+          "type": "string"
+        },
+        "text_form": "boolean",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "false",
+        "default_value": false,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.http_transactions",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__HTTP_TRANSACTIONS",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__HTTP_TRANSACTIONS_FILE",
+        "secrets_file": "telemetry__sentry__http_transactions",
+        "docs": "Record one Sentry transaction per request, named by the method and the matched path.\n\nWhether a started transaction is *kept* is `traces_sample_rate`'s decision. This is the\nswitch for a deployment that should stay out of traces entirely while still reporting\nerrors.",
+        "ty": "bool",
+        "values": [],
+        "constraint": {
+          "type": "boolean"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(true|false)\\s*$",
+          "type": "string"
+        },
+        "text_form": "boolean",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "true",
+        "default_value": true,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.span_attributes",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SPAN_ATTRIBUTES",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SPAN_ATTRIBUTES_FILE",
+        "secrets_file": "telemetry__sentry__span_attributes",
+        "docs": "Copy `tracing` span fields onto the Sentry span as attributes. Off: the request span this\nproxy opens carries the full request path, and a transaction is stored under a longer\nretention than a log line.",
+        "ty": "bool",
+        "values": [],
+        "constraint": {
+          "type": "boolean"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(true|false)\\s*$",
+          "type": "string"
+        },
+        "text_form": "boolean",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "false",
+        "default_value": false,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.shutdown_timeout_secs",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SHUTDOWN_TIMEOUT_SECS",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SHUTDOWN_TIMEOUT_SECS_FILE",
+        "secrets_file": "telemetry__sentry__shutdown_timeout_secs",
+        "docs": "How long process exit waits for queued events to drain.",
+        "ty": "u64",
+        "values": [],
+        "constraint": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*\\+?[0-9]+\\s*$",
+          "type": "string"
+        },
+        "text_form": "integer",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "2",
+        "default_value": 2,
+        "note": null,
+        "required": false,
+        "secret": false,
+        "reserved": false
+      },
+      {
+        "path": "telemetry.sentry.debug",
+        "env": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DEBUG",
+        "env_file": "WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DEBUG_FILE",
+        "secrets_file": "telemetry__sentry__debug",
+        "docs": "Print the SDK's own diagnostics to stderr. For proving a DSN works, not for running.",
+        "ty": "bool",
+        "values": [],
+        "constraint": {
+          "type": "boolean"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(true|false)\\s*$",
+          "type": "string"
+        },
+        "text_form": "boolean",
+        "aliases": [],
+        "env_aliases": [],
+        "env_file_aliases": [],
+        "secrets_file_aliases": [],
+        "default": "false",
+        "default_value": false,
+        "note": null,
+        "required": false,
+        "secret": false,
         "reserved": false
       },
       {
@@ -269,10 +642,89 @@
             "default": "info",
             "description": "Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`).\n\nParsed here rather than in `main` so an unusable value fails the boot with a\nconfiguration error naming the key, instead of after the subscriber is installed."
           },
-          "sentry_dsn": {
-            "description": "Sentry DSN. Error reporting is disabled when absent.\n\nA [`SecretString`]: a DSN carries the project key that authorises event submission.",
-            "type": "string",
-            "writeOnly": true
+          "sentry": {
+            "additionalProperties": false,
+            "properties": {
+              "attach_stacktraces": {
+                "default": true,
+                "description": "Attach a stack trace to events that carry none of their own.",
+                "type": "boolean"
+              },
+              "breadcrumb_level": {
+                "default": "info",
+                "description": "Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next\nissue. Same spellings as `capture_level`; records at or above it become issues instead."
+              },
+              "capture_level": {
+                "default": "error",
+                "description": "Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`,\n`info`, `debug` or `trace`.\n\nBounded from above by `telemetry.log_level`: the Sentry layer sits under the same filter\nthe console log does, so a record that level drops is never reported either."
+              },
+              "debug": {
+                "default": false,
+                "description": "Print the SDK's own diagnostics to stderr. For proving a DSN works, not for running.",
+                "type": "boolean"
+              },
+              "dsn": {
+                "description": "Ingest URL, `https://<key>@<host>/<project>`.\n\nA [`SecretString`]: the embedded key is a bearer credential for the project's ingest\nendpoint. Absent while `enabled` is set fails the boot rather than reporting nowhere.",
+                "type": "string",
+                "writeOnly": true
+              },
+              "enabled": {
+                "default": false,
+                "description": "Initialise the Sentry client. `false` installs no client, no panic hook, no `tracing`\nlayer and no HTTP middleware, so every other key here is inert and nothing is sent\nanywhere.",
+                "type": "boolean"
+              },
+              "environment": {
+                "default": "production",
+                "description": "Environment tag on every event, such as `production` or `staging`.\n\nHas a default rather than being optional so the field is never empty when the SDK's own\ndefaults run: an unset `environment` is the one field they would fill from\n`SENTRY_ENVIRONMENT`, which is a second configuration channel that bypasses the layered\nloader and its shadow-key rejection. `release` and `dsn` are always set for the same\nreason.",
+                "type": "string"
+              },
+              "http_transactions": {
+                "default": true,
+                "description": "Record one Sentry transaction per request, named by the method and the matched path.\n\nWhether a started transaction is *kept* is `traces_sample_rate`'s decision. This is the\nswitch for a deployment that should stay out of traces entirely while still reporting\nerrors.",
+                "type": "boolean"
+              },
+              "max_breadcrumbs": {
+                "default": 100,
+                "description": "How many breadcrumbs one event carries.",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "release": {
+                "description": "Release tag on every event. Defaults to the crate name and version the binary was built\nfrom, which is what makes a regression attributable to a deploy.",
+                "type": "string"
+              },
+              "sample_rate": {
+                "default": 1.0,
+                "description": "Fraction of captured events actually sent, `0.0`-`1.0`. A blunt volume cap — it drops\nwhole issues, not repetitions of one — so leave it at `1.0` unless quota forces it.",
+                "type": "number"
+              },
+              "send_default_pii": {
+                "default": false,
+                "description": "Send personally identifying data with every event: the client IP, the full request header\nset, and request bodies of a known content type.\n\n**Off, and worth leaving off.** Every header this proxy receives is forwarded to a\nCloudflare Access protected service, so the header set of a webhook delivery routinely\ncarries the caller's own signing secret — which is exactly what a crash report does not\nneed in order to be actionable.",
+                "type": "boolean"
+              },
+              "server_name": {
+                "description": "Host tag on every event. Left unset, Sentry reports none: the hostname of a replica is\ninfrastructure detail that `send_default_pii` would otherwise gate.",
+                "type": "string"
+              },
+              "shutdown_timeout_secs": {
+                "default": 2,
+                "description": "How long process exit waits for queued events to drain.",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "span_attributes": {
+                "default": false,
+                "description": "Copy `tracing` span fields onto the Sentry span as attributes. Off: the request span this\nproxy opens carries the full request path, and a transaction is stored under a longer\nretention than a log line.",
+                "type": "boolean"
+              },
+              "traces_sample_rate": {
+                "default": 0.0,
+                "description": "Fraction of traces this proxy **starts** that are recorded, `0.0`-`1.0`.\n\n`0.0` (the default) means it starts none of its own. It does **not** mean the proxy is\nabsent from a trace: a request arriving with a `sentry-trace` header already sampled is\ncontinued regardless, which is what keeps one webhook delivery readable across the\ncaller, this hop and the Cloudflare Access protected service behind it.",
+                "type": "number"
+              }
+            },
+            "type": "object"
           }
         },
         "type": "object"
@@ -300,7 +752,51 @@
     "type": "object"
   },
   "external": {
-    "env": [],
+    "env": [
+      {
+        "name": "HTTP_PROXY",
+        "owner": "the Sentry SDK",
+        "docs": "Proxy for event submission over HTTP. Read only while `telemetry.sentry.enabled` is set.",
+        "ty": "String",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "text",
+        "required": false,
+        "secret": false
+      },
+      {
+        "name": "HTTPS_PROXY",
+        "owner": "the Sentry SDK",
+        "docs": "Proxy for event submission over HTTPS; falls back to `HTTP_PROXY`. Read only while `telemetry.sentry.enabled` is set.",
+        "ty": "String",
+        "values": [],
+        "constraint": {
+          "type": "string"
+        },
+        "text_form": "text",
+        "required": false,
+        "secret": false
+      },
+      {
+        "name": "SSL_VERIFY",
+        "owner": "the Sentry SDK",
+        "docs": "`false` submits events without verifying the ingest endpoint's certificate. Leave unset.",
+        "ty": "bool",
+        "values": [],
+        "constraint": {
+          "type": "boolean"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(true|false)\\s*$",
+          "type": "string"
+        },
+        "text_form": "boolean",
+        "required": false,
+        "secret": false
+      }
+    ],
     "ignore": [
       "HOSTNAME",
       "KUBERNETES_*",

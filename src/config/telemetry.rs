@@ -3,7 +3,7 @@
 //! Both are installed process-globally, once, before the reloadable runtime exists. That makes
 //! this the one block a configuration reload cannot apply. Changing it still needs a restart.
 
-use secrecy::SecretString;
+use crate::config::SentryConfig;
 use serde::{Deserialize, Deserializer};
 use std::str::FromStr;
 use tracing::Level;
@@ -12,9 +12,8 @@ const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 
 /// Observability settings.
 ///
-/// `Serialize` is the schema generator's, not the service's. See [`ServerConfig`]. Neither
-/// field serialises as it deserialises: [`Level`] has no `Serialize` at all, and
-/// [`SecretString`] refuses to have one, which is the point of the type.
+/// `Serialize` is the schema generator's, not the service's. See [`ServerConfig`]. [`Level`]
+/// does not serialise as it deserialises, because it has no `Serialize` at all.
 ///
 /// [`ServerConfig`]: crate::config::ServerConfig
 #[derive(Debug, Clone, Deserialize, Getters)]
@@ -37,17 +36,10 @@ pub struct TelemetryConfig {
         serde(serialize_with = "serialize_level_as_written")
     )]
     log_level: Level,
-    /// Sentry DSN. Error reporting is disabled when absent.
-    ///
-    /// A [`SecretString`]: a DSN carries the project key that authorises event submission.
-    // Below the doc comment on purpose: `config.example.toml` is generated from the whole of
-    // that comment, and how this crate serialises a field is not an operator's business.
-    // `skip_serializing` costs the generated table nothing either way: `#[config(secret)]`
-    // renders `<redacted>` in place of whatever the value is, so the only thing left out is the
-    // one thing that must not reach a documentation file.
-    #[serde(default, skip_serializing)]
-    #[cfg_attr(feature = "config-schema", config(secret))]
-    sentry_dsn: Option<SecretString>,
+    /// Sentry error reporting and performance tracing. Off unless `sentry.enabled` is set.
+    #[serde(default)]
+    #[cfg_attr(feature = "config-schema", config(nested))]
+    sentry: SentryConfig,
 }
 
 impl TelemetryConfig {
@@ -60,7 +52,7 @@ impl Default for TelemetryConfig {
     fn default() -> Self {
         Self {
             log_level: Self::default_log_level(),
-            sentry_dsn: None,
+            sentry: SentryConfig::default(),
         }
     }
 }
@@ -109,7 +101,7 @@ mod tests {
         let config = deserialize("").unwrap();
 
         assert_eq!(config.log_level(), &Level::INFO);
-        assert!(config.sentry_dsn().is_none());
+        assert!(!config.sentry().enabled());
     }
 
     #[test]

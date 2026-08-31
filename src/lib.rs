@@ -14,8 +14,9 @@
 //! through. [`data`] is that same configuration compiled for the request path: one
 //! [`RegexSet`](regex::RegexSet) over the anchored patterns, both credentials already parsed as
 //! header values, and the shared [`reqwest::Client`]. [`converter`] moves a body, a header map, a
-//! status code and a response between actix's types and reqwest's. [`server`] binds the listener,
-//! and [`shutdown`] owns the token every part of it stops on.
+//! status code and a response between actix's types and reqwest's. [`telemetry`] installs the two
+//! process-global sinks, the `tracing` subscriber and the optional Sentry client. [`server`] binds
+//! the listener, and [`shutdown`] owns the token every part of it stops on.
 //!
 //! # Failure posture
 //!
@@ -44,6 +45,7 @@ pub mod error;
 mod routes;
 pub mod server;
 pub mod shutdown;
+pub mod telemetry;
 
 /// A `Result` carrying this crate's [`Error`].
 ///
