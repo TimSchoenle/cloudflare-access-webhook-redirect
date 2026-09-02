@@ -25,6 +25,7 @@ pub struct WebhookConfig {
     /// "/webhook/.*" = ["ALL"]
     /// "/api/public/.*" = ["GET", "POST"]
     /// ```
+    #[cfg_attr(feature = "config-schema", config(element_values))]
     paths: HashMap<String, HashSet<AllowedMethod>>,
 }
 
@@ -38,25 +39,43 @@ where
 
 /// A method a path may be proxied with, or [`AllowedMethod::ALL`] for every one of them.
 ///
-/// Deserialised through [`FromStr`] rather than by variant name, so `"get"` and `"GET"` are the
-/// same value. Operators write these by hand.
+/// Deserialised by variant name, uppercase or lowercase — `"get"` and `"GET"` are the same value,
+/// through the `UPPERCASE` spelling and a lowercase [`serde(alias)`](serde::Deserialize) on each
+/// variant, rather than through [`FromStr`] as before. `terrace-config`'s `Describe` derive
+/// reports the spellings `serde` actually accepts for a leaf's `#[config(values)]` or a
+/// container's `#[config(element_values)]`; a hand-written [`FromStr`]/`TryFrom<String>`
+/// deserializer (case-folded through [`str::to_uppercase`]) is exactly the shape upstream's
+/// `v0.10.0` changelog says such a derive must leave undescribed, so the derive is now the
+/// source of truth for what deserialises, and [`FromStr`] stays only for the call sites below
+/// that parse a method outside of `serde` (a set converted from configuration, and the reverse
+/// direction back to [`actix_web::http::Method`]). Operators write these by hand.
 ///
 /// Every forwarded request keeps its query string. Whether it keeps its body depends on which of
 /// these it is.
 #[derive(Debug, serde::Deserialize, Eq, PartialEq, Hash, Clone)]
-#[serde(try_from = "String")]
+#[cfg_attr(
+    feature = "config-schema",
+    derive(serde::Serialize, terrace_config::schema::Describe)
+)]
+#[serde(rename_all = "UPPERCASE")]
 pub enum AllowedMethod {
     /// Every method, so any other entry in the same list is ignored.
+    #[serde(alias = "all")]
     ALL,
     /// Forwarded without its body.
+    #[serde(alias = "get")]
     GET,
     /// Forwarded with its body.
+    #[serde(alias = "post")]
     POST,
     /// Forwarded with its body.
+    #[serde(alias = "put")]
     PUT,
     /// Forwarded with its body.
+    #[serde(alias = "patch")]
     PATCH,
     /// Forwarded without its body.
+    #[serde(alias = "delete")]
     DELETE,
 }
 
@@ -75,6 +94,12 @@ impl AllowedMethod {
     }
 }
 
+/// Kept for the call sites that parse a method outside of `serde` — [`TryFrom<String>`] below,
+/// and the reverse conversion to [`actix_web::http::Method`] — rather than folded into the
+/// `Deserialize` derive above, which now only accepts the two spellings [`serde(alias)`] names
+/// per variant.
+///
+/// [`serde(alias)`]: serde::Deserialize
 impl FromStr for AllowedMethod {
     type Err = Error;
 

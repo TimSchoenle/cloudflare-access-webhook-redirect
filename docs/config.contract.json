@@ -6,7 +6,7 @@
     "source": "https://github.com/TimSchoenle/cloudflare-access-webhook-redirect"
   },
   "schema": {
-    "schema_version": 1,
+    "schema_version": 2,
     "dialect": {
       "prefix": "WEBHOOK_REDIRECT_",
       "nesting_separator": "__",
@@ -574,6 +574,17 @@
         "values": [],
         "constraint": {
           "additionalProperties": {
+            "items": {
+              "enum": [
+                "ALL",
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+              ],
+              "type": "string"
+            },
             "type": "array",
             "uniqueItems": true
           },
@@ -734,6 +745,17 @@
         "properties": {
           "paths": {
             "additionalProperties": {
+              "items": {
+                "enum": [
+                  "ALL",
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "PATCH",
+                  "DELETE"
+                ],
+                "type": "string"
+              },
               "type": "array",
               "uniqueItems": true
             },

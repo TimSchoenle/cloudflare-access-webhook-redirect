@@ -52,7 +52,7 @@ tracing-actix-web = "0.7.19"
 # documentation generator and belong behind this crate's own `config-schema` feature, not in the
 # image. What is left is what the service does at runtime — load, reload, and say where each
 # value came from.
-terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.9.1", features = ["loader", "reload", "explain"] }
+terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.10.0", features = ["loader", "reload", "explain"] }
 serde = "1.0.209"
 serde_json = "1.0.145"
 reqwest = { version = "0.13.0", features = ["json", "query"] }
@@ -101,7 +101,7 @@ http = "=1.5.0"
 # The loader's own test harness: a jail whose `config`, `secret` and `env_key` methods derive
 # every name from the `Terrace` they were built over, so a test cannot keep passing against a
 # variable the loader no longer reads. Deliberately outside `full`, so it is asked for here.
-terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.9.1", features = ["testing"] }
+terrace-config = { git = "https://github.com/TimSchoenle/terrace-config", tag = "v0.10.0", features = ["testing"] }
 # Still direct for the per-block deserialisation tests, which extract one `[telemetry]` or
 # `[webhook]` table and never touch the layering the harness exists for. Same figment
 # `terrace-config` resolves.
