@@ -2,7 +2,7 @@
   "terrace_contract": 1,
   "app": {
     "name": "cloudflare-access-webhook-redirect",
-    "version": "v2.0.0",
+    "version": "v2.1.0",
     "source": "https://github.com/TimSchoenle/cloudflare-access-webhook-redirect"
   },
   "schema": {

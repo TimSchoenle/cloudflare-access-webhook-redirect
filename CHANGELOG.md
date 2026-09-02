@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.1.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.0.0...v2.1.0) (2026-09-02)
+
+
+### Features
+
+* update terrace to 0.10.0 and opt in to new nested feature ([#451](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/451)) ([47c7fff](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/47c7fff48956fbdce8207773da021e6678d9528a))
+
+
+### Miscellaneous
+
+* **deps:** update timschoenle/actions/actions/common/render-template-and-commit to vactions-common-render-template-and-commit-v1.1.5 ([#446](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/446)) ([89ab06f](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/89ab06fd6bf2d437027e3c538f94497396b145d5))
+* **deps:** update timschoenle/actions/actions/helm/update-chart-version to vactions-helm-update-chart-version-v1.6.5 ([#447](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/447)) ([6c963cf](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/6c963cf8f5e4b26e279bb961ff9b77e6a0a37a89))
+* **deps:** update timschoenle/actions/actions/rust/auto-format to vactions-rust-auto-format-v1.1.13 ([#449](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/449)) ([0c1116c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0c1116c3e15d330a237fa78eae79691828d739a7))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.42 ([#450](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/450)) ([821d77b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/821d77b41e9d3536f7dc3fc8eefb6f92157ffcce))
+
 ## [2.0.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v1.3.0...v2.0.0) (2026-08-31)
 
 
