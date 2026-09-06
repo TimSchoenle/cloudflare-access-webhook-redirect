@@ -10,6 +10,7 @@ use serde::Deserialize;
 #[derive(Debug, Clone, Deserialize, Getters)]
 #[cfg_attr(feature = "config-schema", derive(terrace_config::schema::Describe))]
 #[getset(get = "pub")]
+#[serde(deny_unknown_fields)]
 pub struct CloudFlareConfig {
     /// `CF-Access-Client-Id` header value.
     #[cfg_attr(feature = "config-schema", config(secret))]

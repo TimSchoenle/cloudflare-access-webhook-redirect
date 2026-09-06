@@ -175,6 +175,9 @@ key that does not is not configurable. `Flags` reads `required` when nothing sup
 and `secret` when the value belongs in a mounted file rather than in this table's `Environment`
 column. [`config.example.toml`](config.example.toml) is the same surface as a file to copy.
 
+A key that is not in the table is not ignored. Every block refuses a field it did not declare, so
+a misspelt key fails the boot naming it rather than silently leaving the real key at its default.
+
 | TOML | Type | Environment | Default | Flags | Purpose |
 |---|---|---|---|---|---|
 | `server.host` | `String` | `WEBHOOK_REDIRECT_SERVER__HOST` | `127.0.0.1` | — | Bind address. Containers usually want `0.0.0.0`. |
@@ -187,8 +190,8 @@ column. [`config.example.toml`](config.example.toml) is the same surface as a fi
 | `telemetry.sentry.server_name` | `String` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SERVER_NAME` | unset | — | Host tag on every event. Left unset, Sentry reports none: the hostname of a replica is infrastructure detail that `send_default_pii` would otherwise gate. |
 | `telemetry.sentry.sample_rate` | `f32` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SAMPLE_RATE` | `1` | — | Fraction of captured events actually sent, `0.0`-`1.0`. A blunt volume cap — it drops whole issues, not repetitions of one — so leave it at `1.0` unless quota forces it. |
 | `telemetry.sentry.traces_sample_rate` | `f32` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__TRACES_SAMPLE_RATE` | `0` | — | Fraction of traces this proxy **starts** that are recorded, `0.0`-`1.0`. |
-| `telemetry.sentry.capture_level` | `SentryLevel` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__CAPTURE_LEVEL` | `error` | — | Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`, `info`, `debug` or `trace`. |
-| `telemetry.sentry.breadcrumb_level` | `SentryLevel` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__BREADCRUMB_LEVEL` | `info` | — | Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next issue. Same spellings as `capture_level`; records at or above it become issues instead. |
+| `telemetry.sentry.capture_level` | `SentryLevel`: `off` \| `error` \| `warn` \| `info` \| `debug` \| `trace` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__CAPTURE_LEVEL` | `error` | — | Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`, `info`, `debug` or `trace`. |
+| `telemetry.sentry.breadcrumb_level` | `SentryLevel`: `off` \| `error` \| `warn` \| `info` \| `debug` \| `trace` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__BREADCRUMB_LEVEL` | `info` | — | Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next issue. Same spellings as `capture_level`; records at or above it become issues instead. |
 | `telemetry.sentry.max_breadcrumbs` | `usize` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__MAX_BREADCRUMBS` | `100` | — | How many breadcrumbs one event carries. |
 | `telemetry.sentry.attach_stacktraces` | `bool` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ATTACH_STACKTRACES` | `true` | — | Attach a stack trace to events that carry none of their own. |
 | `telemetry.sentry.send_default_pii` | `bool` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__SEND_DEFAULT_PII` | `false` | — | Send personally identifying data with every event: the client IP, the full request header set, and request bodies of a known content type. |

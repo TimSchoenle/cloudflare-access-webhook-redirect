@@ -33,6 +33,7 @@ use serde::Deserialize;
 #[derive(Debug, Clone, Deserialize, Getters)]
 #[cfg_attr(feature = "config-schema", derive(terrace_config::schema::Describe))]
 #[getset(get = "pub")]
+#[serde(deny_unknown_fields)]
 pub struct Config {
     /// Where the listener binds. Defaults throughout, so the block may be omitted.
     #[serde(default)]
@@ -239,5 +240,83 @@ target_base = "https://example.com/"
             );
             Ok(())
         });
+    }
+
+    /// Every block is `#[serde(deny_unknown_fields)]`, which is what turns a misspelt key from a
+    /// silently ignored line into a boot failure naming it.
+    ///
+    /// Asserted through the loader rather than on one struct, because that is where it could
+    /// still go wrong: the layers merge into a single figment before anything is deserialised,
+    /// so a provider contributing a key of its own would fail every boot rather than none.
+    #[test]
+    fn a_misspelt_key_fails_the_boot() {
+        harness().run(|jail| {
+            jail.config(format!("{CONFIG}\n[server]\nhsot = \"0.0.0.0\"\n"))?;
+
+            let error = jail.load::<Config>().expect_err("`hsot` is not a key");
+
+            assert!(
+                error.to_string().contains("hsot"),
+                "the error must name the misspelt key: {error}"
+            );
+            Ok(())
+        });
+    }
+
+    /// The check `#[config(element_values("…"))]` cannot make for itself.
+    ///
+    /// A literal spelling list is an assertion about another type's `Deserialize`, and nothing in
+    /// the derive reads that. This reads it: every spelling the schema publishes for
+    /// `webhook.paths` is fed to the deserialiser the loader would use, so a variant renamed or
+    /// an alias dropped fails here instead of shipping a schema that refuses a file the service
+    /// takes.
+    #[cfg(feature = "config-schema")]
+    #[test]
+    fn every_published_method_spelling_deserialises() {
+        let schema = terrace().schema::<Config>();
+        let key = schema
+            .keys
+            .iter()
+            .find(|key| key.path == "webhook.paths")
+            .expect("`webhook.paths` is described");
+        let published = key
+            .constraint
+            .as_ref()
+            .expect("the key publishes a constraint")["additionalProperties"]["items"]["enum"]
+            .as_array()
+            .expect("the element publishes its spellings")
+            .clone();
+
+        // Six variants, each with an `UPPERCASE` rename and one lowercase alias. Pinned so that
+        // a variant added without its alias fails here rather than shrinking the published set
+        // by one spelling nobody notices.
+        assert_eq!(
+            published.len(),
+            12,
+            "one rename and one alias per variant: {published:?}"
+        );
+
+        for value in &published {
+            let spelling = value.as_str().expect("a spelling is a string");
+            serde_json::from_value::<AllowedMethod>(value.clone()).unwrap_or_else(|error| {
+                panic!("the schema publishes `{spelling}`, which does not deserialise: {error}")
+            });
+        }
+    }
+
+    /// The other half of the assertion above: the published list is not merely a subset of what
+    /// deserialises, it is the whole of it. `serde`'s derive matches a spelling exactly, so a
+    /// case that is in neither the `UPPERCASE` rename nor the lowercase alias must be refused —
+    /// which is why no case-folded spelling may be added to the list.
+    #[cfg(feature = "config-schema")]
+    #[test]
+    fn an_unpublished_method_spelling_is_refused() {
+        for spelling in ["Get", "gEt", "ALL ", "options"] {
+            let value = serde_json::Value::String(spelling.to_owned());
+            assert!(
+                serde_json::from_value::<AllowedMethod>(value).is_err(),
+                "`{spelling}` is not published, so it must not deserialise"
+            );
+        }
     }
 }

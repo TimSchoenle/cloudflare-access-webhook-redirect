@@ -175,6 +175,9 @@ key that does not is not configurable. `Flags` reads `required` when nothing sup
 and `secret` when the value belongs in a mounted file rather than in this table's `Environment`
 column. [`config.example.toml`](config.example.toml) is the same surface as a file to copy.
 
+A key that is not in the table is not ignored. Every block refuses a field it did not declare, so
+a misspelt key fails the boot naming it rather than silently leaving the real key at its default.
+
 {{{config_keys}}}
 
 `webhook.paths` is the one setting the environment layer cannot express in practice. The spelling
