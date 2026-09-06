@@ -33,11 +33,12 @@
 # port = 8080
 
 [telemetry]
-# Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`).
+# Minimum level emitted by the subscriber.
 #
-# Parsed here rather than in `main` so an unusable value fails the boot with a
-# configuration error naming the key, instead of after the subscriber is installed.
-# Type: Level
+# Read as a [`LogLevel`] rather than as a `tracing` type so an unusable value fails the
+# boot with a configuration error naming the key, instead of after the subscriber is
+# installed — and so the spellings this key takes are the ones the settings table lists.
+# Type: LogLevel — one of: error, warn, info, debug, trace
 # Also from: WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL,
 #   WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL_FILE=/path/to/file, telemetry__log_level in the secrets
 #   directory

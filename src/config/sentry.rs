@@ -3,6 +3,7 @@
 //! Installed once per process, before the reloadable runtime exists, which is why this block —
 //! like the rest of `[telemetry]` — is the one a configuration reload cannot apply.
 
+use crate::config::SentryLevel;
 use secrecy::SecretString;
 use serde::Deserialize;
 
@@ -11,39 +12,6 @@ const DEFAULT_SAMPLE_RATE: f32 = 1.0;
 const DEFAULT_TRACES_SAMPLE_RATE: f32 = 0.0;
 const DEFAULT_MAX_BREADCRUMBS: usize = 100;
 const DEFAULT_SHUTDOWN_TIMEOUT_SECS: u64 = 2;
-
-/// How much of the `tracing` stream one Sentry sink takes.
-///
-/// Ordered by severity, so a threshold names the *least* severe record it accepts: `warn` means
-/// `error` and `warn`.
-///
-/// Deserialised by variant name in lower case rather than through [`FromStr`]: unlike
-/// [`AllowedMethod`], nothing else in this crate parses these, and the generated settings table
-/// lists the accepted spellings.
-///
-/// [`FromStr`]: std::str::FromStr
-/// [`AllowedMethod`]: crate::config::AllowedMethod
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Deserialize)]
-#[cfg_attr(
-    feature = "config-schema",
-    derive(serde::Serialize, terrace_config::schema::Describe)
-)]
-#[serde(rename_all = "lowercase")]
-pub enum SentryLevel {
-    /// Take nothing.
-    Off,
-    /// `error` only.
-    #[default]
-    Error,
-    /// `error` and `warn`.
-    Warn,
-    /// Down to `info`.
-    Info,
-    /// Down to `debug`.
-    Debug,
-    /// Everything.
-    Trace,
-}
 
 /// Sentry error reporting and performance tracing.
 ///

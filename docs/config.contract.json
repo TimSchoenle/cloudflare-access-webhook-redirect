@@ -84,10 +84,30 @@
         "env": "WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL",
         "env_file": "WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL_FILE",
         "secrets_file": "telemetry__log_level",
-        "docs": "Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`).\n\nParsed here rather than in `main` so an unusable value fails the boot with a\nconfiguration error naming the key, instead of after the subscriber is installed.",
-        "ty": "Level",
-        "values": [],
-        "text_form": "unknown",
+        "docs": "Minimum level emitted by the subscriber.\n\nRead as a [`LogLevel`] rather than as a `tracing` type so an unusable value fails the\nboot with a configuration error naming the key, instead of after the subscriber is\ninstalled — and so the spellings this key takes are the ones the settings table lists.",
+        "ty": "LogLevel",
+        "values": [
+          "error",
+          "warn",
+          "info",
+          "debug",
+          "trace"
+        ],
+        "constraint": {
+          "enum": [
+            "error",
+            "warn",
+            "info",
+            "debug",
+            "trace"
+          ],
+          "type": "string"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(error|warn|info|debug|trace)\\s*$",
+          "type": "string"
+        },
+        "text_form": "choice",
         "aliases": [],
         "env_aliases": [],
         "env_file_aliases": [],
@@ -705,7 +725,15 @@
         "properties": {
           "log_level": {
             "default": "info",
-            "description": "Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`).\n\nParsed here rather than in `main` so an unusable value fails the boot with a\nconfiguration error naming the key, instead of after the subscriber is installed."
+            "description": "Minimum level emitted by the subscriber.\n\nRead as a [`LogLevel`] rather than as a `tracing` type so an unusable value fails the\nboot with a configuration error naming the key, instead of after the subscriber is\ninstalled — and so the spellings this key takes are the ones the settings table lists.",
+            "enum": [
+              "error",
+              "warn",
+              "info",
+              "debug",
+              "trace"
+            ],
+            "type": "string"
           },
           "sentry": {
             "additionalProperties": false,
