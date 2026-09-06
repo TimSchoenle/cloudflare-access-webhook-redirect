@@ -10,6 +10,7 @@
 //! configuration up again after a mounted file changes.
 
 mod cloudflare;
+mod level;
 mod loader;
 mod sentry;
 mod server;
@@ -17,8 +18,9 @@ mod telemetry;
 mod webhook;
 
 pub use cloudflare::CloudFlareConfig;
+pub use level::{LogLevel, SentryLevel};
 pub use loader::{ConfigError, Explanation, Loaded, Sources, explain, load, load_watched, terrace};
-pub use sentry::{SentryConfig, SentryLevel};
+pub use sentry::SentryConfig;
 pub use server::ServerConfig;
 pub use telemetry::TelemetryConfig;
 pub use webhook::{AllowedMethod, WebhookConfig};
@@ -53,7 +55,7 @@ pub struct Config {
 
 #[cfg(test)]
 mod tests {
-    use super::{AllowedMethod, Config, SentryLevel, terrace};
+    use super::{AllowedMethod, Config, LogLevel, SentryLevel, terrace};
     use secrecy::ExposeSecret;
     use std::collections::HashSet;
     use terrace_config::explain::Layer;
@@ -96,7 +98,7 @@ target_base = "https://example.com/"
             // Untouched blocks still materialise with their own defaults.
             assert_eq!(config.server().host(), "127.0.0.1");
             assert_eq!(config.server().port(), &8080);
-            assert_eq!(config.telemetry().log_level(), &tracing::Level::INFO);
+            assert_eq!(config.telemetry().log_level(), LogLevel::Info);
             assert!(!config.telemetry().sentry().enabled());
 
             assert_eq!(config.cloudflare().client_id().expose_secret(), "client_id");
@@ -315,6 +317,52 @@ target_base = "https://example.com/"
             let value = serde_json::Value::String(spelling.to_owned());
             assert!(
                 serde_json::from_value::<AllowedMethod>(value).is_err(),
+                "`{spelling}` is not published, so it must not deserialise"
+            );
+        }
+    }
+
+    /// The same pair of assertions for `telemetry.log_level`, which is the key that has something
+    /// to lose by them: its accepted set used to be a parser's behaviour and is now a variant
+    /// list. The list the schema publishes and the list the loader takes have to be one list
+    /// rather than two that happen to agree today — an alias added to widen the key back would
+    /// show up here as a sixth spelling.
+    #[cfg(feature = "config-schema")]
+    #[test]
+    fn every_published_log_level_spelling_deserialises() {
+        let schema = terrace().schema::<Config>();
+        let key = schema
+            .keys
+            .iter()
+            .find(|key| key.path == "telemetry.log_level")
+            .expect("`telemetry.log_level` is described");
+        let published = key
+            .constraint
+            .as_ref()
+            .expect("the key publishes a constraint")["enum"]
+            .as_array()
+            .expect("the key publishes its spellings")
+            .clone();
+
+        assert_eq!(
+            published.len(),
+            5,
+            "one spelling per variant and no alias: {published:?}"
+        );
+
+        for value in &published {
+            let spelling = value.as_str().expect("a spelling is a string");
+            serde_json::from_value::<LogLevel>(value.clone()).unwrap_or_else(|error| {
+                panic!("the schema publishes `{spelling}`, which does not deserialise: {error}")
+            });
+        }
+
+        // The spellings a `tracing::Level` used to take and this key no longer does. Asserted
+        // beside the published list, because the narrowing is only real while both hold.
+        for spelling in ["INFO", "Info", "3", "warning"] {
+            let value = serde_json::Value::String(spelling.to_owned());
+            assert!(
+                serde_json::from_value::<LogLevel>(value).is_err(),
                 "`{spelling}` is not published, so it must not deserialise"
             );
         }

@@ -95,7 +95,7 @@ pub fn init(telemetry: &TelemetryConfig) -> crate::Result<TelemetryGuard> {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::fmt::layer()
-                .with_filter(filter::LevelFilter::from_level(*telemetry.log_level())),
+                .with_filter(filter::LevelFilter::from(telemetry.log_level())),
         )
         .with(sentry_layer(telemetry.sentry()))
         .init();

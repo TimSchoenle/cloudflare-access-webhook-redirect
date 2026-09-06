@@ -182,7 +182,7 @@ a misspelt key fails the boot naming it rather than silently leaving the real ke
 |---|---|---|---|---|---|
 | `server.host` | `String` | `WEBHOOK_REDIRECT_SERVER__HOST` | `127.0.0.1` | — | Bind address. Containers usually want `0.0.0.0`. |
 | `server.port` | `u16` | `WEBHOOK_REDIRECT_SERVER__PORT` | `8080` | — | Bind port. |
-| `telemetry.log_level` | `Level` | `WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL` | `info` | — | Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`). |
+| `telemetry.log_level` | `LogLevel`: `error` \| `warn` \| `info` \| `debug` \| `trace` | `WEBHOOK_REDIRECT_TELEMETRY__LOG_LEVEL` | `info` | — | Minimum level emitted by the subscriber. |
 | `telemetry.sentry.enabled` | `bool` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENABLED` | `false` | — | Initialise the Sentry client. `false` installs no client, no panic hook, no `tracing` layer and no HTTP middleware, so every other key here is inert and nothing is sent anywhere. |
 | `telemetry.sentry.dsn` | `SecretString` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__DSN` | unset | secret | Ingest URL, `https://<key>@<host>/<project>`. |
 | `telemetry.sentry.environment` | `String` | `WEBHOOK_REDIRECT_TELEMETRY__SENTRY__ENVIRONMENT` | `production` | — | Environment tag on every event, such as `production` or `staging`. |
