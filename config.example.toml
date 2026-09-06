@@ -120,7 +120,7 @@
 #
 # Bounded from above by `telemetry.log_level`: the Sentry layer sits under the same filter
 # the console log does, so a record that level drops is never reported either.
-# Type: SentryLevel
+# Type: SentryLevel — one of: off, error, warn, info, debug, trace
 # Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__CAPTURE_LEVEL,
 #   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__CAPTURE_LEVEL_FILE=/path/to/file,
 #   telemetry__sentry__capture_level in the secrets directory
@@ -128,7 +128,7 @@
 
 # Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next
 # issue. Same spellings as `capture_level`; records at or above it become issues instead.
-# Type: SentryLevel
+# Type: SentryLevel — one of: off, error, warn, info, debug, trace
 # Also from: WEBHOOK_REDIRECT_TELEMETRY__SENTRY__BREADCRUMB_LEVEL,
 #   WEBHOOK_REDIRECT_TELEMETRY__SENTRY__BREADCRUMB_LEVEL_FILE=/path/to/file,
 #   telemetry__sentry__breadcrumb_level in the secrets directory

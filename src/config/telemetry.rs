@@ -15,13 +15,14 @@ const DEFAULT_LOG_LEVEL: Level = Level::INFO;
 /// `Serialize` is the schema generator's, not the service's. See [`ServerConfig`]. [`Level`]
 /// does not serialise as it deserialises, because it has no `Serialize` at all.
 ///
+/// `Describe` is written out below rather than derived, for [`Self::log_level`]'s sake. See the
+/// implementation for why no `#[config(...)]` attribute can describe that key truthfully.
+///
 /// [`ServerConfig`]: crate::config::ServerConfig
 #[derive(Debug, Clone, Deserialize, Getters)]
-#[cfg_attr(
-    feature = "config-schema",
-    derive(serde::Serialize, terrace_config::schema::Describe)
-)]
+#[cfg_attr(feature = "config-schema", derive(serde::Serialize))]
 #[getset(get = "pub")]
+#[serde(deny_unknown_fields)]
 pub struct TelemetryConfig {
     /// Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, `error`).
     ///
@@ -38,8 +39,58 @@ pub struct TelemetryConfig {
     log_level: Level,
     /// Sentry error reporting and performance tracing. Off unless `sentry.enabled` is set.
     #[serde(default)]
-    #[cfg_attr(feature = "config-schema", config(nested))]
     sentry: SentryConfig,
+}
+
+/// Reported by hand, because [`Level`] defeats every attribute the derive offers.
+///
+/// `terrace-config` v0.11.0 refuses a field whose type is a bare name it does not recognise,
+/// and rightly: such a key published no shape at all. The six resolving attributes are the
+/// wrong answer here, every one of them.
+///
+/// [`Level`] has no `Deserialize` of its own, so `deserialize_level_from_string` below parses it
+/// through [`FromStr`], which folds ASCII case **and** accepts `"1"` through `"5"`
+/// (`tracing_core::metadata`, `impl FromStr for Level`). The accepted set is therefore not a
+/// fixed list of spellings, so `#[config(values("trace", …))]` would publish a schema refusing
+/// `INFO` and `"3"` — files this service boots on. It is also a newtype over a private enum, so
+/// `#[serde(remote)]` cannot mirror it and `values_from` has nothing to point at. That leaves
+/// `#[config(skip)]`, which would delete the key from the settings table and the example file
+/// for a key operators do set.
+///
+/// So the leaf below reports exactly what is true and no more: the type as written, its prose,
+/// and no constraint. It is what the derive emitted for this field before v0.11.0 made the
+/// silence deliberate rather than accidental.
+///
+/// The doc text is spelled twice — once as the field's `///` comment, once here — which is the
+/// cost of the hand-written route. Nothing checks that they agree.
+///
+/// [`FromStr`]: std::str::FromStr
+#[cfg(feature = "config-schema")]
+impl terrace_config::schema::Describe for TelemetryConfig {
+    fn describe(sink: &mut terrace_config::schema::Sink) {
+        // First, so the level it closes is this type's own rather than one a key below pushed.
+        sink.deny_unknown_fields();
+        sink.leaf(terrace_config::schema::Leaf {
+            name: "log_level",
+            docs: concat!(
+                "Minimum level emitted by the subscriber (`trace`, `debug`, `info`, `warn`, ",
+                "`error`).\n\nParsed here rather than in `main` so an unusable value fails the ",
+                "boot with a\nconfiguration error naming the key, instead of after the ",
+                "subscriber is installed."
+            ),
+            ty: Some("Level"),
+            values: None,
+            bounds: None,
+            aliases: &[],
+            note: None,
+            required: false,
+            secret: false,
+        });
+        sink.nested(
+            "sentry",
+            <SentryConfig as terrace_config::schema::Describe>::describe,
+        );
+    }
 }
 
 impl TelemetryConfig {

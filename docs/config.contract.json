@@ -227,6 +227,8 @@
         "ty": "f32",
         "values": [],
         "constraint": {
+          "maximum": 1.0,
+          "minimum": 0.0,
           "type": "number"
         },
         "text_form": "unknown",
@@ -250,6 +252,8 @@
         "ty": "f32",
         "values": [],
         "constraint": {
+          "maximum": 1.0,
+          "minimum": 0.0,
           "type": "number"
         },
         "text_form": "unknown",
@@ -271,8 +275,30 @@
         "secrets_file": "telemetry__sentry__capture_level",
         "docs": "Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`,\n`info`, `debug` or `trace`.\n\nBounded from above by `telemetry.log_level`: the Sentry layer sits under the same filter\nthe console log does, so a record that level drops is never reported either.",
         "ty": "SentryLevel",
-        "values": [],
-        "text_form": "unknown",
+        "values": [
+          "off",
+          "error",
+          "warn",
+          "info",
+          "debug",
+          "trace"
+        ],
+        "constraint": {
+          "enum": [
+            "off",
+            "error",
+            "warn",
+            "info",
+            "debug",
+            "trace"
+          ],
+          "type": "string"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(off|error|warn|info|debug|trace)\\s*$",
+          "type": "string"
+        },
+        "text_form": "choice",
         "aliases": [],
         "env_aliases": [],
         "env_file_aliases": [],
@@ -291,8 +317,30 @@
         "secrets_file": "telemetry__sentry__breadcrumb_level",
         "docs": "Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next\nissue. Same spellings as `capture_level`; records at or above it become issues instead.",
         "ty": "SentryLevel",
-        "values": [],
-        "text_form": "unknown",
+        "values": [
+          "off",
+          "error",
+          "warn",
+          "info",
+          "debug",
+          "trace"
+        ],
+        "constraint": {
+          "enum": [
+            "off",
+            "error",
+            "warn",
+            "info",
+            "debug",
+            "trace"
+          ],
+          "type": "string"
+        },
+        "text_constraint": {
+          "pattern": "^\\s*(off|error|warn|info|debug|trace)\\s*$",
+          "type": "string"
+        },
+        "text_form": "choice",
         "aliases": [],
         "env_aliases": [],
         "env_file_aliases": [],
@@ -577,11 +625,17 @@
             "items": {
               "enum": [
                 "ALL",
+                "all",
                 "GET",
+                "get",
                 "POST",
+                "post",
                 "PUT",
+                "put",
                 "PATCH",
-                "DELETE"
+                "patch",
+                "DELETE",
+                "delete"
               ],
               "type": "string"
             },
@@ -663,11 +717,29 @@
               },
               "breadcrumb_level": {
                 "default": "info",
-                "description": "Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next\nissue. Same spellings as `capture_level`; records at or above it become issues instead."
+                "description": "Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next\nissue. Same spellings as `capture_level`; records at or above it become issues instead.",
+                "enum": [
+                  "off",
+                  "error",
+                  "warn",
+                  "info",
+                  "debug",
+                  "trace"
+                ],
+                "type": "string"
               },
               "capture_level": {
                 "default": "error",
-                "description": "Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`,\n`info`, `debug` or `trace`.\n\nBounded from above by `telemetry.log_level`: the Sentry layer sits under the same filter\nthe console log does, so a record that level drops is never reported either."
+                "description": "Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`,\n`info`, `debug` or `trace`.\n\nBounded from above by `telemetry.log_level`: the Sentry layer sits under the same filter\nthe console log does, so a record that level drops is never reported either.",
+                "enum": [
+                  "off",
+                  "error",
+                  "warn",
+                  "info",
+                  "debug",
+                  "trace"
+                ],
+                "type": "string"
               },
               "debug": {
                 "default": false,
@@ -707,6 +779,8 @@
               "sample_rate": {
                 "default": 1.0,
                 "description": "Fraction of captured events actually sent, `0.0`-`1.0`. A blunt volume cap — it drops\nwhole issues, not repetitions of one — so leave it at `1.0` unless quota forces it.",
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               "send_default_pii": {
@@ -732,6 +806,8 @@
               "traces_sample_rate": {
                 "default": 0.0,
                 "description": "Fraction of traces this proxy **starts** that are recorded, `0.0`-`1.0`.\n\n`0.0` (the default) means it starts none of its own. It does **not** mean the proxy is\nabsent from a trace: a request arriving with a `sentry-trace` header already sampled is\ncontinued regardless, which is what keeps one webhook delivery readable across the\ncaller, this hop and the Cloudflare Access protected service behind it.",
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               }
             },
@@ -748,11 +824,17 @@
               "items": {
                 "enum": [
                   "ALL",
+                  "all",
                   "GET",
+                  "get",
                   "POST",
+                  "post",
                   "PUT",
+                  "put",
                   "PATCH",
-                  "DELETE"
+                  "patch",
+                  "DELETE",
+                  "delete"
                 ],
                 "type": "string"
               },

@@ -11,6 +11,7 @@ use std::str::FromStr;
 #[derive(Debug, Clone, Deserialize, Getters)]
 #[cfg_attr(feature = "config-schema", derive(terrace_config::schema::Describe))]
 #[getset(get = "pub")]
+#[serde(deny_unknown_fields)]
 pub struct WebhookConfig {
     /// Base URL of the Cloudflare Access protected service every allowed path is joined onto.
     #[serde(deserialize_with = "deserialize_url_from_string")]
@@ -25,7 +26,21 @@ pub struct WebhookConfig {
     /// "/webhook/.*" = ["ALL"]
     /// "/api/public/.*" = ["GET", "POST"]
     /// ```
-    #[cfg_attr(feature = "config-schema", config(element_values))]
+    // Spelled out rather than read off [`AllowedMethod`]'s variants, which is what the bare
+    // `element_values` this replaced did. A derive reports serde's *variant* names — the
+    // `UPPERCASE` half — and does not read `#[serde(alias = "…")]`, so the published list left
+    // out the six lowercase spellings the deserialiser accepts and the schema refused
+    // `["get"]`, which loads. `element_values("…")` from terrace-config v0.11.0 is what can say
+    // both halves. The list is the twelve spellings `AllowedMethod`'s `Deserialize` derive
+    // matches: one per variant from `#[serde(rename_all = "UPPERCASE")]`, one per variant from
+    // its `#[serde(alias)]`, and nothing else — `FromStr` below is not in this path.
+    #[cfg_attr(
+        feature = "config-schema",
+        config(element_values(
+            "ALL", "all", "GET", "get", "POST", "post", "PUT", "put", "PATCH", "patch", "DELETE",
+            "delete"
+        ))
+    )]
     paths: HashMap<String, HashSet<AllowedMethod>>,
 }
 
@@ -41,22 +56,22 @@ where
 ///
 /// Deserialised by variant name, uppercase or lowercase — `"get"` and `"GET"` are the same value,
 /// through the `UPPERCASE` spelling and a lowercase [`serde(alias)`](serde::Deserialize) on each
-/// variant, rather than through [`FromStr`] as before. `terrace-config`'s `Describe` derive
-/// reports the spellings `serde` actually accepts for a leaf's `#[config(values)]` or a
-/// container's `#[config(element_values)]`; a hand-written [`FromStr`]/`TryFrom<String>`
-/// deserializer (case-folded through [`str::to_uppercase`]) is exactly the shape upstream's
-/// `v0.10.0` changelog says such a derive must leave undescribed, so the derive is now the
-/// source of truth for what deserialises, and [`FromStr`] stays only for the call sites below
-/// that parse a method outside of `serde` (a set converted from configuration, and the reverse
+/// variant, rather than through [`FromStr`]. [`FromStr`] stays only for the call sites below that
+/// parse a method outside of `serde` (a set converted from configuration, and the reverse
 /// direction back to [`actix_web::http::Method`]). Operators write these by hand.
+///
+/// Deliberately **not** `Describe`. That derive builds `Values` from the variant names alone —
+/// `#[serde(rename_all)]` is applied, `#[serde(alias)]` is not — so the twelve spellings this
+/// type accepts would reach a schema as six, and a file saying `["get"]` would be refused by a
+/// document describing a loader that takes it. The spellings are asserted where they can be
+/// stated in full instead, on [`WebhookConfig::paths`] with `#[config(element_values("…"))]`.
+/// Without a `Values` implementation here, a bare `#[config(element_values)]` cannot compile,
+/// so the six-spelling version cannot come back by accident.
 ///
 /// Every forwarded request keeps its query string. Whether it keeps its body depends on which of
 /// these it is.
 #[derive(Debug, serde::Deserialize, Eq, PartialEq, Hash, Clone)]
-#[cfg_attr(
-    feature = "config-schema",
-    derive(serde::Serialize, terrace_config::schema::Describe)
-)]
+#[cfg_attr(feature = "config-schema", derive(serde::Serialize))]
 #[serde(rename_all = "UPPERCASE")]
 pub enum AllowedMethod {
     /// Every method, so any other entry in the same list is ignored.

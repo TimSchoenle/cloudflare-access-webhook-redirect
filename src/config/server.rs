@@ -16,6 +16,7 @@ const DEFAULT_PORT: u16 = 8080;
     derive(serde::Serialize, terrace_config::schema::Describe)
 )]
 #[getset(get = "pub")]
+#[serde(deny_unknown_fields)]
 pub struct ServerConfig {
     /// Bind address. Containers usually want `0.0.0.0`.
     #[serde(default = "ServerConfig::default_host")]

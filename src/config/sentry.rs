@@ -68,6 +68,7 @@ pub enum SentryLevel {
               lint's remedy — folding pairs of them into two-variant enums — would change the \
               TOML surface to quiet a lint about the shape of the Rust struct"
 )]
+#[serde(deny_unknown_fields)]
 pub struct SentryConfig {
     /// Initialise the Sentry client. `false` installs no client, no panic hook, no `tracing`
     /// layer and no HTTP middleware, so every other key here is inert and nothing is sent
@@ -111,6 +112,7 @@ pub struct SentryConfig {
     /// Fraction of captured events actually sent, `0.0`-`1.0`. A blunt volume cap — it drops
     /// whole issues, not repetitions of one — so leave it at `1.0` unless quota forces it.
     #[serde(default = "SentryConfig::default_sample_rate")]
+    #[cfg_attr(feature = "config-schema", config(range(min = 0.0, max = 1.0)))]
     #[getset(get_copy = "pub")]
     sample_rate: f32,
     /// Fraction of traces this proxy **starts** that are recorded, `0.0`-`1.0`.
@@ -120,6 +122,7 @@ pub struct SentryConfig {
     /// continued regardless, which is what keeps one webhook delivery readable across the
     /// caller, this hop and the Cloudflare Access protected service behind it.
     #[serde(default = "SentryConfig::default_traces_sample_rate")]
+    #[cfg_attr(feature = "config-schema", config(range(min = 0.0, max = 1.0)))]
     #[getset(get_copy = "pub")]
     traces_sample_rate: f32,
     /// Least severe `tracing` level reported as a Sentry **issue**: `off`, `error`, `warn`,
@@ -128,11 +131,13 @@ pub struct SentryConfig {
     /// Bounded from above by `telemetry.log_level`: the Sentry layer sits under the same filter
     /// the console log does, so a record that level drops is never reported either.
     #[serde(default)]
+    #[cfg_attr(feature = "config-schema", config(values))]
     #[getset(get_copy = "pub")]
     capture_level: SentryLevel,
     /// Least severe `tracing` level kept as a **breadcrumb** — the trail attached to the next
     /// issue. Same spellings as `capture_level`; records at or above it become issues instead.
     #[serde(default = "SentryConfig::default_breadcrumb_level")]
+    #[cfg_attr(feature = "config-schema", config(values))]
     #[getset(get_copy = "pub")]
     breadcrumb_level: SentryLevel,
     /// How many breadcrumbs one event carries.
