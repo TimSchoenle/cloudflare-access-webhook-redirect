@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.2.0...v2.3.0) (2026-09-06)
+
+
+### Features
+
+* add first party log level type to fully add terrace describe su… ([#464](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/464)) ([09ca680](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/09ca6802bfc4c3c19bdc1018996c75260f13c727))
+
 ## [2.2.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.1.0...v2.2.0) (2026-09-06)
 
 
