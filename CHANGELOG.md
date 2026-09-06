@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.2.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.1.0...v2.2.0) (2026-09-06)
+
+
+### Features
+
+* update terrace to 0.11.0 ([#463](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/463)) ([837abf1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/837abf1d9e3b47a946914f6af8cb9b66f1d56aef))
+
+
+### Miscellaneous
+
+* **deps:** update all non-major action updates ([#445](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/445)) ([1ef6887](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/1ef6887436aa424b77a2abd82a4116ee1b816102))
+* **deps:** update docker/dockerfile docker tag to v1.27 ([#462](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/462)) ([32dd402](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/32dd402657789549e8164c67257155c302aadc0c))
+* **deps:** update step-security/harden-runner action to v2.21.1 ([#444](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/444)) ([4dcd27b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/4dcd27b13941a49ebaf400210517c9cfc60b82bd))
+* **deps:** update step-security/harden-runner action to v2.21.1 ([#453](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/453)) ([8b39c92](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/8b39c92d98337292089afeb885b2f142e4cbbb9d))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml to vworkflows-maintenance-auto-approve-renovate-v1.4.22 ([#454](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/454)) ([86b75b0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/86b75b06f60e022c83741b207e37cedc4405c066))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml to vworkflows-maintenance-timed-auto-pr-approve-v1.2.34 ([#455](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/455)) ([a2cb604](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/a2cb6047110e6fe85f1cbdb18370787f3637b9c3))
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.4.1 ([#456](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/456)) ([89a8281](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/89a82817bf363ed3a9549f8cd2ff341b4e46c1df))
+* **deps:** update timschoenle/actions/actions/common/readme-variables to vactions-common-readme-variables-v1.1.2 ([#457](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/457)) ([f838841](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f838841a47478a009984c7c9644b11e83d9088a6))
+* **deps:** update timschoenle/actions/actions/common/render-template to vactions-common-render-template-v1.1.3 ([#458](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/458)) ([f365482](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f365482121ca1aaba55fa971cbcbc8a0c237e421))
+* **deps:** update timschoenle/actions/actions/helm/update-chart-version to vactions-helm-update-chart-version-v1.6.6 ([#459](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/459)) ([306af60](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/306af60f1e4332ef5f90742899a90a3aaa2e75ee))
+* **deps:** update timschoenle/actions/actions/rust/config-contract to vactions-rust-config-contract-v1.2.1 ([#460](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/460)) ([976b56b](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/976b56b7c5d4c54bf9bf015b5c698ea9b09d4a9c))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.43 ([#461](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/461)) ([dc8b44a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/dc8b44a67ac8c9994e4828d85cc2dfb44adf887c))
+
 ## [2.1.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.0.0...v2.1.0) (2026-09-02)
 
 
