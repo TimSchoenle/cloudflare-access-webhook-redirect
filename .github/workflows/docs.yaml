@@ -132,7 +132,7 @@ jobs:
 
       - name: Render and commit the README
         id: readme
-        uses: TimSchoenle/actions/actions/common/render-template-and-commit@0406974974a3aaf884e7c65866b091d266614b46 # tag=actions-common-render-template-and-commit-v1.1.5
+        uses: TimSchoenle/actions/actions/common/render-template-and-commit@30bc73a560c7aac65f449b23378b9fd7782f8d39 # tag=actions-common-render-template-and-commit-v1.1.6
         with:
           template: .github/templates/README.md.hbs
           output: README.md
