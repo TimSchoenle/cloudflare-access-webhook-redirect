@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.3.1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.0...v2.3.1) (2026-09-07)
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#466](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/466)) ([2d64ee5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2d64ee5495338549ce60e445b7b56e7b6eb5e207))
+* **deps:** lock file maintenance ([#468](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/468)) ([c0b741a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/c0b741a2dfe6f63184505c4d6a521474abe777d9))
+* **deps:** lock file maintenance ([#469](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/469)) ([9c80a91](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/9c80a91bccab2ebcfd53d160a975f4f7393b536d))
+* **deps:** lock file maintenance ([#470](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/470)) ([8e9d532](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/8e9d5324dae5eda4ea71adee33f79a8896907cbf))
+
 ## [2.3.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.2.0...v2.3.0) (2026-09-06)
 
 
