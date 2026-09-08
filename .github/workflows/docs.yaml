@@ -264,7 +264,7 @@ jobs:
       # half: it reports a renamed key without waiting for a container build. The expensive half
       # is `build.yaml`, which runs the same action against the image it just built.
       - name: Verify the configuration contract
-        uses: TimSchoenle/actions/actions/rust/config-contract@c7e430537b061a61687ed9308048fc319c97a59c # tag=actions-rust-config-contract-v1.2.1
+        uses: TimSchoenle/actions/actions/rust/config-contract@30bc73a560c7aac65f449b23378b9fd7782f8d39 # tag=actions-rust-config-contract-v1.3.0
         with:
           features: config-schema
           image: ''
