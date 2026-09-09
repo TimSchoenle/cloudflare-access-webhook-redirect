@@ -134,7 +134,7 @@ jobs:
   docker-build-test:
     name: Docker Build and Test (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
-    needs: [check, doc]
+    needs: [ check, doc ]
     permissions:
       contents: read # Required to checkout the code
       security-events: write # Required to upload Trivy scan results
@@ -309,20 +309,13 @@ jobs:
           category: trivy-${{ matrix.arch }} # Keeps the per-architecture scans from overwriting each other
 
       - name: Comment image size on PR
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: TimSchoenle/actions/actions/common/upsert-pr-comment@30bc73a560c7aac65f449b23378b9fd7782f8d39 # tag=actions-common-upsert-pr-comment-v1.1.0
         if: github.event_name == 'pull_request'
-        env:
-          SIZE: ${{ steps.size-check.outputs.size }}
-          PLATFORM: ${{ matrix.platform }}
         with:
-          script: |
-            const { SIZE, PLATFORM } = process.env;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🐳 Docker image size (\`${PLATFORM}\`): **${SIZE}MB**`
-            });
+          token: ${{ secrets.GITHUB_TOKEN }}
+          identifier: docker-image-size-${{ matrix.arch }}
+          body: |
+            🐳 Docker image size (`${{ matrix.platform }}`): **${{ steps.size-check.outputs.size }}MB**
 
   dependency-review:
     name: Dependency Review
