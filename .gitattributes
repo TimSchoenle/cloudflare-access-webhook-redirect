@@ -1,0 +1,96 @@
+# https://git-scm.com/docs/gitattributes
+
+# Default: detect text, normalize to LF in the repository and on checkout.
+* text=auto eol=lf
+
+# --- Rust ---------------------------------------------------------------
+*.rs                text diff=rust
+Cargo.toml          text
+Cargo.lock          text -diff linguist-generated
+
+# --- Shell / task runner --------------------------------------------------
+*.sh                text eol=lf
+justfile            text eol=lf
+
+# --- Windows-only scripts (checked out with CRLF for native tooling) -----
+*.ps1               text eol=crlf
+*.cmd               text eol=crlf
+*.bat               text eol=crlf
+
+# --- Docker ---------------------------------------------------------------
+Dockerfile          text eol=lf
+Dockerfile.*        text eol=lf
+.dockerignore       text eol=lf
+
+# --- Docs / templates -----------------------------------------------------
+*.md                text diff=markdown
+*.mdx               text diff=markdown
+*.hbs               text
+*.txt               text
+
+# --- Structured data / config ----------------------------------------------
+*.json              text
+*.json5             text
+*.toml              text
+*.yaml              text
+*.yml               text
+*.xml               text
+*.csv               text
+*.ini               text
+*.cfg               text
+.editorconfig       text
+
+# --- Git housekeeping -------------------------------------------------------
+.gitattributes      text eol=lf export-ignore
+.gitignore          text eol=lf export-ignore
+.gitkeep            text eol=lf export-ignore
+
+# --- Binary assets: never diffed, never line-ending normalized -----------
+*.png               binary
+*.jpg               binary
+*.jpeg              binary
+*.gif               binary
+*.ico               binary
+*.webp              binary
+*.svg               text eol=lf
+*.pdf               binary
+*.zip               binary
+*.gz                binary
+*.tar               binary
+*.7z                binary
+*.woff              binary
+*.woff2             binary
+*.ttf               binary
+*.eot               binary
+
+# libFuzzer corpus/artifacts are raw byte streams fed to the harness, not text.
+fuzz/corpus/**      binary linguist-generated
+fuzz/artifacts/**   binary linguist-generated
+
+# -----------------------------------------------------------------------------
+# Linguist: keep GitHub's language stats on the hand-written Rust service code.
+# https://github.com/github-linguist/linguist/blob/main/docs/overrides.md
+# -----------------------------------------------------------------------------
+Cargo.lock                     linguist-generated
+CHANGELOG.md                   linguist-generated
+.release-please-manifest.json  linguist-generated
+docs/**                        linguist-documentation
+examples/**                    linguist-documentation
+tests/**                       linguist-detectable=false
+fuzz/fuzz_targets/**           linguist-detectable=false
+.github/**                     linguist-detectable=false
+.github/templates/**           linguist-language=Handlebars
+
+# -----------------------------------------------------------------------------
+# Export-ignore: exclude non-runtime files from `git archive` exports.
+# -----------------------------------------------------------------------------
+.github/                       export-ignore
+fuzz/                          export-ignore
+tests/                         export-ignore
+docs/                          export-ignore
+codecov.yml                    export-ignore
+renovate.json                  export-ignore
+release-please-config.json     export-ignore
+.release-please-manifest.json  export-ignore
+CHANGELOG.md                   export-ignore
+SECURITY.md                    export-ignore
