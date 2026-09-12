@@ -89,7 +89,7 @@ jobs:
           persist-credentials: false
 
       - name: Install stable toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
 
       # The recipes under `justfile` are what a developer runs before pushing, so CI runs them
       # rather than a second spelling of the same cargo invocation. A generated file that only
@@ -215,7 +215,7 @@ jobs:
           persist-credentials: false
 
       - name: Install stable toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
 
       # The same recipe the render job writes `config.example.toml` with, so this job cannot fail
       # a file that `just` would have produced identically.
