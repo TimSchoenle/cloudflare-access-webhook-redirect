@@ -1,5 +1,51 @@
 # Changelog
 
+## [2.3.1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.0...v2.3.1) (2026-09-12)
+
+
+### CI
+
+* migrate pr comments to shared action ([#481](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/481)) ([0ea1a66](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0ea1a66dc8965fd5409cad4402a8262a231f1ec5))
+
+
+### Miscellaneous
+
+* add .gitattributes ([49e7ff8](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/49e7ff8798dac7bd4397a7ee22281d2fbb9a183b))
+* **deps:** update github/codeql-action action to v4.38.0 ([#498](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/498)) ([3444e3c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/3444e3cb24e014b31aad9cf22470c1fee6d83591))
+* **deps:** update rust crate reqwest to v0.13.5 ([#494](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/494)) ([7cbfafd](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/7cbfafd2546893730b4743bdf59e977a55f40d62))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml to vworkflows-maintenance-auto-approve-renovate-v1.4.23 ([#471](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/471)) ([db4b390](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/db4b390b03f5e173298ab1c85b48e604b3e28f10))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml to vworkflows-maintenance-timed-auto-pr-approve-v1.2.35 ([#472](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/472)) ([85cd1b3](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/85cd1b3aa15f0979a00b083c050228536ea453a2))
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.5.0 ([#477](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/477)) ([582c206](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/582c206e0e3fbc36afd0b11031765e2fa00dc5bd))
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.5.1 ([#482](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/482)) ([2684723](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2684723fb954cda04d7173999ed1365087f47fc3))
+* **deps:** update timschoenle/actions/actions/common/readme-variables to vactions-common-readme-variables-v1.2.0 ([#478](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/478)) ([9984499](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/99844990b55b478db44f65ce1fcdb0ffd889d941))
+* **deps:** update timschoenle/actions/actions/common/readme-variables to vactions-common-readme-variables-v1.2.1 ([#483](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/483)) ([e3d9ee0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e3d9ee08e5a20ec63f399613366923236df285a6))
+* **deps:** update timschoenle/actions/actions/common/render-template to vactions-common-render-template-v1.2.0 ([#479](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/479)) ([becd30c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/becd30c35762f701665fb9408c024d4fea85ac84))
+* **deps:** update timschoenle/actions/actions/common/render-template to vactions-common-render-template-v1.2.1 ([#484](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/484)) ([e9c14af](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e9c14af862c3261092593acf3b212fbe4ab3ee40))
+* **deps:** update timschoenle/actions/actions/common/render-template-and-commit to vactions-common-render-template-and-commit-v1.1.6 ([#473](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/473)) ([b01a1cb](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b01a1cb6e559f9ece685c39993ac9b948fc0625d))
+* **deps:** update timschoenle/actions/actions/common/render-template-and-commit to vactions-common-render-template-and-commit-v1.1.7 ([#485](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/485)) ([2a9b72c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2a9b72c4f362a84ae17e6429155fe304bee1f6b2))
+* **deps:** update timschoenle/actions/actions/common/render-template-and-commit to vactions-common-render-template-and-commit-v1.1.8 ([#492](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/492)) ([47fc83f](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/47fc83f112dc9cae62fc3993240162075a0b693e))
+* **deps:** update timschoenle/actions/actions/common/upsert-pr-comment to vactions-common-upsert-pr-comment-v1.1.1 ([#486](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/486)) ([925e970](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/925e970cb36725552af4db813e0629b72acdb834))
+* **deps:** update timschoenle/actions/actions/helm/update-chart-version to vactions-helm-update-chart-version-v1.6.7 ([#474](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/474)) ([5980afa](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5980afad1fabb8e5ce733105ed6a77a052840bdf))
+* **deps:** update timschoenle/actions/actions/helm/update-chart-version to vactions-helm-update-chart-version-v1.6.8 ([#487](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/487)) ([69bcdb9](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/69bcdb976d77eaccc3d86d6a51c7dd65c42e34d5))
+* **deps:** update timschoenle/actions/actions/helm/update-chart-version to vactions-helm-update-chart-version-v1.6.9 ([#493](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/493)) ([8b7dd95](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/8b7dd951157c1c854277d2ea00605b56e632112f))
+* **deps:** update timschoenle/actions/actions/rust/auto-format to vactions-rust-auto-format-v1.1.14 ([#475](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/475)) ([5cd3564](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/5cd35642e5005748f7ed5434974fffc524041218))
+* **deps:** update timschoenle/actions/actions/rust/auto-format to vactions-rust-auto-format-v1.1.15 ([#488](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/488)) ([df4e469](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/df4e469aab1e990e54ac790fe75020329d16071d))
+* **deps:** update timschoenle/actions/actions/rust/auto-format to vactions-rust-auto-format-v1.1.16 ([#495](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/495)) ([d74dd04](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/d74dd0403685c4feee1869c7b0f4142434d75a22))
+* **deps:** update timschoenle/actions/actions/rust/config-contract to vactions-rust-config-contract-v1.3.0 ([#480](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/480)) ([e62d20f](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e62d20f9507e02909639a30badf82c5269599742))
+* **deps:** update timschoenle/actions/actions/rust/config-contract to vactions-rust-config-contract-v1.3.1 ([#489](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/489)) ([e8fa126](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e8fa1269f0ce98e68ba8f32a2bb123f9f628bbe9))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.44 ([#476](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/476)) ([7639dd7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/7639dd7b5285fc841a20797e820ca0a066cf6353))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.45 ([#490](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/490)) ([2987cf0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2987cf06235bab824dfdee6c497119c23731d8ce))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.46 ([#496](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/496)) ([f4dc973](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f4dc973762ef1950e0c83a7268c860d072af8d7a))
+* **deps:** update zizmorcore/zizmor-action action to v0.6.4 ([#497](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/497)) ([2e5f413](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2e5f4136417e6fa2feb5844823f4d12832fd6b3c))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#466](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/466)) ([2d64ee5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2d64ee5495338549ce60e445b7b56e7b6eb5e207))
+* **deps:** lock file maintenance ([#468](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/468)) ([c0b741a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/c0b741a2dfe6f63184505c4d6a521474abe777d9))
+* **deps:** lock file maintenance ([#469](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/469)) ([9c80a91](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/9c80a91bccab2ebcfd53d160a975f4f7393b536d))
+* **deps:** lock file maintenance ([#470](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/470)) ([8e9d532](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/8e9d5324dae5eda4ea71adee33f79a8896907cbf))
+
 ## [2.3.0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.2.0...v2.3.0) (2026-09-06)
 
 
