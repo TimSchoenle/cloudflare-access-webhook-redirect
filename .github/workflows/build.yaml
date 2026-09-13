@@ -120,7 +120,7 @@ jobs:
           persist-credentials: false
 
       - name: Install stable toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
 
       # One feature set is enough here: nothing in the crate documentation is behind a `cfg`, so
       # `--all-features` renders every page there is. `config-schema` only adds the generator.
@@ -209,7 +209,7 @@ jobs:
       # the build wrote, which is what lets it check the Dockerfile's region and the committed
       # document in the same pass as the image.
       - name: Install stable toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
           # This job builds and loads a runtime image, and a restored cache is writable by any
           # branch: caching here is a path from a poisoned entry into a runtime artefact, which is
