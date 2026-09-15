@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.2](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.1...v2.3.2) (2026-09-15)
+
+
+### Miscellaneous
+
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.5.2 ([#512](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/512)) ([9d40bed](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/9d40bed209993c2ff8975be27af3f010b52201ec))
+
 ## [2.3.1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.0...v2.3.1) (2026-09-14)
 
 
