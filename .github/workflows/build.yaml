@@ -309,7 +309,7 @@ jobs:
           category: trivy-${{ matrix.arch }} # Keeps the per-architecture scans from overwriting each other
 
       - name: Comment image size on PR
-        uses: TimSchoenle/actions/actions/common/upsert-pr-comment@cf936b448984595778c82c079af93d0bb5d49297 # tag=actions-common-upsert-pr-comment-v1.1.1
+        uses: TimSchoenle/actions/actions/common/upsert-pr-comment@5edf216e14f1ba5cb4b5444c1bd67b87139a12ac # tag=actions-common-upsert-pr-comment-v1.1.2
         if: github.event_name == 'pull_request'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
