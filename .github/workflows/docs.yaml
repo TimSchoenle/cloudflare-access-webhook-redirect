@@ -240,7 +240,7 @@ jobs:
 
       # Writes nothing; fails with the first differing line when README.md is stale.
       - name: Verify README.md is current
-        uses: TimSchoenle/actions/actions/common/render-template@cf936b448984595778c82c079af93d0bb5d49297 # tag=actions-common-render-template-v1.2.1
+        uses: TimSchoenle/actions/actions/common/render-template@5edf216e14f1ba5cb4b5444c1bd67b87139a12ac # tag=actions-common-render-template-v1.2.2
         with:
           template: .github/templates/README.md.hbs
           output: README.md
