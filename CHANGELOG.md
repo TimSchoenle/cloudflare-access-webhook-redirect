@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.3](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.2...v2.3.3) (2026-09-26)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate terrace-config to v0.13.0 ([#533](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/533)) ([a0be59c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/a0be59ce60e73c0fa501dcded3ac2683bd250181))
+* **deps:** update rust crate terrace-config to v0.14.0 ([#534](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/534)) ([6d4c8aa](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/6d4c8aa25a21d2a88e834cf34914815743cab5e7))
+
+
+### Miscellaneous
+
+* **deps:** update rust crate sentry to v0.49.3 ([#531](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/531)) ([13f2682](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/13f2682b4a6a5e595cc31de27748a1d5dd190465))
+* **deps:** update rust crate thiserror to v2.0.21 ([#535](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/535)) ([e133d9d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e133d9d5ef414b949bebbbe8ff773b8fd3bf7337))
+
 ## [2.3.2](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.1...v2.3.2) (2026-09-21)
 
 
