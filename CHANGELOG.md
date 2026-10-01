@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.3.3](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.2...v2.3.3) (2026-10-01)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate terrace-config to v0.13.0 ([#533](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/533)) ([a0be59c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/a0be59ce60e73c0fa501dcded3ac2683bd250181))
+* **deps:** update rust crate terrace-config to v0.14.0 ([#534](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/534)) ([6d4c8aa](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/6d4c8aa25a21d2a88e834cf34914815743cab5e7))
+* **deps:** update rust crate terrace-config to v0.15.0 ([#539](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/539)) ([6bb10b8](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/6bb10b844f851b19f5cb8a05350c85d4149b21de))
+
+
+### Miscellaneous
+
+* **deps:** update github/codeql-action action to v4.38.2 ([#536](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/536)) ([b297eba](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b297eba0d394563cd7231d037680331fbb6c99da))
+* **deps:** update rust crate sentry to v0.49.3 ([#531](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/531)) ([13f2682](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/13f2682b4a6a5e595cc31de27748a1d5dd190465))
+* **deps:** update rust crate thiserror to v2.0.21 ([#535](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/535)) ([e133d9d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e133d9d5ef414b949bebbbe8ff773b8fd3bf7337))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#537](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/537)) ([ad5733c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ad5733cbd8dbe8632861ec3cf5377465468e06d6))
+* **deps:** lock file maintenance ([#538](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/538)) ([c602d0a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/c602d0a82d99745a45db5c6bbdab3c64773e0f63))
+
 ## [2.3.2](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.1...v2.3.2) (2026-09-21)
 
 
