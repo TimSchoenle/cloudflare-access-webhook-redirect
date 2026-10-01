@@ -7,7 +7,7 @@
   },
   "app": {
     "name": "cloudflare-access-webhook-redirect",
-    "version": "v2.3.2",
+    "version": "v2.3.3",
     "source": "https://github.com/TimSchoenle/cloudflare-access-webhook-redirect"
   },
   "schema": {
