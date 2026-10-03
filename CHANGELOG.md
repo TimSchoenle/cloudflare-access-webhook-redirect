@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.3.4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.3...v2.3.4) (2026-10-03)
+
+
+### Miscellaneous
+
+* **deps:** update oras-project/setup-oras action to v2.0.2 ([#540](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/540)) ([2ae706a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2ae706aab4f911a8d4d2b42d1088215ab9d56097))
+* **deps:** update timschoenle/actions/actions/common/commit-changes to vactions-common-commit-changes-v1.5.3 ([#542](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/542)) ([87a6ae1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/87a6ae109945b3d2fb0e30f8287a52b692c43be8))
+* **deps:** update timschoenle/actions/actions/common/readme-variables to vactions-common-readme-variables-v1.2.3 ([#543](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/543)) ([e3f2ff7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e3f2ff7adbb5ea1a1a2bc94c5eb4137db7345c8f))
+* **deps:** update timschoenle/actions/actions/common/render-template to vactions-common-render-template-v1.2.3 ([#544](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/544)) ([32c20b1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/32c20b1604b95a70b4d825a5c4878872bdc7134b))
+* **deps:** update timschoenle/actions/actions/common/upsert-pr-comment to vactions-common-upsert-pr-comment-v1.1.3 ([#545](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/545)) ([b6bd16f](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b6bd16fb306213435aae69a21430f55d855be82f))
+* **deps:** update timschoenle/actions/actions/helm/update-chart-version to vactions-helm-update-chart-version-v1.6.13 ([#546](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/546)) ([61940ee](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/61940eec524f5d8f085c69c32037c568606b66b7))
+* **deps:** update timschoenle/actions/actions/rust/clippy to vactions-rust-clippy-v1.1.12 ([#547](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/547)) ([ad64175](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ad641754c50439da69f6d2e6d2d233006d5848d0))
+* **deps:** update timschoenle/actions/actions/rust/config-contract to vactions-rust-config-contract-v1.3.3 ([#548](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/548)) ([fb07d38](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/fb07d38fedf21393dcee0ba3d17649642bc4f559))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.49 ([#549](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/549)) ([dede290](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/dede290524f130ea39a40e7478ecc498fd108ad5))
+
 ## [2.3.3](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.2...v2.3.3) (2026-10-01)
 
 
