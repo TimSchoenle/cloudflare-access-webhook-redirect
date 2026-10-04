@@ -222,7 +222,7 @@ jobs:
       # nothing is pulled — and the same run also compares the Dockerfile's marked region and the
       # committed document against what the types produce.
       - name: Verify the configuration contract
-        uses: TimSchoenle/actions/actions/rust/config-contract@7e8fd61045447d321c5139eea8f2e2b766333f8b # tag=actions-rust-config-contract-v1.3.3
+        uses: TimSchoenle/actions/actions/rust/config-contract@7568f9a485ca91c369095414ce4d9f1a8237df21 # tag=actions-rust-config-contract-v1.3.4
         with:
           features: config-schema
           image: ${{ env.IMAGE }}
