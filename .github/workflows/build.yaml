@@ -314,7 +314,7 @@ jobs:
           egress-policy: audit
 
       - name: Comment image sizes on PR
-        uses: TimSchoenle/actions/actions/docker/image-check-summary@7568f9a485ca91c369095414ce4d9f1a8237df21 # tag=actions-docker-image-check-summary-v1.1.0
+        uses: TimSchoenle/actions/actions/docker/image-check-summary@c4068f4412c52bcf92d15f9bb255d37b2eafd0b7 # tag=actions-docker-image-check-summary-v1.1.1
 
   dependency-review:
     name: Dependency Review
