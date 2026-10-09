@@ -125,7 +125,7 @@ jobs:
       # fail the gate for a reason absent from the diff.
       - name: Collect the README payload
         id: variables
-        uses: TimSchoenle/actions/actions/common/readme-variables@c4068f4412c52bcf92d15f9bb255d37b2eafd0b7 # tag=actions-common-readme-variables-v1.2.5
+        uses: TimSchoenle/actions/actions/common/readme-variables@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-common-readme-variables-v1.2.6
         with:
           branch: ${{ github.event.repository.default_branch }}
           extra: ${{ steps.config.outputs.json }}
@@ -233,7 +233,7 @@ jobs:
 
       - name: Collect the README payload
         id: variables
-        uses: TimSchoenle/actions/actions/common/readme-variables@c4068f4412c52bcf92d15f9bb255d37b2eafd0b7 # tag=actions-common-readme-variables-v1.2.5
+        uses: TimSchoenle/actions/actions/common/readme-variables@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-common-readme-variables-v1.2.6
         with:
           branch: ${{ github.event.repository.default_branch }}
           extra: ${{ steps.config.outputs.json }}
