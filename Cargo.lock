@@ -410,7 +410,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-access-webhook-redirect"
-version = "2.3.3"
+version = "2.3.4"
 dependencies = [
  "actix-web",
  "anyhow",
