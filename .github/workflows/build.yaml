@@ -289,7 +289,7 @@ jobs:
       # code-scanning alerts carry over instead of being orphaned under the derived
       # `trivy-linux-<arch>`.
       - name: Check Docker image
-        uses: TimSchoenle/actions/actions/docker/image-check@c4068f4412c52bcf92d15f9bb255d37b2eafd0b7 # tag=actions-docker-image-check-v1.1.1
+        uses: TimSchoenle/actions/actions/docker/image-check@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-docker-image-check-v1.1.2
         with:
           image: ${{ env.IMAGE }}
           platform: ${{ matrix.platform }}
