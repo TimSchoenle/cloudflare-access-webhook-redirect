@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.3.5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.4...v2.3.5) (2026-10-10)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate terrace-config to v0.15.1 ([#585](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/585)) ([ea96a07](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ea96a07f6050354277f6346564c14dba529c351c))
+
+
+### Documentation
+
+* **readme:** add a Helm chart badge and install section ([#586](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/586)) ([2c64bed](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/2c64bedd5d668058713046ec8b818593eda83619))
+* **readme:** align the template with the README standard ([#589](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/589)) ([6ca7a16](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/6ca7a1630ad60f9759f04d33132d56aef33a2e1b))
+
+
+### CI
+
+* move CodeQL to the shared action ([#587](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/587)) ([f00ca6d](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f00ca6d5384d47b93c42f59ab5bbddecfcc1d39b))
+
+
+### Miscellaneous
+
+* **deps:** update all non-major action updates ([a9574a7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/a9574a713c2ba04b9f20cea60dfa861144cf6aa2))
+* **deps:** update all non-major action updates ([#588](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/588)) ([a9574a7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/a9574a713c2ba04b9f20cea60dfa861144cf6aa2))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml to vworkflows-maintenance-auto-approve-renovate-v1.4.28 ([#590](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/590)) ([838f627](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/838f62746a2b0667a7dd2d7f5f00148b64d435a8))
+* **deps:** update timschoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml to vworkflows-maintenance-timed-auto-pr-approve-v1.2.40 ([#591](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/591)) ([7a13989](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/7a139898950aadffa3878024fd21bf52cd1b5769))
+* **deps:** update timschoenle/actions/actions/common/render-template to vactions-common-render-template-v1.2.6 ([#578](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/578)) ([725268a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/725268a3bbaadcce7b07d0bb0cb8770bd88c5791))
+* **deps:** update timschoenle/actions/actions/common/render-template-and-commit to vactions-common-render-template-and-commit-v1.1.13 ([#579](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/579)) ([7108122](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/7108122670646107aa36da6359ffccb4cf0a0ac9))
+* **deps:** update timschoenle/actions/actions/docker/image-check to vactions-docker-image-check-v1.1.2 ([#581](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/581)) ([7fc7484](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/7fc7484e29ddc428d2af9e92df600583be97704e))
+* **deps:** update timschoenle/actions/actions/docker/image-check-summary to vactions-docker-image-check-summary-v1.1.2 ([#582](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/582)) ([e4906b2](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e4906b26b2a8f00f282fc000f4aff5d3cd357795))
+* **deps:** update timschoenle/actions/actions/rust/config-contract to vactions-rust-config-contract-v1.3.6 ([#583](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/583)) ([fb1c220](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/fb1c220368ae3b2164c9ad6df686492de2829f86))
+* **deps:** update timschoenle/actions/actions/rust/coverage-codecov to vactions-rust-coverage-codecov-v1.1.50 ([#584](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/584)) ([a752bba](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/a752bba0f8a289e0ddc4b7e88dc0355d5b29de84))
+
 ## [2.3.4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.3...v2.3.4) (2026-10-09)
 
 
