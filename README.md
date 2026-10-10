@@ -19,6 +19,7 @@ type — so a key that exists below exists in the service.
 Reverse proxy exposing chosen paths of a Cloudflare Access protected service, with the service token injected.
 
 [![Release](https://img.shields.io/github/v/release/TimSchoenle/cloudflare-access-webhook-redirect?sort=semver)](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/releases)
+[![Chart](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Ftimschoenle.github.io%2Fhelm-charts%2Findex.yaml&query=%24.entries.cloudflare-access-webhook-redirect%5B0%5D.version&label=chart)](https://github.com/TimSchoenle/helm-charts/tree/main/charts/cloudflare-access-webhook-redirect)
 [![Build](https://img.shields.io/github/actions/workflow/status/TimSchoenle/cloudflare-access-webhook-redirect/build.yaml?branch=master)](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/actions/workflows/build.yaml)
 [![Coverage](https://codecov.io/gh/TimSchoenle/cloudflare-access-webhook-redirect/branch/master/graph/badge.svg?token=dDUZjsYmh2)](https://codecov.io/gh/TimSchoenle/cloudflare-access-webhook-redirect)
 [![License](https://img.shields.io/github/license/TimSchoenle/cloudflare-access-webhook-redirect)](LICENSE)
@@ -110,8 +111,16 @@ architecture and no platform flag is needed. Each tag is signed with
 [cosign](https://docs.sigstore.dev/) under this repository's GitHub OIDC identity. `latest`
 follows releases; pin the tag above where an unattended restart must not change the version.
 
-Compose, a Kubernetes Deployment and the Helm chart are in
-[docs/INSTALLATION.md](docs/INSTALLATION.md).
+With Helm:
+
+```bash
+helm repo add timschoenle https://timschoenle.github.io/helm-charts
+helm install cloudflare-access-webhook-redirect timschoenle/cloudflare-access-webhook-redirect
+```
+
+The chart pins the image by digest, so a chart version names one build. Its values are at
+[TimSchoenle/helm-charts](https://github.com/TimSchoenle/helm-charts/tree/main/charts/cloudflare-access-webhook-redirect).
+Compose and a plain Kubernetes Deployment are in [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 ## Usage
 
