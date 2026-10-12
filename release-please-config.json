@@ -5,11 +5,10 @@
   "always-update": true,
   "packages": {
     ".": {
-      "release-type": "rust",
+      "exclude-paths": [".github"],
       "draft": false,
       "prerelease": false,
-      "include-component-in-tag": false,
-      "changelogPath": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "changelog-sections": [
@@ -32,42 +31,39 @@
     {
       "type": "docs",
       "section": "Documentation",
-      "hidden": false
+      "hidden": true
     },
     {
       "type": "refactor",
-      "section": "Code Refactoring",
-      "hidden": false
+      "section": "Code Refactoring"
     },
     {
       "type": "test",
       "section": "Tests",
-      "hidden": false
+      "hidden": true
     },
     {
       "type": "style",
       "section": "Styles",
-      "hidden": false
+      "hidden": true
     },
     {
       "type": "ci",
       "section": "CI",
-      "hidden": false
+      "hidden": true
     },
     {
       "type": "build",
-      "section": "Build System",
-      "hidden": false
+      "section": "Build System"
     },
     {
       "type": "chore",
       "section": "Miscellaneous",
-      "hidden": false
+      "hidden": true
     },
     {
       "type": "deps",
-      "section": "Dependencies",
-      "hidden": false
+      "section": "Dependencies"
     }
   ]
 }
