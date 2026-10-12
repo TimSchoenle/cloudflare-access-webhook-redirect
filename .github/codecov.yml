@@ -1,0 +1,51 @@
+# Codecov configuration. Codecov reads this file from the commit it is processing, so a change
+# here takes effect on the pull request that makes it.
+#
+# This is the baseline every repository in the estate carries unchanged. Statuses are
+# informational until the rollout makes `codecov/patch` a required check.
+
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+    # One coverage upload per commit, from the `coverage` job in build.yaml. Test results are a
+    # separate report type and do not count towards this.
+    after_n_builds: 1
+
+coverage:
+  precision: 2
+  round: down
+  range: '60...90'
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        if_ci_failed: error
+        informational: true
+    patch:
+      default:
+        target: 80%
+        # A pull request that changes no measured line, such as a lockfile update, passes rather
+        # than reporting 0% of nothing.
+        if_not_found: success
+        informational: true
+
+comment:
+  layout: 'condensed_header, diff, flags, components, condensed_files, condensed_footer'
+  behavior: default
+  require_changes: 'coverage_drop OR uncovered_patch'
+
+github_checks:
+  annotations: false
+
+flag_management:
+  default_rules:
+    carryforward: true
+
+ignore:
+  - '**/fuzz/**'
+  - 'xtask/**'
+  - '**/benches/**'
+  - '**/examples/**'
+  - '**/generated/**'

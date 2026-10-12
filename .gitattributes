@@ -88,7 +88,6 @@ fuzz/fuzz_targets/**           linguist-detectable=false
 fuzz/                          export-ignore
 tests/                         export-ignore
 docs/                          export-ignore
-codecov.yml                    export-ignore
 renovate.json                  export-ignore
 release-please-config.json     export-ignore
 .release-please-manifest.json  export-ignore
