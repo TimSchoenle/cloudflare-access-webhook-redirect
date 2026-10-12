@@ -33,14 +33,16 @@ jobs:
       - name: Run Check
         uses: TimSchoenle/actions/actions/rust/cargo-check@88e964d440835fd99f7e9d17b4ba1b48544303ba # tag=actions-rust-cargo-check-v1.1.7
 
+  # The upload authenticates with this job's OIDC token, so the job needs neither the `ci`
+  # environment nor its `CODECOV_TOKEN`. `.github/codecov.yml` decides what the Codecov statuses
+  # check.
   coverage:
     name: Coverage
-    environment:
-      name: ci
-      deployment: false
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read # Required to checkout the code
+      id-token: write # Required to authenticate the Codecov upload with OIDC
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
@@ -48,9 +50,9 @@ jobs:
           egress-policy: audit
 
       - name: Run Coverage
-        uses: TimSchoenle/actions/actions/rust/coverage-codecov@5f23e7ecae779a09b699ce2983ec5e49e5f2b0a5 # tag=actions-rust-coverage-codecov-v1.1.51
+        uses: TimSchoenle/actions/actions/rust/coverage-codecov@3dc15ee0f2fbacdc1741a20bc0e8ad1011b989c7 # tag=actions-rust-coverage-codecov-v2.0.0
         with:
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          flags: rust
 
   test:
     name: Test
