@@ -1,4 +1,4 @@
-﻿name: Build
+name: Build
 
 on:
   push:
@@ -235,17 +235,21 @@ jobs:
       # `FROM scratch` has no shell, but `docker cp` does not need one — it reads the container's
       # filesystem without starting it.
       - name: Verify the embedded contract matches the exported one
+        env:
+          ARCH: ${{ matrix.arch }}
         run: |
           container="$(docker create "${IMAGE}")"
           docker cp "${container}:/config/contract.json" from-image.json
           docker rm "${container}" > /dev/null
           if ! cmp from-image.json contract-out/contract.json; then
-            echo "::error::/config/contract.json in the ${{ matrix.arch }} image is not the document this build generated."
+            echo "::error::/config/contract.json in the ${ARCH} image is not the document this build generated."
             exit 1
           fi
-          echo "The ${{ matrix.arch }} image's embedded contract matches the exported one."
+          echo "The ${ARCH} image's embedded contract matches the exported one."
 
       - name: Test Docker image runs
+        env:
+          PLATFORM: ${{ matrix.platform }}
         run: |
           # `webhook.paths` is a table, so it comes from the config file the image reads at
           # `/app/config.toml`. The scalars stay on the command line to keep both layers
@@ -268,13 +272,13 @@ jobs:
 
           for _ in $(seq 1 30); do
             if curl -fsS http://localhost:8080/health > /dev/null; then
-              echo "Health check passed on ${{ matrix.platform }}"
+              echo "Health check passed on ${PLATFORM}"
               exit 0
             fi
             sleep 1
           done
 
-          echo "::error::Container did not become healthy on ${{ matrix.platform }}"
+          echo "::error::Container did not become healthy on ${PLATFORM}"
           docker logs smoke-test
           exit 1
 
