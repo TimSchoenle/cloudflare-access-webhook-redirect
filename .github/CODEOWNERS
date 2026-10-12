@@ -1,0 +1,3 @@
+# Codecov reads its configuration from the pull request's own commit, so without this review a
+# pull request could lower the coverage targets it is checked against.
+.github/codecov.yml @TimSchoenle
