@@ -22,7 +22,7 @@ Reverse proxy exposing chosen paths of a Cloudflare Access protected service, wi
 [![Release](https://img.shields.io/github/v/release/TimSchoenle/cloudflare-access-webhook-redirect?sort=semver)](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/releases)
 [![Chart](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Ftimschoenle.github.io%2Fhelm-charts%2Findex.yaml&query=%24.entries.cloudflare-access-webhook-redirect%5B0%5D.version&label=chart)](https://github.com/TimSchoenle/helm-charts/tree/main/charts/cloudflare-access-webhook-redirect)
 [![Build](https://img.shields.io/github/actions/workflow/status/TimSchoenle/cloudflare-access-webhook-redirect/build.yaml?branch=master)](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/actions/workflows/build.yaml)
-[![Coverage](https://codecov.io/gh/TimSchoenle/cloudflare-access-webhook-redirect/branch/master/graph/badge.svg?token=dDUZjsYmh2)](https://codecov.io/gh/TimSchoenle/cloudflare-access-webhook-redirect)
+[![Coverage](https://codecov.io/gh/TimSchoenle/cloudflare-access-webhook-redirect/graph/badge.svg)](https://codecov.io/gh/TimSchoenle/cloudflare-access-webhook-redirect)
 [![License](https://img.shields.io/github/license/TimSchoenle/cloudflare-access-webhook-redirect)](LICENSE)
 
 ## What this is

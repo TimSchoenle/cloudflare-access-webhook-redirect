@@ -1,8 +1,11 @@
 # Codecov configuration. Codecov reads this file from the commit it is processing, so a change
 # here takes effect on the pull request that makes it.
 #
-# This is the baseline every repository in the estate carries unchanged. Statuses are
-# informational until the rollout makes `codecov/patch` a required check.
+# This is the baseline every repository in the estate carries unchanged.
+#
+# Both statuses block: they fail the pull request when coverage falls short. CODEOWNERS sends
+# changes to this file through code-owner review, because a pull request could otherwise lower
+# its own targets.
 
 codecov:
   require_ci_to_pass: true
@@ -22,14 +25,14 @@ coverage:
         target: auto
         threshold: 1%
         if_ci_failed: error
-        informational: true
+        informational: false
     patch:
       default:
         target: 80%
         # A pull request that changes no measured line, such as a lockfile update, passes rather
         # than reporting 0% of nothing.
         if_not_found: success
-        informational: true
+        informational: false
 
 comment:
   layout: 'condensed_header, diff, flags, components, condensed_files, condensed_footer'
