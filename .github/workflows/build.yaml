@@ -81,7 +81,7 @@ jobs:
           egress-policy: audit
 
       - name: Auto Format
-        uses: TimSchoenle/actions/actions/rust/auto-format@5f23e7ecae779a09b699ce2983ec5e49e5f2b0a5 # tag=actions-rust-auto-format-v1.1.21
+        uses: TimSchoenle/actions/actions/rust/auto-format@ff1e7853c7953c8d7176325ea4912add4a3c5398 # tag=actions-rust-auto-format-v1.1.22
         with:
           bot_app_id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
           bot_private_key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
@@ -295,7 +295,7 @@ jobs:
       # code-scanning alerts carry over instead of being orphaned under the derived
       # `trivy-linux-<arch>`.
       - name: Check Docker image
-        uses: TimSchoenle/actions/actions/docker/image-check@5f23e7ecae779a09b699ce2983ec5e49e5f2b0a5 # tag=actions-docker-image-check-v1.1.3
+        uses: TimSchoenle/actions/actions/docker/image-check@ff1e7853c7953c8d7176325ea4912add4a3c5398 # tag=actions-docker-image-check-v1.1.4
         with:
           image: ${{ env.IMAGE }}
           platform: ${{ matrix.platform }}
