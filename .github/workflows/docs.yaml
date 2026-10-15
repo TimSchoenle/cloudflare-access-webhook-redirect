@@ -125,7 +125,7 @@ jobs:
       # fail the gate for a reason absent from the diff.
       - name: Collect the README payload
         id: variables
-        uses: TimSchoenle/actions/actions/common/readme-variables@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-common-readme-variables-v1.2.6
+        uses: TimSchoenle/actions/actions/common/readme-variables@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-common-readme-variables-v1.2.7
         with:
           branch: ${{ github.event.repository.default_branch }}
           extra: ${{ steps.config.outputs.json }}
@@ -146,7 +146,7 @@ jobs:
       # commit API re-reads the branch head, so this lands on top of the one above.
       - name: Commit config.example.toml
         id: example
-        uses: TimSchoenle/actions/actions/common/commit-changes@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-common-commit-changes-v1.5.6
+        uses: TimSchoenle/actions/actions/common/commit-changes@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-common-commit-changes-v1.5.7
         with:
           commit_message: 'docs: regenerate config.example.toml'
           file_pattern: 'config.example.toml'
@@ -162,7 +162,7 @@ jobs:
       # in the workspace can ride along in a commit that claims to be about the contract.
       - name: Commit the configuration contract
         id: contract
-        uses: TimSchoenle/actions/actions/common/commit-changes@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-common-commit-changes-v1.5.6
+        uses: TimSchoenle/actions/actions/common/commit-changes@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-common-commit-changes-v1.5.7
         with:
           commit_message: 'docs: regenerate the configuration contract'
           file_pattern: 'docs/config.contract.json Dockerfile'
@@ -233,14 +233,14 @@ jobs:
 
       - name: Collect the README payload
         id: variables
-        uses: TimSchoenle/actions/actions/common/readme-variables@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-common-readme-variables-v1.2.6
+        uses: TimSchoenle/actions/actions/common/readme-variables@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-common-readme-variables-v1.2.7
         with:
           branch: ${{ github.event.repository.default_branch }}
           extra: ${{ steps.config.outputs.json }}
 
       # Writes nothing; fails with the first differing line when README.md is stale.
       - name: Verify README.md is current
-        uses: TimSchoenle/actions/actions/common/render-template@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-common-render-template-v1.2.6
+        uses: TimSchoenle/actions/actions/common/render-template@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-common-render-template-v1.2.7
         with:
           template: .github/templates/README.md.hbs
           output: README.md
@@ -264,7 +264,7 @@ jobs:
       # half: it reports a renamed key without waiting for a container build. The expensive half
       # is `build.yaml`, which runs the same action against the image it just built.
       - name: Verify the configuration contract
-        uses: TimSchoenle/actions/actions/rust/config-contract@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-rust-config-contract-v1.3.6
+        uses: TimSchoenle/actions/actions/rust/config-contract@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-rust-config-contract-v1.3.7
         with:
           features: config-schema
           image: ''
