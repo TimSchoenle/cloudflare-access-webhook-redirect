@@ -50,7 +50,7 @@ jobs:
           egress-policy: audit
 
       - name: Run Coverage
-        uses: TimSchoenle/actions/actions/rust/coverage-codecov@3dc15ee0f2fbacdc1741a20bc0e8ad1011b989c7 # tag=actions-rust-coverage-codecov-v2.0.0
+        uses: TimSchoenle/actions/actions/rust/coverage-codecov@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-rust-coverage-codecov-v2.0.1
         with:
           flags: rust
 
@@ -224,7 +224,7 @@ jobs:
       # nothing is pulled — and the same run also compares the Dockerfile's marked region and the
       # committed document against what the types produce.
       - name: Verify the configuration contract
-        uses: TimSchoenle/actions/actions/rust/config-contract@1e89d598e447ab05d36edc9e9d18e8771adf6426 # tag=actions-rust-config-contract-v1.3.6
+        uses: TimSchoenle/actions/actions/rust/config-contract@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-rust-config-contract-v1.3.7
         with:
           features: config-schema
           image: ${{ env.IMAGE }}
@@ -295,7 +295,7 @@ jobs:
       # code-scanning alerts carry over instead of being orphaned under the derived
       # `trivy-linux-<arch>`.
       - name: Check Docker image
-        uses: TimSchoenle/actions/actions/docker/image-check@ff1e7853c7953c8d7176325ea4912add4a3c5398 # tag=actions-docker-image-check-v1.1.4
+        uses: TimSchoenle/actions/actions/docker/image-check@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-docker-image-check-v1.1.5
         with:
           image: ${{ env.IMAGE }}
           platform: ${{ matrix.platform }}
@@ -320,7 +320,7 @@ jobs:
           egress-policy: audit
 
       - name: Comment image sizes on PR
-        uses: TimSchoenle/actions/actions/docker/image-check-summary@5f23e7ecae779a09b699ce2983ec5e49e5f2b0a5 # tag=actions-docker-image-check-summary-v1.1.3
+        uses: TimSchoenle/actions/actions/docker/image-check-summary@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-docker-image-check-summary-v1.1.4
 
   dependency-review:
     name: Dependency Review

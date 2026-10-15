@@ -37,6 +37,6 @@ jobs:
           persist-credentials: false
 
       - name: Run CodeQL
-        uses: TimSchoenle/actions/actions/security/codeql@ff1e7853c7953c8d7176325ea4912add4a3c5398 # tag=actions-security-codeql-v1.1.1
+        uses: TimSchoenle/actions/actions/security/codeql@f33849da61e2397d3a9277762d09a1bf0d2b9d7c # tag=actions-security-codeql-v1.1.2
         with:
           language: ${{ matrix.language }}
