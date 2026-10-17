@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.3.5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.4...v2.3.5) (2026-10-17)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate terrace-config to v0.15.1 ([#585](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/585)) ([ea96a07](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ea96a07f6050354277f6346564c14dba529c351c))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#600](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/600)) ([0dc905a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0dc905a54fcf8d198997749615384ac967a34eea))
+* **deps:** lock file maintenance ([#601](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/601)) ([e8f7f98](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e8f7f984145dbb3460fe15002557634c1aeb09bc))
+* **deps:** lock file maintenance ([#602](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/602)) ([89c2141](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/89c2141051d134b6a5aa3cad4e770a92bda68748))
+* **deps:** lock file maintenance ([#603](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/603)) ([9ce6488](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/9ce6488dc13033f7faafee799c8d976931055811))
+* **deps:** update rust crate actix-web to v4.16.0 ([#612](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/612)) ([e1e9df8](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/e1e9df815a1270230dde866d71650ede38c19e9e))
+* **deps:** update rust crate tokio to v1.53.3 ([#615](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/615)) ([8d2ff65](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/8d2ff6598dbe62addd6df76f293f495be09f0124))
+
 ## [2.3.4](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.3...v2.3.4) (2026-10-09)
 
 
