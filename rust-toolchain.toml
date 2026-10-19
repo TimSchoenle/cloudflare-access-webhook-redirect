@@ -1,0 +1,13 @@
+# The compiler every build of this repository uses: local `cargo`, every CI job (none names a
+# toolchain of its own), and the container build, which copies this file into its `chef` stage
+# before the first `cargo` call.
+#
+# Pinned to an exact release rather than `stable` so that a new Rust, with its new clippy lints
+# and rustfmt output, arrives as a reviewed Renovate pull request instead of turning an unrelated
+# pull request red on the day it ships. The base image's floating `latest-rust-alpine` tag does
+# not decide the compiler: when it carries a different release, the build installs this one.
+[toolchain]
+channel = "1.99.1"
+# What the `cargo fmt --check` and `cargo clippy -- -D warnings` gates run.
+components = ["rustfmt", "clippy"]
+profile = "minimal"

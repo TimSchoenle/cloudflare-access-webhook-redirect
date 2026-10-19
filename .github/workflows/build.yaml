@@ -121,7 +121,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install stable toolchain
+      - name: Install pinned toolchain
         uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
 
       # One feature set is enough here: nothing in the crate documentation is behind a `cfg`, so
@@ -209,7 +209,7 @@ jobs:
       # the action renders the labels from `src/config.rs` itself rather than trusting the file
       # the build wrote, which is what lets it check the Dockerfile's region and the committed
       # document in the same pass as the image.
-      - name: Install stable toolchain
+      - name: Install pinned toolchain
         uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
           # This job builds and loads a runtime image, and a restored cache is writable by any
