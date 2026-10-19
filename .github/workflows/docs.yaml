@@ -88,7 +88,7 @@ jobs:
           ref: ${{ github.head_ref }}
           persist-credentials: false
 
-      - name: Install stable toolchain
+      - name: Install pinned toolchain
         uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
 
       # The recipes under `justfile` are what a developer runs before pushing, so CI runs them
@@ -214,7 +214,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install stable toolchain
+      - name: Install pinned toolchain
         uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
 
       # The same recipe the render job writes `config.example.toml` with, so this job cannot fail

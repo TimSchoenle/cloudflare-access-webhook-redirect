@@ -9,6 +9,14 @@ RUN LATEST_VERSION=$(curl -s https://api.github.com/repos/getsentry/sentry-cli/r
     chmod +x /usr/local/bin/sentry-cli
 WORKDIR /app
 
+# The compiler `rust-toolchain.toml` pins, installed before any stage forks. Without it the
+# toolchain would be whichever release the base image happens to carry, and only the stages that
+# `COPY . .` would see the pin: `cargo chef cook` and `cargo build` would then compile with
+# different rustc releases, and the build would recompile every dependency the cook just cached.
+# Copied on its own so that no other change to the tree invalidates this layer.
+COPY rust-toolchain.toml ./
+RUN rustup toolchain install --no-self-update
+
 FROM chef AS planner
 COPY  . .
 RUN cargo chef prepare --recipe-path recipe.json
