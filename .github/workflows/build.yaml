@@ -99,7 +99,7 @@ jobs:
           egress-policy: audit
 
       - name: Run Clippy
-        uses: TimSchoenle/actions/actions/rust/clippy@7e8fd61045447d321c5139eea8f2e2b766333f8b # tag=actions-rust-clippy-v1.1.12
+        uses: TimSchoenle/actions/actions/rust/clippy@ea4465fbe2bec98efad19b63849f8d1ac67b5c88 # tag=actions-rust-clippy-v1.1.13
 
   doc:
     name: Doc
@@ -224,7 +224,7 @@ jobs:
       # nothing is pulled — and the same run also compares the Dockerfile's marked region and the
       # committed document against what the types produce.
       - name: Verify the configuration contract
-        uses: TimSchoenle/actions/actions/rust/config-contract@8da2713994ba2b5f542e7e3334db287b1e22854a # tag=actions-rust-config-contract-v1.3.9
+        uses: TimSchoenle/actions/actions/rust/config-contract@ea4465fbe2bec98efad19b63849f8d1ac67b5c88 # tag=actions-rust-config-contract-v1.4.0
         with:
           features: config-schema
           image: ${{ env.IMAGE }}

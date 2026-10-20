@@ -132,7 +132,7 @@ jobs:
 
       - name: Render and commit the README
         id: readme
-        uses: TimSchoenle/actions/actions/common/render-template-and-commit@81e4009704e0963651bbd8275e31244c1d1e220d # tag=actions-common-render-template-and-commit-v1.1.17
+        uses: TimSchoenle/actions/actions/common/render-template-and-commit@ea4465fbe2bec98efad19b63849f8d1ac67b5c88 # tag=actions-common-render-template-and-commit-v1.1.18
         with:
           template: .github/templates/README.md.hbs
           output: README.md
@@ -264,7 +264,7 @@ jobs:
       # half: it reports a renamed key without waiting for a container build. The expensive half
       # is `build.yaml`, which runs the same action against the image it just built.
       - name: Verify the configuration contract
-        uses: TimSchoenle/actions/actions/rust/config-contract@8da2713994ba2b5f542e7e3334db287b1e22854a # tag=actions-rust-config-contract-v1.3.9
+        uses: TimSchoenle/actions/actions/rust/config-contract@ea4465fbe2bec98efad19b63849f8d1ac67b5c88 # tag=actions-rust-config-contract-v1.4.0
         with:
           features: config-schema
           image: ''
