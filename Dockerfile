@@ -42,8 +42,12 @@ RUN case "${TARGETARCH}" in \
     esac && \
     echo "${target}" > /rust-target
 
+# `--locked` here and in the two stages below: the image compiles the versions `Cargo.lock` pins.
+# The lockfile used to be kept out of the build context, so `cargo chef prepare` resolved the
+# newest compatible versions into the recipe instead. The image then shipped dependencies nobody
+# had tested, and any upstream release changed the recipe and discarded this layer.
 COPY --from=planner  /app/recipe.json recipe.json
-RUN cargo chef cook --release --target "$(cat /rust-target)" --recipe-path recipe.json
+RUN cargo chef cook --release --locked --target "$(cat /rust-target)" --recipe-path recipe.json
 
 FROM cook AS builder
 COPY  . .
@@ -53,7 +57,7 @@ COPY  . .
 #
 # `target/` is removed in the same step, so this layer holds the binary and not the build output
 # around it. The layer changes with every commit, and the layer cache exported it on every run.
-RUN cargo build --release --target "$(cat /rust-target)" && \
+RUN cargo build --release --locked --target "$(cat /rust-target)" && \
     install -D "target/$(cat /rust-target)/release/cloudflare-access-webhook-redirect" /out/app && \
     rm -rf target
 
@@ -93,14 +97,14 @@ COPY  . .
 # so the block in `runtime` below is hand-written, and `contract.labels` is what CI checks the
 # built image against.
 #
-# `--release` reuses the profile `cook` compiled. No `--locked`: `.dockerignore` keeps `Cargo.lock`
-# out of the build context. `target/` is removed for the reason given in `builder`, and because
-# the export step in CI pulls this layer from the cache to read the two files out of it.
+# `--release` reuses the profile `cook` compiled. `target/` is removed for the reason given in
+# `builder`, and because the export step in CI pulls this layer from the cache to read the two
+# files out of it.
 RUN mkdir -p /out && \
-    cargo run --quiet --release --target "$(cat /rust-target)" \
+    cargo run --quiet --release --locked --target "$(cat /rust-target)" \
         --features config-schema --example config-schema \
         -- --format contract > /out/contract.json && \
-    cargo run --quiet --release --target "$(cat /rust-target)" \
+    cargo run --quiet --release --locked --target "$(cat /rust-target)" \
         --features config-schema --example config-schema \
         -- --format labels > /out/contract.labels && \
     rm -rf target
