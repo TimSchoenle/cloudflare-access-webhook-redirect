@@ -1,12 +1,19 @@
 # syntax=docker/dockerfile:1.28@sha256:bb22d9815c728170f72750f4e5b0d672e06176142e1d602c7e66c050100b7e5b
 
 FROM lukemathwalker/cargo-chef:latest-rust-alpine AS chef
-RUN apk add --no-cache musl-dev pkgconfig openssl-dev openssl-libs-static upx curl jq
-# Install sentry-cli. Images are built natively (one runner per target platform),
-# so the build machine's architecture is also the target architecture.
-RUN LATEST_VERSION=$(curl -s https://api.github.com/repos/getsentry/sentry-cli/releases/latest | jq -r .tag_name) && \
-    wget -qO /usr/local/bin/sentry-cli "https://downloads.sentry-cdn.com/sentry-cli/${LATEST_VERSION}/sentry-cli-Linux-$(uname -m)" && \
-    chmod +x /usr/local/bin/sentry-cli
+RUN apk add --no-cache musl-dev pkgconfig openssl-dev openssl-libs-static upx
+
+# sentry-cli, for the debug-symbol upload in `builder`. Copied from Sentry's image pinned by digest,
+# which Renovate bumps like the other base images. It used to be downloaded from the tag an
+# unauthenticated `releases/latest` API call returned: a rate-limited call returned `null` and
+# failed the build, and two builds of one commit could ship different CLIs. The index is
+# multi-platform, so BuildKit picks the binary for the architecture being built.
+COPY --from=getsentry/sentry-cli:3.8.0@sha256:973a77ecc96852081f946e36a8f090ed74a02249009594aff51575e593871427 \
+    /bin/sentry-cli /usr/local/bin/sentry-cli
+
+# CI never supplies the upload token, so without this a CLI that cannot start on the build
+# architecture would first fail in a release.
+RUN sentry-cli --version
 WORKDIR /app
 
 # The compiler `rust-toolchain.toml` pins, installed before any stage forks. Without it the
