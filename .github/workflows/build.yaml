@@ -167,6 +167,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
+      # Every build reads the layer cache of its architecture; only a push to `master` writes it.
+      #
+      # A pull request's export is stored under the pull request's ref, which `master` never
+      # reads, but it counts against the repository's 10 GB Actions cache all the same. Each one
+      # that rebuilt the cook layer added a compiled dependency tree per architecture, and GitHub
+      # made room by evicting the least recently used entries, `master`'s among them. The cost is
+      # that a pull request changing the manifests or the build stages cooks again on each push.
       - name: Build Docker image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
@@ -181,11 +188,15 @@ jobs:
             vendor=Timmi6790
             VERSION=test
           cache-from: type=gha,scope=build-${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=build-${{ matrix.arch }}
+          cache-to: ${{ github.event_name == 'push' && format('type=gha,mode=max,scope=build-{0}', matrix.arch) || '' }}
 
       # One export, reusing the layers the build above already produced, so this costs a layer
       # export and nothing else. The `contract` stage holds only the two generated files —
       # exporting the builder stage itself would write the whole Rust toolchain to the runner.
+      #
+      # No `build-args`: the `cook` and `contract-builder` stages this target depends on declare
+      # no `ARG` the build above sets, so their cache keys do not depend on any. If one is added,
+      # it has to be passed here with the build's value, or this step recompiles the generator.
       - name: Export the generated configuration contract
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
@@ -193,11 +204,6 @@ jobs:
           platforms: ${{ matrix.platform }}
           target: contract
           outputs: type=local,dest=contract-out
-          # The same value the build above passed. `VERSION` is the only build argument the
-          # `builder` chain this target depends on consumes, and a different value would change
-          # those layers' cache key — turning a layer export into a full recompile.
-          build-args: |
-            VERSION=test
           cache-from: type=gha,scope=build-${{ matrix.arch }}
 
       # The checkpoint the whole scheme rests on. The `LABEL` region in the Dockerfile is

@@ -1,12 +1,19 @@
 # syntax=docker/dockerfile:1.28@sha256:bb22d9815c728170f72750f4e5b0d672e06176142e1d602c7e66c050100b7e5b
 
 FROM lukemathwalker/cargo-chef:latest-rust-alpine AS chef
-RUN apk add --no-cache musl-dev pkgconfig openssl-dev openssl-libs-static upx curl jq
-# Install sentry-cli. Images are built natively (one runner per target platform),
-# so the build machine's architecture is also the target architecture.
-RUN LATEST_VERSION=$(curl -s https://api.github.com/repos/getsentry/sentry-cli/releases/latest | jq -r .tag_name) && \
-    wget -qO /usr/local/bin/sentry-cli "https://downloads.sentry-cdn.com/sentry-cli/${LATEST_VERSION}/sentry-cli-Linux-$(uname -m)" && \
-    chmod +x /usr/local/bin/sentry-cli
+RUN apk add --no-cache musl-dev pkgconfig openssl-dev openssl-libs-static upx
+
+# sentry-cli, for the debug-symbol upload in `builder`. Copied from Sentry's image pinned by digest,
+# which Renovate bumps like the other base images. It used to be downloaded from the tag an
+# unauthenticated `releases/latest` API call returned: a rate-limited call returned `null` and
+# failed the build, and two builds of one commit could ship different CLIs. The index is
+# multi-platform, so BuildKit picks the binary for the architecture being built.
+COPY --from=getsentry/sentry-cli:3.8.0@sha256:973a77ecc96852081f946e36a8f090ed74a02249009594aff51575e593871427 \
+    /bin/sentry-cli /usr/local/bin/sentry-cli
+
+# CI never supplies the upload token, so without this a CLI that cannot start on the build
+# architecture would first fail in a release.
+RUN sentry-cli --version
 WORKDIR /app
 
 # The compiler `rust-toolchain.toml` pins, installed before any stage forks. Without it the
@@ -21,7 +28,10 @@ FROM chef AS planner
 COPY  . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM chef AS builder
+# The dependencies, compiled once and shared by `builder` and `contract-builder` below. Both stages
+# start from this layer rather than one from the other, so BuildKit runs the release build and the
+# contract generator side by side once the cook is done.
+FROM chef AS cook
 ARG TARGETARCH
 
 # Resolve the Rust target triple once; later steps read it back from /rust-target.
@@ -32,15 +42,24 @@ RUN case "${TARGETARCH}" in \
     esac && \
     echo "${target}" > /rust-target
 
+# `--locked` here and in the two stages below: the image compiles the versions `Cargo.lock` pins.
+# The lockfile used to be kept out of the build context, so `cargo chef prepare` resolved the
+# newest compatible versions into the recipe instead. The image then shipped dependencies nobody
+# had tested, and any upstream release changed the recipe and discarded this layer.
 COPY --from=planner  /app/recipe.json recipe.json
-RUN cargo chef cook --release --target "$(cat /rust-target)" --recipe-path recipe.json
+RUN cargo chef cook --release --locked --target "$(cat /rust-target)" --recipe-path recipe.json
 
+FROM cook AS builder
 COPY  . .
 
 # The binary is moved to an architecture-independent path so that the runtime
 # stage can COPY it without knowing the target triple.
-RUN cargo build --release --target "$(cat /rust-target)" && \
-    install -D "target/$(cat /rust-target)/release/cloudflare-access-webhook-redirect" /out/app
+#
+# `target/` is removed in the same step, so this layer holds the binary and not the build output
+# around it. The layer changes with every commit, and the layer cache exported it on every run.
+RUN cargo build --release --locked --target "$(cat /rust-target)" && \
+    install -D "target/$(cat /rust-target)/release/cloudflare-access-webhook-redirect" /out/app && \
+    rm -rf target
 
 # Upload debug symbols to Sentry before stripping
 ARG SENTRY_ORG
@@ -62,9 +81,15 @@ RUN strip --strip-all /out/app && \
     upx --best --lzma /out/app
 
 # The configuration contract: every key this image's binary reads, in the shape a deployment can
-# validate against. On the builder image so no toolchain is added, and behind `config-schema` so
-# the release binary still never links the schema machinery.
-FROM builder AS contract-builder
+# validate against. Behind `config-schema`, so the release binary still never links the schema
+# machinery.
+#
+# `FROM cook` rather than `FROM builder`: the generator needs the source tree and the cooked
+# dependencies, and nothing the release build, the Sentry upload or UPX produce. Based on
+# `builder`, it waited for all three and added its own 60 to 80 seconds to every build that
+# compiled the binary.
+FROM cook AS contract-builder
+COPY  . .
 
 # One stage, one source tree, one compiled generator — so the document and the labels that
 # advertise it are two renderings of the same thing rather than two opinions produced at different
@@ -72,14 +97,17 @@ FROM builder AS contract-builder
 # so the block in `runtime` below is hand-written, and `contract.labels` is what CI checks the
 # built image against.
 #
-# `--release` reuses the profile the stage above already compiled. No `--locked`: `.dockerignore`
-# keeps `Cargo.lock` out of the build context.
-RUN cargo run --quiet --release --target "$(cat /rust-target)" \
+# `--release` reuses the profile `cook` compiled. `target/` is removed for the reason given in
+# `builder`, and because the export step in CI pulls this layer from the cache to read the two
+# files out of it.
+RUN mkdir -p /out && \
+    cargo run --quiet --release --locked --target "$(cat /rust-target)" \
         --features config-schema --example config-schema \
         -- --format contract > /out/contract.json && \
-    cargo run --quiet --release --target "$(cat /rust-target)" \
+    cargo run --quiet --release --locked --target "$(cat /rust-target)" \
         --features config-schema --example config-schema \
-        -- --format labels > /out/contract.labels
+        -- --format labels > /out/contract.labels && \
+    rm -rf target
 
 # The two generated files and nothing else, so one `--output type=local` against this target puts
 # them on the host. Exporting `contract-builder` itself would write the entire Rust toolchain to
