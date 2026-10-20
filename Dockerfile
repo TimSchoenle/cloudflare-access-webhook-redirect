@@ -21,7 +21,10 @@ FROM chef AS planner
 COPY  . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM chef AS builder
+# The dependencies, compiled once and shared by `builder` and `contract-builder` below. Both stages
+# start from this layer rather than one from the other, so BuildKit runs the release build and the
+# contract generator side by side once the cook is done.
+FROM chef AS cook
 ARG TARGETARCH
 
 # Resolve the Rust target triple once; later steps read it back from /rust-target.
@@ -35,6 +38,7 @@ RUN case "${TARGETARCH}" in \
 COPY --from=planner  /app/recipe.json recipe.json
 RUN cargo chef cook --release --target "$(cat /rust-target)" --recipe-path recipe.json
 
+FROM cook AS builder
 COPY  . .
 
 # The binary is moved to an architecture-independent path so that the runtime
@@ -62,9 +66,15 @@ RUN strip --strip-all /out/app && \
     upx --best --lzma /out/app
 
 # The configuration contract: every key this image's binary reads, in the shape a deployment can
-# validate against. On the builder image so no toolchain is added, and behind `config-schema` so
-# the release binary still never links the schema machinery.
-FROM builder AS contract-builder
+# validate against. Behind `config-schema`, so the release binary still never links the schema
+# machinery.
+#
+# `FROM cook` rather than `FROM builder`: the generator needs the source tree and the cooked
+# dependencies, and nothing the release build, the Sentry upload or UPX produce. Based on
+# `builder`, it waited for all three and added its own 60 to 80 seconds to every build that
+# compiled the binary.
+FROM cook AS contract-builder
+COPY  . .
 
 # One stage, one source tree, one compiled generator — so the document and the labels that
 # advertise it are two renderings of the same thing rather than two opinions produced at different
@@ -72,9 +82,10 @@ FROM builder AS contract-builder
 # so the block in `runtime` below is hand-written, and `contract.labels` is what CI checks the
 # built image against.
 #
-# `--release` reuses the profile the stage above already compiled. No `--locked`: `.dockerignore`
-# keeps `Cargo.lock` out of the build context.
-RUN cargo run --quiet --release --target "$(cat /rust-target)" \
+# `--release` reuses the profile `cook` compiled. No `--locked`: `.dockerignore` keeps `Cargo.lock`
+# out of the build context.
+RUN mkdir -p /out && \
+    cargo run --quiet --release --target "$(cat /rust-target)" \
         --features config-schema --example config-schema \
         -- --format contract > /out/contract.json && \
     cargo run --quiet --release --target "$(cat /rust-target)" \

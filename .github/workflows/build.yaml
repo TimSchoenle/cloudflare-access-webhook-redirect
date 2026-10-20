@@ -186,6 +186,10 @@ jobs:
       # One export, reusing the layers the build above already produced, so this costs a layer
       # export and nothing else. The `contract` stage holds only the two generated files —
       # exporting the builder stage itself would write the whole Rust toolchain to the runner.
+      #
+      # No `build-args`: the `cook` and `contract-builder` stages this target depends on declare
+      # no `ARG` the build above sets, so their cache keys do not depend on any. If one is added,
+      # it has to be passed here with the build's value, or this step recompiles the generator.
       - name: Export the generated configuration contract
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
@@ -193,11 +197,6 @@ jobs:
           platforms: ${{ matrix.platform }}
           target: contract
           outputs: type=local,dest=contract-out
-          # The same value the build above passed. `VERSION` is the only build argument the
-          # `builder` chain this target depends on consumes, and a different value would change
-          # those layers' cache key — turning a layer export into a full recompile.
-          build-args: |
-            VERSION=test
           cache-from: type=gha,scope=build-${{ matrix.arch }}
 
       # The checkpoint the whole scheme rests on. The `LABEL` region in the Dockerfile is

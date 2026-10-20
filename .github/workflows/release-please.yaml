@@ -154,14 +154,10 @@ jobs:
           platforms: ${{ matrix.platform }}
           target: contract
           outputs: type=local,dest=contract-out
-          # The build arguments the `builder` chain this target depends on consumes, with the same
-          # values the push above used. Anything different would change those layers' cache key and
-          # turn a layer export into a full recompile — including the Sentry upload, which is why
-          # its two arguments are here even though this target does not upload anything.
-          build-args: |
-            SENTRY_ORG=${{ secrets.SENTRY_ORG }}
-            SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
-            VERSION=${{ needs.release-please.outputs.tag_name }}
+          # No `build-args`, and so no Sentry values: the `cook` and `contract-builder` stages this
+          # target depends on declare no `ARG` the push above sets, so their cache keys do not
+          # depend on any. If one is added, it has to be passed here with the push's value, or
+          # this step recompiles the generator.
           cache-from: type=gha,scope=release-${{ matrix.arch }}
 
       # Per architecture rather than once, so `docker-release` can prove both architectures embed
