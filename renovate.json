@@ -7,7 +7,6 @@
     {
       "matchPackageNames": [
         "dtolnay/rust-toolchain",
-        "lukemathwalker/cargo-chef",
         "aquasecurity/trivy-action",
         "taiki-e/install-action"
       ],
