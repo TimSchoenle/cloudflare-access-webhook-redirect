@@ -50,8 +50,12 @@ COPY  . .
 
 # The binary is moved to an architecture-independent path so that the runtime
 # stage can COPY it without knowing the target triple.
+#
+# `target/` is removed in the same step, so this layer holds the binary and not the build output
+# around it. The layer changes with every commit, and the layer cache exported it on every run.
 RUN cargo build --release --target "$(cat /rust-target)" && \
-    install -D "target/$(cat /rust-target)/release/cloudflare-access-webhook-redirect" /out/app
+    install -D "target/$(cat /rust-target)/release/cloudflare-access-webhook-redirect" /out/app && \
+    rm -rf target
 
 # Upload debug symbols to Sentry before stripping
 ARG SENTRY_ORG
@@ -90,14 +94,16 @@ COPY  . .
 # built image against.
 #
 # `--release` reuses the profile `cook` compiled. No `--locked`: `.dockerignore` keeps `Cargo.lock`
-# out of the build context.
+# out of the build context. `target/` is removed for the reason given in `builder`, and because
+# the export step in CI pulls this layer from the cache to read the two files out of it.
 RUN mkdir -p /out && \
     cargo run --quiet --release --target "$(cat /rust-target)" \
         --features config-schema --example config-schema \
         -- --format contract > /out/contract.json && \
     cargo run --quiet --release --target "$(cat /rust-target)" \
         --features config-schema --example config-schema \
-        -- --format labels > /out/contract.labels
+        -- --format labels > /out/contract.labels && \
+    rm -rf target
 
 # The two generated files and nothing else, so one `--output type=local` against this target puts
 # them on the host. Exporting `contract-builder` itself would write the entire Rust toolchain to
