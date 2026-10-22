@@ -423,6 +423,6 @@ mod tests {
     /// the target would parse as a malformed trace and log about on every request.
     #[test]
     fn trace_headers_are_empty_without_a_client() {
-        assert!(super::trace_headers().is_empty());
+        assert_eq!(super::trace_headers(), Vec::new());
     }
 }

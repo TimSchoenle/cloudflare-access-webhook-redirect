@@ -10,6 +10,10 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  # Turns every `warn` in `[workspace.lints]` into a failure for each job here, `clippy` among
+  # them. Workflow-wide rather than per job so every job compiles with the same flags and shares
+  # one set of cache fingerprints.
+  RUSTFLAGS: "-D warnings"
 
 permissions:
   contents: read # Required to checkout the code

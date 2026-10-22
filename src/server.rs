@@ -9,20 +9,24 @@ use crate::routes::{health_check, redirect};
 use crate::telemetry;
 use actix_web::middleware::Condition;
 use actix_web::{App, HttpServer, web};
-use derive_new::new;
 use tokio_util::sync::CancellationToken;
 use tracing_actix_web::TracingLogger;
 
 /// One generation of the listener, bound to `server.host` and `server.port`.
 ///
 /// A reload constructs a new one, so the address is fixed for the life of a listener.
-#[derive(new)]
 pub struct Server {
     host: String,
     port: u16,
 }
 
 impl Server {
+    /// Creates a listener that will bind `host:port` once served.
+    #[must_use]
+    pub fn new(host: String, port: u16) -> Self {
+        Self { host, port }
+    }
+
     /// Serves until `shutdown` is cancelled.
     ///
     /// Cancellation reaches it from a termination signal, or from the reload supervisor
