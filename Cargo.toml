@@ -64,7 +64,6 @@ tracing-subscriber = "0.3.20"
 secrecy = { version = "0.10.3", features = ["serde"] }
 regex = "1.12.2"
 getset = "0.1.6"
-derive-new = "0.7.0"
 # Error reporting and performance tracing, off unless an operator turns `[telemetry.sentry]` on
 # (`src/telemetry.rs`). One crate rather than three: `sentry` re-exports `sentry-tracing` and
 # `sentry-actix` under `sentry::integrations::*`, so the three versions cannot drift.

@@ -1,6 +1,5 @@
 use crate::Result;
 use crate::error::Error;
-use derive_new::new;
 use regex::RegexSet;
 use reqwest::Client;
 use reqwest::Url;
@@ -178,7 +177,7 @@ impl AllowedPaths {
 ///
 /// The two fields are independent. `["ALL", "GET"]` sets `all` and still lists `GET`, and `all`
 /// decides the answer on its own.
-#[derive(new, Getters, Debug)]
+#[derive(Getters, Debug)]
 #[getset(get = "pub")]
 pub struct AllowedPath {
     /// Set by the `ALL` entry, after which no method is refused.
@@ -188,6 +187,12 @@ pub struct AllowedPath {
 }
 
 impl AllowedPath {
+    /// Creates the entry for one path from its `ALL` flag and its listed methods.
+    #[must_use]
+    pub fn new(all: bool, methods: HashSet<actix_web::http::Method>) -> Self {
+        Self { all, methods }
+    }
+
     /// Whether `method` is admitted, which every method is once `all` is set.
     #[must_use]
     pub fn is_allowed(&self, method: &actix_web::http::Method) -> bool {
