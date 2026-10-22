@@ -1,7 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>TimSchoenle/actions//configs/renovate/default"
+    "github>TimSchoenle/actions//configs/renovate/default",
+    "github>TimSchoenle/actions//configs/renovate/rust-application"
   ],
   "packageRules": [
     {
