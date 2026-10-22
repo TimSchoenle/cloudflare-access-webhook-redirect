@@ -1,0 +1,104 @@
+# yaml-language-server: $schema=https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json
+tone_instructions: "Direct, no filler, no praise."
+
+reviews:
+  profile: assertive
+
+  auto_review:
+    # CodeRabbit cannot filter by head branch, so automated pull requests are
+    # skipped by author: Renovate opens `renovate/*`, the release manager app
+    # opens `release-please--*`. Both the bot login and the bare app slug are
+    # listed because the match is exact.
+    ignore_usernames:
+      - "renovate[bot]"
+      - "renovate"
+      - "automatic-release-manager[bot]"
+      - "automatic-release-manager"
+
+  # Generated or tool-owned files. Review their sources instead.
+  path_filters:
+    - "!Cargo.lock"
+    - "!CHANGELOG.md"
+    - "!.release-please-manifest.json"
+    - "!README.md" # rendered from .github/templates/README.md.hbs
+    # Rendered from the types in src/config/ by examples/config-schema.rs.
+    - "!config.example.toml"
+    - "!docs/config.contract.json"
+
+  path_instructions:
+    - path: "src/**/*.rs"
+      instructions: |
+        Internet-facing reverse proxy that attaches a Cloudflare Access service token. The library
+        exists for the binary; no semver obligations. Flag:
+        - `unwrap`, `expect`, `panic!` or indexing that can panic on the request path.
+        - Missing rustdoc, `# Errors` and `# Panics` sections on public items.
+        - Bare `#[allow(...)]`; prefer `#[expect(..., reason = "...")]`.
+        - Any `unsafe`; none exists and none is needed.
+        - Credentials leaving `secrecy::SecretString` other than to become header values, or
+          reaching logs, `Debug`, Sentry events, error bodies or responses.
+        - Blocking work on the actix/Tokio runtime.
+    - path: "src/routes/**"
+      instructions: |
+        The allow list is the only gate in front of the credentials. Check: patterns anchored and
+        matched against the normalised path (percent-encoding, `..`, `//`, trailing slashes) together
+        with the method; refused requests stay `404` with no detail; client-supplied
+        `CF-Access-*`, `Host`, `Cookie`, `Authorization` and hop-by-hop headers are not forwarded
+        blindly; upstream redirects are not followed to another origin with the token attached;
+        upstream error bodies and internal errors are not echoed to the caller.
+    - path: "src/{converter.rs,data/**}"
+      instructions: |
+        Request and response translation and the shared `reqwest::Client`. Require connect and
+        request timeouts, bounded request and response body sizes, streaming rather than buffering
+        where possible, and correct header and status mapping in both directions.
+    - path: "src/config/**"
+      instructions: |
+        Configuration surface. A key added, renamed or removed is an operator-facing change: require
+        regenerated `config.example.toml` and `docs/config.contract.json` (`just regenerate`),
+        validation at load time, and secret fields as `SecretString`. Reload must keep the previous
+        generation serving when the new configuration fails to load.
+    - path: "examples/**"
+      instructions: |
+        Documentation generator behind the `config-schema` feature, never shipped in the image.
+        Focus on output correctness; library documentation rules do not apply.
+    - path: "Dockerfile"
+      instructions: |
+        Base images pinned by digest, non-root user, no secrets in layers or build args, minimal
+        runtime stage. The `terrace-config:labels` region is generated; do not hand-edit it.
+    - path: ".github/workflows/**"
+      instructions: |
+        Every third-party action must be pinned to a full commit SHA with a version comment.
+        Require least-privilege `permissions:` at workflow or job level, `persist-credentials: false`
+        on checkout unless pushing, no untrusted `${{ github.event.* }}` interpolation into `run:`,
+        and no `pull_request_target` that checks out or executes PR code.
+    - path: ".github/templates/**"
+      instructions: |
+        Source of the generated README.md. Review rendered wording, links and badge URLs here.
+    - path: "{**/*.sh,justfile}"
+      instructions: |
+        Require `set -euo pipefail`, quoted expansions, and no reliance on GNU-only flags
+        without a comment.
+
+  pre_merge_checks:
+    title:
+      mode: error
+      requirements: |
+        Must follow Conventional Commits: `type(scope)?!?: subject`. Allowed types: feat, fix, perf,
+        revert, docs, refactor, test, style, ci, build, chore, deps. Lowercase, imperative subject,
+        no trailing period. release-please derives version bumps and the changelog from this title.
+
+  tools:
+    # Already enforced in CI (`clippy` job via TimSchoenle/actions rust/clippy).
+    clippy:
+      enabled: false
+    actionlint:
+      enabled: true
+    zizmor:
+      enabled: true
+    gitleaks:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+    hadolint:
+      enabled: true
