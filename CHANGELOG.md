@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.3.6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.5...v2.3.6) (2026-10-22)
+
+
+### Build System
+
+* **renovate:** extend the shared rust-application preset ([#626](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/626)) ([6bfe963](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/6bfe96333242cefd27ed6421ccad1e6333ebd4d5))
+* **toolchain:** pin Rust 1.99.1 in rust-toolchain.toml ([#620](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/620)) ([b304cc1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/b304cc1c341ff7bb7b56287479cacf0e178bd78a))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#619](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/619)) ([6980981](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/6980981ec1c2ddd47895c6e1475a53f6468060d1))
+* **deps:** update rust crate actix-web to v4.17.0 ([#617](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/617)) ([307b857](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/307b8579f463f7c18ef91a81e1cc2282fecaccc1))
+* **deps:** update rust crate terrace-config to v0.15.2 ([#622](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/622)) ([40ace4c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/40ace4c1c60c3620f108296897915b5b1f52a037))
+
 ## [2.3.5](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.4...v2.3.5) (2026-10-17)
 
 
