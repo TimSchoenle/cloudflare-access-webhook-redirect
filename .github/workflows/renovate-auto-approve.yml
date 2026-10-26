@@ -4,15 +4,32 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
+# A newer push to the same pull request supersedes the run judging the previous head.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-auto-approve-renovate
+  cancel-in-progress: true
+
 permissions: {}
 
 jobs:
   auto-approve-renovate:
     name: Auto Approve Renovate
-    uses: TimSchoenle/actions/.github/workflows/maintenance-auto-approve-renovate.yaml@27e020480d2c7c41694065b53a6565817e67680a # tag=workflows-maintenance-auto-approve-renovate-v1.4.32
+    runs-on: ubuntu-latest
     permissions:
-      pull-requests: write # To approve PRs
-    with:
-      user_ids: '29139614,253958393' # Renovate, actions-maintenance-bot
-    secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+      pull-requests: write # To read the pull request and its commits, and to approve it
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+
+      - name: Auto-approve Renovate PRs
+        uses: TimSchoenle/actions/actions/maintenance/auto-approve-pr@495fd50fd4a5ae3d9fb1496c96eada74c6f2529a # tag=actions-maintenance-auto-approve-pr-v3.0.0
+        with:
+          token: ${{ github.token }}
+          user_ids: '29139614,253958393' # Renovate, actions-maintenance-bot
+          branch_pattern: '^renovate\/.*$'
+          reject_forks: 'true'
+          ignore_empty_prs: 'true'

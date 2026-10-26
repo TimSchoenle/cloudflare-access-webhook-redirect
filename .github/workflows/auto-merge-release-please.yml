@@ -12,19 +12,50 @@ on:
         required: true
         default: '1d'
 
+# A newer run supersedes a sweep still in progress.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-timed-auto-pr-approve
+  cancel-in-progress: true
+
 permissions: {}
 
 jobs:
   auto-merge-releases:
     name: Auto Merge Releases
-    permissions:
-      contents: write # Required to merge PRs
-      pull-requests: write # Required to merge PRs
-    uses: TimSchoenle/actions/.github/workflows/maintenance-timed-auto-pr-approve.yaml@87a8aa7d345eb8215f655b5e47b029f3bf8e46f1 # tag=workflows-maintenance-timed-auto-pr-approve-v1.2.45
-    with:
-      time_elapsed: ${{ inputs.time_elapsed || '7d' }}
-      branch_pattern: 'release-please--branches--%'
-      trusted_authors: '253958393,248313786' # actions-maintenance-bot, automatic-release-manager
-    secrets:
-      app_id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
-      private_key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
+    runs-on: ubuntu-latest
+    # Every call is made with the app token minted below, so this job needs nothing from the
+    # ambient `GITHUB_TOKEN`.
+    permissions: {}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+
+      # The release pull requests are opened by automatic-release-manager, so the review comes from
+      # the maintenance app: GitHub refuses a review from a pull request's own author. Scoped to what
+      # the action does; without a `permission-*` input the token would inherit the whole installation.
+      - name: Generate Bot Token
+        id: token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
+          private-key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
+          permission-contents: write # to enable auto-merge
+          permission-pull-requests: write # to list the pull requests and approve them
+
+      - name: Approve and Auto-merge
+        uses: TimSchoenle/actions/actions/maintenance/timed-auto-merge@495fd50fd4a5ae3d9fb1496c96eada74c6f2529a # tag=actions-maintenance-timed-auto-merge-v2.0.0
+        with:
+          token: ${{ steps.token.outputs.token }}
+          trusted_authors: '253958393,248313786' # actions-maintenance-bot, automatic-release-manager
+          branch_pattern: 'release-please--branches--%'
+          pattern_mode: 'legacy'
+          # `inputs` is empty on `schedule` and `pull_request_review`, hence the fallback.
+          time_elapsed: ${{ inputs.time_elapsed || '7d' }}
+          # The floor a dispatch cannot go below. Deliberately not a dispatch input: lowering it has
+          # to take a commit to this file.
+          minimum_age: '1h'
+          merge_method: 'squash'

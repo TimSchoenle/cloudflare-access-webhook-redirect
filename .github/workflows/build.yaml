@@ -72,23 +72,87 @@ jobs:
       - name: Run Test
         uses: TimSchoenle/actions/actions/rust/test@e16a1e466faf8ec751b26289c1898143a253269f # tag=actions-rust-test-v1.1.2
 
+  # Auto-format comes in two halves. `cargo fmt` runs the toolchain `rust-toolchain.toml` names
+  # and honours any `rustfmt.toml`, both of which the pull request controls, so the half that runs
+  # it holds no secret and a read-only `GITHUB_TOKEN` and hands on only a patch artifact. The second
+  # half, in the `ci` environment, mints the maintenance App's token and commits that patch; it runs
+  # nothing from the checkout, and `allowed_paths` refuses any path that is not Rust source.
+  #
+  # Pull requests only: the patch is committed to the pull request's branch, and a push to `master`
+  # has none. Code reaches `master` through a pull request that already went through this.
   fmt:
     name: Auto Format
-    environment:
-      name: ci
-      deployment: false
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required to checkout the code
+    outputs:
+      changes_detected: ${{ steps.format.outputs.changes_detected }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
-      - name: Auto Format
-        uses: TimSchoenle/actions/actions/rust/auto-format@81e4009704e0963651bbd8275e31244c1d1e220d # tag=actions-rust-auto-format-v1.1.25
+      # The pull request head, not the default merge commit: the patch is committed to the branch,
+      # so it has to be computed against the commit the branch points at.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          bot_app_id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
-          bot_private_key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Auto Format
+        id: format
+        uses: TimSchoenle/actions/actions/rust/auto-format@495fd50fd4a5ae3d9fb1496c96eada74c6f2529a # tag=actions-rust-auto-format-v2.0.0
+        with:
+          artifact_name: rust-auto-format
+
+  fmt-commit:
+    name: Commit Format
+    needs: fmt
+    # A fork's pull request gets no secrets, and its branch is not in this repository.
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.fmt.outputs.changes_detected == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    environment:
+      name: ci
+      deployment: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required to fetch the commit the patch applies to
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
+      # Only git's objects are needed. Nothing in this checkout is executed.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Generate Bot Token
+        id: generate_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
+          private-key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
+          permission-contents: write # Required to commit the patch to the pull request's branch
+
+      # The artifact name is a literal, not the format job's output: that job ran the pull
+      # request's code.
+      - name: Commit Format
+        uses: TimSchoenle/actions/actions/common/commit-patch@bbc2c5e2a0f9345cb2e84946846736f047a6eae3 # tag=actions-common-commit-patch-v1.1.0
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          artifact_name: rust-auto-format
+          # Rust sources only: the only files `cargo fmt` rewrites. Any other path fails this job.
+          allowed_paths: '**/*.rs'
+          commit_message: 'style: auto-format rust code'
 
   clippy:
     name: Clippy
