@@ -30,7 +30,7 @@ jobs:
       contents: read # Required to checkout the code
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -49,12 +49,12 @@ jobs:
       id-token: write # Required to authenticate the Codecov upload with OIDC
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
       - name: Run Coverage
-        uses: TimSchoenle/actions/actions/rust/coverage-codecov@81e4009704e0963651bbd8275e31244c1d1e220d # tag=actions-rust-coverage-codecov-v2.0.3
+        uses: TimSchoenle/actions/actions/rust/coverage-codecov@9d5cb31939ace7a3d3d7f452052724337c65f153 # tag=actions-rust-coverage-codecov-v2.0.4
         with:
           flags: rust
 
@@ -65,7 +65,7 @@ jobs:
       contents: read # Required to checkout the code
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -98,7 +98,7 @@ jobs:
       checks: write # Required to annotate the commit with clippy warnings
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -116,7 +116,7 @@ jobs:
       RUSTDOCFLAGS: '-D warnings'
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -159,7 +159,7 @@ jobs:
       IMAGE: cloudflare-access-webhook-redirect:test-${{ matrix.arch }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -305,7 +305,7 @@ jobs:
       # code-scanning alerts carry over instead of being orphaned under the derived
       # `trivy-linux-<arch>`.
       - name: Check Docker image
-        uses: TimSchoenle/actions/actions/docker/image-check@8da2713994ba2b5f542e7e3334db287b1e22854a # tag=actions-docker-image-check-v1.1.7
+        uses: TimSchoenle/actions/actions/docker/image-check@9d5cb31939ace7a3d3d7f452052724337c65f153 # tag=actions-docker-image-check-v1.1.8
         with:
           image: ${{ env.IMAGE }}
           platform: ${{ matrix.platform }}
@@ -325,7 +325,7 @@ jobs:
       pull-requests: write # Required to comment on PRs with image size
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -339,7 +339,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 

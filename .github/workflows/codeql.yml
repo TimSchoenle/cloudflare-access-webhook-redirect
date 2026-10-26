@@ -27,7 +27,7 @@ jobs:
         language: [ actions, rust ]
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -37,6 +37,6 @@ jobs:
           persist-credentials: false
 
       - name: Run CodeQL
-        uses: TimSchoenle/actions/actions/security/codeql@8da2713994ba2b5f542e7e3334db287b1e22854a # tag=actions-security-codeql-v1.1.4
+        uses: TimSchoenle/actions/actions/security/codeql@9d5cb31939ace7a3d3d7f452052724337c65f153 # tag=actions-security-codeql-v1.1.5
         with:
           language: ${{ matrix.language }}
