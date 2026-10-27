@@ -108,6 +108,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
+          # Read the revision and ref from the checked-out tag. The default `workflow` context takes
+          # them from the event, which on a queued run is a later commit than the one released.
+          context: git
           images: ${{ env.DOCKER_REPO }}
           tags: |
             type=raw,value=${{ needs.release-please.outputs.tag_name }}
