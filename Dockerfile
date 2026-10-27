@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1.28@sha256:bb22d9815c728170f72750f4e5b0d672e06176142e1d602c7e66c050100b7e5b
 
-FROM lukemathwalker/cargo-chef:latest-rust-alpine AS chef
+# Pinned by digest, which Renovate bumps like the other base images. The floating tag alone let two
+# builds of one commit compile with different toolchain images and cargo-chef releases.
+FROM lukemathwalker/cargo-chef:latest-rust-alpine@sha256:c48fa69aff194617af79ddc9473a58b946068012721979a9aef9c3e1466ccbd8 AS chef
 RUN apk add --no-cache musl-dev pkgconfig openssl-dev openssl-libs-static upx
 
 # sentry-cli, for the debug-symbol upload in `builder`. Copied from Sentry's image pinned by digest,
