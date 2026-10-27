@@ -185,6 +185,79 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
 
+      # A second copy of the patch `commit-patch` downloads below, read only by the check that
+      # follows.
+      - name: Receive the patch for inspection
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: docs-render
+          path: ${{ runner.temp }}/docs-render-inspect
+
+      # `allowed_paths` below can admit the Dockerfile only as a whole, and the Dockerfile is the
+      # build recipe of the published image: a generator that rewrote a `RUN` line would have it
+      # committed by the App, under the App's name. So the patch is applied to a scratch index on
+      # top of the head commit - git plumbing only, nothing from the checkout runs - and the
+      # result has to equal the head's Dockerfile everywhere outside the `terrace-config:labels`
+      # markers, with each marker exactly once and nothing between them but `LABEL key="value"`
+      # lines and their continuations, which is all `--format dockerfile` emits. A region in any
+      # other shape fails here and is committed by nobody; regenerate it locally with
+      # `just regenerate` and push it by hand.
+      - name: Refuse Dockerfile changes outside the LABEL region
+        env:
+          PATCH_FILE: ${{ runner.temp }}/docs-render-inspect/changes.patch
+          METADATA_FILE: ${{ runner.temp }}/docs-render-inspect/metadata.json
+          BEGIN: '# terrace-config:labels:begin'
+          END: '# terrace-config:labels:end'
+        run: |
+          set -euo pipefail
+          # A patch computed against another commit is skipped by `commit-patch`, not committed;
+          # the run for the new head checks its own.
+          if [ "$(jq -r .base_sha "$METADATA_FILE")" != "$(git rev-parse HEAD)" ]; then
+            echo "The patch was computed against another commit; commit-patch will skip it."
+            exit 0
+          fi
+          work="$RUNNER_TEMP/dockerfile-check"
+          mkdir -p "$work"
+          export GIT_INDEX_FILE="$work/index"
+          git read-tree HEAD
+          git apply --cached --whitespace=nowarn --include=Dockerfile "$PATCH_FILE"
+          git show HEAD:Dockerfile > "$work/before"
+          git show :Dockerfile > "$work/after"
+          if cmp -s "$work/before" "$work/after"; then
+            echo "The patch does not change the Dockerfile."
+            exit 0
+          fi
+          for marker in "$BEGIN" "$END"; do
+            if [ "$(grep -cxF -- "$marker" "$work/after")" != 1 ]; then
+              echo "::error file=Dockerfile::'${marker}' must appear exactly once."
+              exit 1
+            fi
+          done
+          if [ "$(grep -nxF -- "$BEGIN" "$work/after" | cut -d: -f1)" -gt "$(grep -nxF -- "$END" "$work/after" | cut -d: -f1)" ]; then
+            echo "::error file=Dockerfile::'${BEGIN}' must come before '${END}'."
+            exit 1
+          fi
+          outside() { awk -v b="$BEGIN" -v e="$END" '$0 == b { skip = 1; print "<region>"; next } $0 == e { skip = 0; next } !skip' "$1"; }
+          if ! diff -u <(outside "$work/before") <(outside "$work/after"); then
+            echo "::error file=Dockerfile::The patch changes the Dockerfile outside the LABEL region; nothing was committed."
+            exit 1
+          fi
+          if ! awk -v b="$BEGIN" -v e="$END" '
+            $0 == e { inside = 0 }
+            inside {
+              if (cont) { ok = $0 ~ /^[ \t]+[A-Za-z0-9._-]+="[^"\\$]*"( \\)?$/ }
+              else { ok = $0 ~ /^LABEL [A-Za-z0-9._-]+="[^"\\$]*"( \\)?$/ }
+              if (!ok) { print "unexpected line in the LABEL region: " $0; bad = 1 }
+              cont = $0 ~ / \\$/
+            }
+            $0 == b { inside = 1; cont = 0 }
+            END { exit (bad || cont) }
+          ' "$work/after"; then
+            echo "::error file=Dockerfile::The LABEL region holds something other than LABEL instructions; nothing was committed."
+            exit 1
+          fi
+          echo "The patch changes only the LABEL region of the Dockerfile."
+
       # An App installation token, so the commit is verified and — unlike one made with
       # `GITHUB_TOKEN` — re-triggers the checks on the branch it lands on.
       - name: Generate Bot Token
