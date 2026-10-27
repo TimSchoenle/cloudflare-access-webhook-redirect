@@ -88,6 +88,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          # The tag release-please just cut, not the event commit: a queued run can release a
+          # newer merge than the one that triggered it.
+          ref: refs/tags/${{ needs.release-please.outputs.tag_name }}
           persist-credentials: false
 
       - name: Set up Docker Buildx
@@ -201,6 +204,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          # The tag release-please just cut, not the event commit: a queued run can release a
+          # newer merge than the one that triggered it.
+          ref: refs/tags/${{ needs.release-please.outputs.tag_name }}
           persist-credentials: false
 
       - name: Install Cosign
@@ -452,6 +458,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          # The tag release-please just cut, not the event commit: a queued run can release a
+          # newer merge than the one that triggered it.
+          ref: refs/tags/${{ needs.release-please.outputs.tag_name }}
           persist-credentials: false
 
       - name: Sentry Release
