@@ -120,6 +120,13 @@ jobs:
       name: ci
       deployment: false
     runs-on: ubuntu-latest
+    # Shared with docs.yaml rather than with the rest of this workflow: both jobs commit to the
+    # pull request branch through the API, which rejects a commit whose parent has moved. Racing
+    # them would fail one of the two for a reason its log does not explain, so they queue. Only
+    # this half takes the queue: the format job above writes nothing.
+    concurrency:
+      group: branch-writes-${{ github.ref }}
+      cancel-in-progress: false
     permissions:
       contents: read # Required to fetch the commit the patch applies to
     steps:
