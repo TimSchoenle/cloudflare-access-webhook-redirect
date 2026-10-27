@@ -26,6 +26,11 @@ name: Docs
 # previous tag. Rendering here means the released README already points at the tag the merge is
 # about to create.
 #
+# That half is two jobs. `render` runs the generators, which means running the pull request's
+# code, so it holds no secret and only uploads what they wrote as a patch. `render-commit` holds
+# the App token, executes nothing from the branch, and commits that patch only when every path in
+# it is one of the four generated files.
+#
 # Everywhere it cannot commit — a push to `master`, a pull request from a fork — it verifies
 # instead, writing nothing and failing if what is committed is stale. Without it, editing
 # `README.md` directly would appear to work right up until the next pull request silently
@@ -53,39 +58,34 @@ env:
 jobs:
   render:
     name: Render
-    # Forks get no secrets, so the App token would be empty and the commit could not be pushed to
-    # their branch anyway. `verify` below picks those pull requests up instead.
+    # Forks get no secrets, so the commit half below could not mint a token and their branch is not
+    # in this repository anyway. `verify` below picks those pull requests up instead.
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    environment:
-      name: ci
-      deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # This half runs the pull request's code — the `just` recipes, the generator example and the
+    # payload script — so it holds no secret and no write token. It writes the regenerated files
+    # into its own checkout and uploads them as a patch; `render-commit` below commits that patch
+    # without running anything from the branch.
     permissions:
-      contents: read # the writes happen with the App token below, not with GITHUB_TOKEN
+      contents: read # Required to checkout the code
+    outputs:
+      has_changes: ${{ steps.patch.outputs.has_changes }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
-      # An App installation token, so the commits are verified and — unlike ones made with
-      # `GITHUB_TOKEN` — re-trigger the checks on the branch they land on.
-      - name: Generate Bot Token
-        id: generate_token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          app-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
-          private-key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
-          permission-contents: write
-
-      # The head of the branch, not the merge commit: the render has to read the `Cargo.toml` and
-      # the `Config` the pull request proposes, and the commits have to land on top of what is
-      # there now.
+      # The head of the pull request, not the merge commit: the render has to read the
+      # `Cargo.toml` and the `Config` the pull request proposes, and the patch is committed to the
+      # branch, so it has to be computed against the commit the branch points at. The SHA rather
+      # than the branch name, so the patch's base is the commit `render-commit` checks the branch
+      # against.
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Install pinned toolchain
@@ -130,68 +130,97 @@ jobs:
           branch: ${{ github.event.repository.default_branch }}
           extra: ${{ steps.config.outputs.json }}
 
-      - name: Render and commit the README
-        id: readme
-        uses: TimSchoenle/actions/actions/common/render-template-and-commit@ea4465fbe2bec98efad19b63849f8d1ac67b5c88 # tag=actions-common-render-template-and-commit-v1.1.18
+      # Written, not committed: the commit is `render-commit`'s, over every generated file at once.
+      - name: Render the README
+        uses: TimSchoenle/actions/actions/common/render-template@8da2713994ba2b5f542e7e3334db287b1e22854a # tag=actions-common-render-template-v1.2.9
         with:
           template: .github/templates/README.md.hbs
           output: README.md
           variables: ${{ steps.variables.outputs.variables }}
-          token: ${{ steps.generate_token.outputs.token }}
-          commit_message: 'docs: render README from template'
 
-      # A second commit rather than one `file_pattern` covering both, because the two artefacts
-      # change independently: a `#[config(note)]` reaches the example file without touching a
-      # table cell, and the README's own prose changes without the example moving at all. The
-      # commit API re-reads the branch head, so this lands on top of the one above.
-      - name: Commit config.example.toml
-        id: example
-        uses: TimSchoenle/actions/actions/common/commit-changes@8da2713994ba2b5f542e7e3334db287b1e22854a # tag=actions-common-commit-changes-v1.5.9
+      # Every generated path is named rather than left to default to `.`, so nothing else a step
+      # left dirty in the workspace can ride along. `render-commit` holds the same list as its
+      # allowlist and refuses a patch touching anything outside it.
+      - name: Create Patch
+        id: patch
+        uses: TimSchoenle/actions/actions/common/create-patch@bbc2c5e2a0f9345cb2e84946846736f047a6eae3 # tag=actions-common-create-patch-v1.1.0
         with:
-          commit_message: 'docs: regenerate config.example.toml'
-          file_pattern: 'config.example.toml'
-          token: ${{ steps.generate_token.outputs.token }}
+          artifact_name: docs-render
+          paths: README.md config.example.toml docs/config.contract.json Dockerfile
 
-      # A third commit, for the same reason the second is separate: the contract moves when the
-      # configuration surface moves, which is not when the README's prose does.
-      #
-      # The Dockerfile is in the same commit as the document rather than one of its own. The
-      # region and the document are one generator run over one source tree, and a branch carrying
-      # one without the other is a branch whose image advertises a contract it does not publish.
-      # Both paths are named rather than left to default to `.`, so nothing else a step left dirty
-      # in the workspace can ride along in a commit that claims to be about the contract.
-      - name: Commit the configuration contract
-        id: contract
-        uses: TimSchoenle/actions/actions/common/commit-changes@8da2713994ba2b5f542e7e3334db287b1e22854a # tag=actions-common-commit-changes-v1.5.9
+  render-commit:
+    name: Commit Render
+    needs: render
+    # A fork's pull request gets no secrets, and its branch is not in this repository.
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.render.outputs.has_changes == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    environment:
+      name: ci
+      deployment: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # Required to fetch the commit the patch applies to
+    steps:
+      # Nothing from the branch runs here, so the egress this job needs is known in full: GitHub
+      # for the checkout, the token and the commit, and the artifact service for the patch.
+      - name: Harden Runner
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
-          commit_message: 'docs: regenerate the configuration contract'
-          file_pattern: 'docs/config.contract.json Dockerfile'
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+
+      # Only git's objects are needed. Nothing in this checkout is executed.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # An App installation token, so the commit is verified and — unlike one made with
+      # `GITHUB_TOKEN` — re-triggers the checks on the branch it lands on.
+      - name: Generate Bot Token
+        id: generate_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
+          private-key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
+          permission-contents: write # Required to commit the patch to the pull request's branch
+
+      # The artifact name is a literal, not the render job's output: that job ran the pull
+      # request's code. One commit over every generated file, because a second commit would have to
+      # name the head the first just moved. If `fmt-commit` committed first, the branch has moved
+      # past the commit the patch was made from, and commit-patch skips it with
+      # `outcome: branch_moved`; the new head starts a new run, which renders again.
+      - name: Commit the generated files
+        id: commit
+        uses: TimSchoenle/actions/actions/common/commit-patch@bbc2c5e2a0f9345cb2e84946846736f047a6eae3 # tag=actions-common-commit-patch-v1.1.0
+        with:
           token: ${{ steps.generate_token.outputs.token }}
+          artifact_name: docs-render
+          # Exactly the files `render` writes. The Dockerfile is here only because `just
+          # regenerate` rewrites its `terrace-config:labels` region; any other path fails this job.
+          allowed_paths: 'README.md config.example.toml docs/config.contract.json Dockerfile'
+          commit_message: 'docs: regenerate the README, config.example.toml and the configuration contract'
 
       - name: Summarise
         env:
-          README_COMMITTED: ${{ steps.readme.outputs.changes_detected }}
-          README_URL: ${{ steps.readme.outputs.commit_url }}
-          EXAMPLE_COMMITTED: ${{ steps.example.outputs.changes_detected }}
-          EXAMPLE_URL: ${{ steps.example.outputs.commit_url }}
-          CONTRACT_COMMITTED: ${{ steps.contract.outputs.changes_detected }}
-          CONTRACT_URL: ${{ steps.contract.outputs.commit_url }}
+          OUTCOME: ${{ steps.commit.outputs.outcome }}
+          COMMIT_URL: ${{ steps.commit.outputs.commit_url }}
         run: |
-          if [ "${README_COMMITTED}" = "true" ]; then
-            echo "README.md re-rendered: ${README_URL}" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "README.md already matched its template." >> "$GITHUB_STEP_SUMMARY"
-          fi
-          if [ "${EXAMPLE_COMMITTED}" = "true" ]; then
-            echo "config.example.toml regenerated: ${EXAMPLE_URL}" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "config.example.toml already matched the schema." >> "$GITHUB_STEP_SUMMARY"
-          fi
-          if [ "${CONTRACT_COMMITTED}" = "true" ]; then
-            echo "The configuration contract and the Dockerfile's LABEL region were regenerated: ${CONTRACT_URL}" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "The configuration contract and the Dockerfile's LABEL region already matched the schema." >> "$GITHUB_STEP_SUMMARY"
-          fi
+          case "${OUTCOME}" in
+            committed) echo "Generated files re-rendered: ${COMMIT_URL}" >> "$GITHUB_STEP_SUMMARY" ;;
+            branch_moved) echo "The branch moved while rendering; the run for the new head renders again." >> "$GITHUB_STEP_SUMMARY" ;;
+            *) echo "README.md, config.example.toml and the configuration contract already matched their sources." >> "$GITHUB_STEP_SUMMARY" ;;
+          esac
 
   verify:
     name: Verify
