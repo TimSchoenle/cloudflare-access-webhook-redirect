@@ -1,7 +1,10 @@
 name: CodeRabbit Review
 
+# pull_request_target, not pull_request: GitHub runs this file from the default branch, so a pull
+# request cannot rewrite the job that receives the token. That is safe only because the job checks
+# out nothing and runs no code from the pull request; keep it that way.
 on:
-  pull_request:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] -- no checkout, no PR code; see above
     types: [opened, reopened, ready_for_review, synchronize]
 
 # A newer push to the same pull request supersedes a run that has not posted yet.
@@ -16,8 +19,8 @@ jobs:
     name: Trigger CodeRabbit Review
     # CodeRabbit does not review public repositories under 10 stars on its own, and answers
     # `@coderabbitai review` only from a user account, so the comment is posted with a personal
-    # access token. Forks get no secrets, and drafts and bot pull requests are not reviewed, so
-    # those runs stop here without entering the environment that holds the token.
+    # access token. Forks, drafts and bot pull requests are not reviewed, so those runs stop here
+    # without entering the environment that holds the token.
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       !github.event.pull_request.draft &&
