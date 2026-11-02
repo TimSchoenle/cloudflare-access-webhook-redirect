@@ -118,6 +118,7 @@ codegen-units = 1
 workspace = true
 
 [workspace.lints.rust]
+unsafe_code = "forbid"
 missing_docs = "warn"
 
 [workspace.lints.clippy]
