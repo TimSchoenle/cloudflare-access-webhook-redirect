@@ -354,6 +354,32 @@ mod tests {
     use figment::providers::Format;
     use tracing::Level;
 
+    /// Wired into a subscriber, the layers admit exactly what one of the sinks wants: events at
+    /// the breadcrumb threshold or above, spans at `INFO` or above, and nothing more verbose.
+    #[test]
+    fn the_layers_admit_only_what_a_sink_wants() {
+        use tracing::Level;
+        use tracing_subscriber::layer::SubscriberExt as _;
+
+        // `capture_level = error`, `breadcrumb_level = info`.
+        let config = config("enabled = true\nspan_attributes = true");
+        let subscriber =
+            tracing_subscriber::registry().with(super::sentry_layer(&config).expect("enabled"));
+
+        tracing::subscriber::with_default(subscriber, || {
+            assert!(tracing::event_enabled!(Level::ERROR));
+            assert!(tracing::event_enabled!(Level::INFO));
+            assert!(!tracing::event_enabled!(Level::DEBUG));
+            assert!(tracing::span_enabled!(Level::INFO));
+            assert!(!tracing::span_enabled!(Level::DEBUG));
+
+            // No client is bound, so these reach every layer and are reported nowhere.
+            let _span = tracing::info_span!("unit", attribute = 1).entered();
+            tracing::info!("a breadcrumb");
+            tracing::error!("an issue");
+        });
+    }
+
     /// An event is an issue or a breadcrumb, never both: the error layer would otherwise capture
     /// it with a copy of itself at the end of its own trail.
     #[test]
