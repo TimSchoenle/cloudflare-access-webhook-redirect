@@ -154,7 +154,7 @@ jobs:
       # The artifact name is a literal, not the format job's output: that job ran the pull
       # request's code.
       - name: Commit Format
-        uses: TimSchoenle/actions/actions/common/commit-patch@bbc2c5e2a0f9345cb2e84946846736f047a6eae3 # tag=actions-common-commit-patch-v1.1.0
+        uses: TimSchoenle/actions/actions/common/commit-patch@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-commit-patch-v1.1.1
         with:
           token: ${{ steps.generate_token.outputs.token }}
           artifact_name: rust-auto-format
@@ -377,7 +377,7 @@ jobs:
       # code-scanning alerts carry over instead of being orphaned under the derived
       # `trivy-linux-<arch>`.
       - name: Check Docker image
-        uses: TimSchoenle/actions/actions/docker/image-check@9d5cb31939ace7a3d3d7f452052724337c65f153 # tag=actions-docker-image-check-v1.1.8
+        uses: TimSchoenle/actions/actions/docker/image-check@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-docker-image-check-v1.1.9
         with:
           image: ${{ env.IMAGE }}
           platform: ${{ matrix.platform }}
