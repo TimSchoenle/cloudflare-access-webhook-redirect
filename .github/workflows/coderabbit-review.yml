@@ -26,8 +26,11 @@ jobs:
       !github.event.pull_request.draft &&
       github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
-    # CODERABBIT_TRIGGER_TOKEN is an environment secret, readable only by jobs that name this
-    # environment. `deployment: false` keeps each run from recording a deployment.
+    # CODERABBIT_TRIGGER_TOKEN is an environment secret. Naming the environment is not a guard on
+    # its own: any workflow a pull request adds could name it too. The `coderabbit` environment must
+    # therefore be restricted to the default branch in the repository settings: a pull request's
+    # own workflow runs on its merge ref and is refused, this pull_request_target run is not.
+    # `deployment: false` keeps each run from recording a deployment.
     environment:
       name: coderabbit
       deployment: false
