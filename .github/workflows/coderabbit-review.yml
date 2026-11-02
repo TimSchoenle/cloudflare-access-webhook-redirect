@@ -1,0 +1,49 @@
+name: CodeRabbit Review
+
+# pull_request_target, not pull_request: GitHub runs this file from the default branch, so a pull
+# request cannot rewrite the job that receives the token. That is safe only because the job checks
+# out nothing and runs no code from the pull request; keep it that way.
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] -- no checkout, no PR code; see above
+    types: [opened, reopened, ready_for_review, synchronize]
+
+# A newer push to the same pull request supersedes a run that has not posted yet.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  trigger-review:
+    name: Trigger CodeRabbit Review
+    # CodeRabbit does not review public repositories under 10 stars on its own, and answers
+    # `@coderabbitai review` only from a user account, so the comment is posted with a personal
+    # access token. Forks, drafts and bot pull requests are not reviewed, so those runs stop here
+    # without entering the environment that holds the token.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !github.event.pull_request.draft &&
+      github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    # CODERABBIT_TRIGGER_TOKEN is an environment secret. Naming the environment is not a guard on
+    # its own: any workflow a pull request adds could name it too. The `coderabbit` environment must
+    # therefore be restricted to the default branch in the repository settings: a pull request's
+    # own workflow runs on its merge ref and is refused, this pull_request_target run is not.
+    # `deployment: false` keeps each run from recording a deployment.
+    environment:
+      name: coderabbit
+      deployment: false
+    permissions: {} # the comment is posted with the token, not github.token
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+
+      - name: Trigger CodeRabbit Review
+        uses: TimSchoenle/actions/actions/maintenance/trigger-coderabbit-review@e4229b81c3c3c880b9561dc4d53bd87ccf49eaf3 # tag=actions-maintenance-trigger-coderabbit-review-v1.1.0
+        with:
+          token: ${{ secrets.CODERABBIT_TRIGGER_TOKEN }}
