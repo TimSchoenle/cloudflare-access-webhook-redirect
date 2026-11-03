@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.3.7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.6...v2.3.7) (2026-11-02)
+
+
+### Build System
+
+* **lints:** forbid unsafe code ([#628](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/628)) ([83ba0a1](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/83ba0a1f8174593d6fcf1fd2a3769a3f71572978))
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#651](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/651)) ([4daef98](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/4daef98bd98853c2d1bc408ba1974238b84eb562))
+* **deps:** update alpine:3.24 docker digest to be26560 ([#638](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/638)) ([d15b447](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/d15b447ee964e00715b0f7167141f49d5203d47e))
+* **deps:** update getsentry/sentry-cli docker tag to v3.8.2 ([#631](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/631)) ([ea9e10e](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/ea9e10ecb5afc201fcd386fdf3578df207f8e476))
+* **deps:** update rust crate actix-web to v4.18.1 ([#640](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/640)) ([247bd78](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/247bd78742fedc22b377639126bd3c3ed320962e))
+* **deps:** update rust crate backtrace to v0.3.77 ([#645](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/645)) ([bffd4d9](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/bffd4d96d5efa873e6e2c37e958270501efc34e8))
+* **deps:** update rust crate sentry to v0.49.5 ([#646](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/646)) ([20bed4e](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/20bed4eaaf46b7d863b13587836ac21a867e87e1))
+* **deps:** update rust crate terrace-config to v0.17.0 ([#632](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/632)) ([cdf237f](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/cdf237fbd358671b64757f54af22126bc85a3c70))
+* **deps:** update rust crate terrace-config to v0.18.0 ([#647](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/647)) ([7065106](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/70651066caf53777f8fcfd548270d30d9a044bbf))
+* **deps:** update rust crate tokio to v1.54.1 ([#633](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/633)) ([0f62bb0](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0f62bb047415c01ad40b503a096b064b13e80f12))
+
 ## [2.3.6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.5...v2.3.6) (2026-10-22)
 
 
