@@ -54,7 +54,7 @@ jobs:
           egress-policy: audit
 
       - name: Run Coverage
-        uses: TimSchoenle/actions/actions/rust/coverage-codecov@9d5cb31939ace7a3d3d7f452052724337c65f153 # tag=actions-rust-coverage-codecov-v2.0.4
+        uses: TimSchoenle/actions/actions/rust/coverage-codecov@e4229b81c3c3c880b9561dc4d53bd87ccf49eaf3 # tag=actions-rust-coverage-codecov-v2.0.5
         with:
           flags: rust
 
@@ -104,7 +104,7 @@ jobs:
 
       - name: Auto Format
         id: format
-        uses: TimSchoenle/actions/actions/rust/auto-format@495fd50fd4a5ae3d9fb1496c96eada74c6f2529a # tag=actions-rust-auto-format-v2.0.0
+        uses: TimSchoenle/actions/actions/rust/auto-format@e4229b81c3c3c880b9561dc4d53bd87ccf49eaf3 # tag=actions-rust-auto-format-v2.0.1
         with:
           artifact_name: rust-auto-format
 
