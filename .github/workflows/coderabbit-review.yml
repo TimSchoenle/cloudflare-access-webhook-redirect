@@ -26,6 +26,7 @@ jobs:
       !github.event.pull_request.draft &&
       github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # CODERABBIT_TRIGGER_TOKEN is an environment secret. Naming the environment is not a guard on
     # its own: any workflow a pull request adds could name it too. The `coderabbit` environment must
     # therefore be restricted to the default branch in the repository settings: a pull request's

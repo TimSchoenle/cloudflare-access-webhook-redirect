@@ -5,17 +5,29 @@ on:
     branches: [ 'master' ]
   pull_request:
     branches: [ '**' ]
+  schedule:
+    # Weekly, so advisories published since the last change are reported. Off the hour, because
+    # GitHub's scheduling backlog is deepest on the hour.
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions: { }
 
 jobs:
-  zizmor:
-    name: Zizmor
+  # jactionlint keeps every check of actionlint and has a rule for every zizmor audit. The shared
+  # action runs the pedantic profile online, so it also asks GitHub about the actions in use
+  # (impostor commits, vulnerable versions, moved tags, archived repositories), uploads the SARIF to
+  # code scanning under the category jactionlint and, with strict-exit, fails on findings of every
+  # level.
+  # .github/jactionlint.yaml turns off the rules this repository does not want.
+  action-lint:
+    name: Action Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read # to fetch code
       security-events: write # to upload SARIF results
@@ -30,5 +42,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Run Zizmor
-        uses: TimSchoenle/actions/actions/security/zizmor@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-security-zizmor-v2.0.1
+      - name: Run jactionlint
+        uses: TimSchoenle/actions/actions/security/jactionlint@e2799424abd778c41e7f6d1547fd402386ef398e # tag=actions-security-jactionlint-v1.1.0
+        with:
+          online: 'true'
+          strict-exit: 'true'
