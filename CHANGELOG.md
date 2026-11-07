@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.8](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.7...v2.3.8) (2026-11-07)
+
+
+### Dependencies
+
+* **deps:** update rust crate actix-web to v4.18.2 [security] ([#654](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/654)) ([f8c783a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f8c783ad7ddcea3a3ec6161166e3f1caad402eaa))
+
 ## [2.3.7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.6...v2.3.7) (2026-11-02)
 
 
