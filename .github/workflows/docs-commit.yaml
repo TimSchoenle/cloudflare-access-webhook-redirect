@@ -1,0 +1,149 @@
+name: Docs Commit
+
+# Commits what `Docs` generated on a pull request. A pull_request run executes the pull
+# request's own copy of its workflow, so a job there holding the maintenance App's key hands it to
+# anyone who can push a branch. This workflow_run job runs the default branch's copy, which a pull
+# request cannot change, and only reads the patch the pull_request run uploaded: commit-patch refuses
+# anything outside allowed_paths or made from another head, and nothing from the branch executes.
+
+on:
+  workflow_run:
+    workflows: ['Docs']
+    types: [completed]
+
+# Shares the per-branch group with every other job that writes to a pull request's branch, so
+# two commits never race for the same head.
+concurrency:
+  group: branch-writes-${{ github.repository }}:${{ github.event.workflow_run.head_branch }}
+  queue: max
+
+permissions: {}
+
+jobs:
+  # Holds no secret and no environment. The pull_request run uploads the patch empty when nothing
+  # changed and not at all when the job making it was skipped; in both cases there is nothing to
+  # commit, so the commit job below is skipped without minting a token.
+  find-patch:
+    name: Find The Patch
+    # A finished pull_request run, not a cancelled one: another job failing does not make the patch
+    # wrong. From a branch of this repository, never the default branch.
+    if: >-
+      (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure') &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch != github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read # to list and download the pull_request run's artifacts
+    outputs:
+      has_changes: ${{ steps.patch.outputs.has_changes }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            *.blob.core.windows.net:443
+
+      # Only the patch's size is read; nothing in the artifact is executed.
+      - name: Look For A Non-Empty Patch
+        id: patch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          ARTIFACT: docs-render
+        run: |
+          set -euo pipefail
+          count="$(gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}/artifacts?name=${ARTIFACT}" --jq '[.artifacts[] | select(.expired | not)] | length')"
+          if [ "${count}" = "0" ]; then
+            echo "The run uploaded no ${ARTIFACT} artifact: the job that makes it did not run."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          gh run download "${RUN_ID}" --repo "${REPOSITORY}" --name "${ARTIFACT}" --dir "${RUNNER_TEMP}/patch"
+          if [ ! -f "${RUNNER_TEMP}/patch/changes.patch" ]; then
+            echo "::error::The ${ARTIFACT} artifact holds no changes.patch; refusing to read it as empty."
+            exit 1
+          fi
+          if [ -s "${RUNNER_TEMP}/patch/changes.patch" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "The ${ARTIFACT} patch is empty: nothing changed."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  render-commit:
+    name: Commit Render
+    needs: [find-patch]
+    if: needs.find-patch.outputs.has_changes == 'true'
+    environment:
+      name: ci
+      deployment: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read # to download the patch from the pull_request run
+      contents: read # Required to fetch the commit the patch applies to
+    steps:
+      # Nothing from the branch runs here, so the egress this job needs is known in full: GitHub
+      # for the checkout, the token and the commit, and the artifact service for the patch.
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+
+      # Only git's objects are needed. Nothing in this checkout is executed.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      # An App installation token, so the commit is verified and — unlike one made with
+      # `GITHUB_TOKEN` — re-triggers the checks on the branch it lands on.
+      - name: Generate Bot Token
+        id: generate_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
+          private-key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
+          permission-contents: write # Required to commit the patch to the pull request's branch
+
+      # The artifact name is a literal, not the render job's output: that job ran the pull
+      # request's code. One commit over every generated file, because a second commit would have to
+      # name the head the first just moved. If `fmt-commit` committed first, the branch has moved
+      # past the commit the patch was made from, and commit-patch skips it with
+      # `outcome: branch_moved`; the new head starts a new run, which renders again.
+      - name: Commit the generated files
+        id: commit
+        uses: TimSchoenle/actions/actions/common/commit-patch@95d5504ec41c354a35ce0414234107a8eaf921b9 # tag=actions-common-commit-patch-v1.2.0
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          run_id: ${{ github.event.workflow_run.id }}
+          branch: ${{ github.event.workflow_run.head_branch }}
+          expected_head_sha: ${{ github.event.workflow_run.head_sha }}
+          artifact_name: docs-render
+          # Exactly the files `render` writes; any other path fails this job.
+          allowed_paths: 'README.md config.example.toml docs/config.contract.json'
+          commit_message: 'docs: regenerate the README, config.example.toml and the configuration contract'
+
+      - name: Summarise
+        env:
+          OUTCOME: ${{ steps.commit.outputs.outcome }}
+          COMMIT_URL: ${{ steps.commit.outputs.commit_url }}
+        run: |
+          case "${OUTCOME}" in
+            committed) echo "Generated files re-rendered: ${COMMIT_URL}" >> "$GITHUB_STEP_SUMMARY" ;;
+            branch_moved) echo "The branch moved while rendering; the run for the new head renders again." >> "$GITHUB_STEP_SUMMARY" ;;
+            *) echo "Nothing committed (${OUTCOME})." >> "$GITHUB_STEP_SUMMARY" ;;
+          esac
