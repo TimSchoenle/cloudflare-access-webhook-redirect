@@ -110,6 +110,19 @@ jobs:
         with:
           artifact_name: rust-auto-format
 
+      # `cargo fmt` reformats rather than fails, and build-commit.yaml commits the patch only after
+      # this whole run has finished, when every other required check on this head may already be
+      # green. Failing here keeps the unformatted head from merging; the run on the formatting
+      # commit decides. Nothing commits to a fork's branch, so a fork's pull request is not held,
+      # as it was not before the commit moved out of this run.
+      - name: Fail while a formatting commit is pending
+        if: >-
+          steps.format.outputs.changes_detected == 'true' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          echo "::error::cargo fmt changed files; build-commit.yaml commits them and the run on that commit decides."
+          exit 1
+
   clippy:
     name: Clippy
     runs-on: ubuntu-latest

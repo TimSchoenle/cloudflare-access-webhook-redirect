@@ -57,7 +57,7 @@ jobs:
           ARTIFACT: docs-render
         run: |
           set -euo pipefail
-          count="$(gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}/artifacts?name=${ARTIFACT}" --jq '.total_count')"
+          count="$(gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}/artifacts?name=${ARTIFACT}" --jq '[.artifacts[] | select(.expired | not)] | length')"
           if [ "${count}" = "0" ]; then
             echo "The run uploaded no ${ARTIFACT} artifact: the job that makes it did not run."
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
