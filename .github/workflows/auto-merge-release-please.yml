@@ -22,7 +22,12 @@ permissions: {}
 jobs:
   auto-merge-releases:
     name: Auto Merge Releases
+    # The maintenance app's secrets belong in the ci environment.
+    environment:
+      name: ci
+      deployment: false
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     # Every call is made with the app token minted below, so this job needs nothing from the
     # ambient `GITHUB_TOKEN`.
     permissions: {}
@@ -41,7 +46,7 @@ jobs:
         id: token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
-          app-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
+          client-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
           private-key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
           permission-contents: write # to enable auto-merge
           permission-pull-requests: write # to list the pull requests and approve them

@@ -26,6 +26,7 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read # Required to checkout the code
     steps:
@@ -61,6 +62,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read # Required to checkout the code
     steps:
@@ -84,6 +86,7 @@ jobs:
     name: Auto Format
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read # Required to checkout the code
     outputs:
@@ -120,6 +123,7 @@ jobs:
       name: ci
       deployment: false
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # Shared with docs.yaml rather than with the rest of this workflow: both jobs commit to the
     # pull request branch through the API, which rejects a commit whose parent has moved. Racing
     # them would fail one of the two for a reason its log does not explain, so they queue. Only
@@ -147,7 +151,7 @@ jobs:
         id: generate_token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
-          app-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
+          client-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
           private-key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
           permission-contents: write # Required to commit the patch to the pull request's branch
 
@@ -165,6 +169,7 @@ jobs:
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read # Required to checkout the code
       checks: write # Required to annotate the commit with clippy warnings
@@ -180,6 +185,7 @@ jobs:
   doc:
     name: Doc
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read # Required to checkout the code
     env:
@@ -212,6 +218,7 @@ jobs:
   docker-build-test:
     name: Docker Build and Test (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
     needs: [ check, doc ]
     permissions:
       contents: read # Required to checkout the code
@@ -296,7 +303,7 @@ jobs:
         with:
           # This job builds and loads a runtime image, and a restored cache is writable by any
           # branch: caching here is a path from a poisoned entry into a runtime artefact, which is
-          # what zizmor's `cache-poisoning` audit flags. The only thing compiled is the contract
+          # what jactionlint's `cache-poisoning` rule flags. The only thing compiled is the contract
           # generator, so there is almost nothing to save.
           cache: false
 
@@ -392,6 +399,7 @@ jobs:
     if: always() && github.event_name == 'pull_request'
     needs: docker-build-test
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read # Required by image-check-summary
       pull-requests: write # Required to comment on PRs with image size
@@ -407,6 +415,7 @@ jobs:
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: check
     if: github.event_name == 'pull_request'
     steps:
