@@ -120,7 +120,7 @@ jobs:
           steps.format.outputs.changes_detected == 'true' &&
           github.event.pull_request.head.repo.full_name == github.repository
         run: |
-          echo "::error::cargo fmt changed files; build-commit.yaml commits them and the run on that commit decides."
+          echo "::error::cargo fmt changed files; build-commit.yaml commits them and the run on that commit decides. If no bot commit appears, run cargo fmt locally and push."
           exit 1
 
   clippy:

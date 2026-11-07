@@ -148,6 +148,14 @@ jobs:
           artifact_name: docs-render
           paths: README.md config.example.toml docs/config.contract.json
 
+      # The patch is committed by docs-commit.yaml after this run has finished. While it is
+      # non-empty this head is not the one to merge: the run on the bot commit decides.
+      - name: Fail while the patch is uncommitted
+        if: steps.patch.outputs.has_changes == 'true'
+        run: |
+          echo "::error::README.md config.example.toml docs/config.contract.json changed; docs-commit.yaml commits them and the run on that commit decides. If no bot commit appears, regenerate them locally and push."
+          exit 1
+
   verify:
     name: Verify
     # The complement of `render`: it covers the pushes to `master` that no pull request rendered,
