@@ -77,8 +77,9 @@ jobs:
   # Auto-format comes in two halves. `cargo fmt` runs the toolchain `rust-toolchain.toml` names
   # and honours any `rustfmt.toml`, both of which the pull request controls, so the half that runs
   # it holds no secret and a read-only `GITHUB_TOKEN` and hands on only a patch artifact. The second
-  # half, in the `ci` environment, mints the maintenance App's token and commits that patch; it runs
-  # nothing from the checkout, and `allowed_paths` refuses any path that is not Rust source.
+  # half, `fmt-commit` in build-commit.yaml, runs in the `ci` environment from the default branch's
+  # copy, mints the maintenance App's token and commits that patch; it runs nothing from the
+  # checkout, and `allowed_paths` refuses any path that is not Rust source.
   #
   # Pull requests only: the patch is committed to the pull request's branch, and a push to `master`
   # has none. Code reaches `master` through a pull request that already went through this.
@@ -89,8 +90,6 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read # Required to checkout the code
-    outputs:
-      changes_detected: ${{ steps.format.outputs.changes_detected }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
@@ -110,61 +109,6 @@ jobs:
         uses: TimSchoenle/actions/actions/rust/auto-format@e4229b81c3c3c880b9561dc4d53bd87ccf49eaf3 # tag=actions-rust-auto-format-v2.0.1
         with:
           artifact_name: rust-auto-format
-
-  fmt-commit:
-    name: Commit Format
-    needs: fmt
-    # A fork's pull request gets no secrets, and its branch is not in this repository.
-    if: >-
-      github.event_name == 'pull_request' &&
-      needs.fmt.outputs.changes_detected == 'true' &&
-      github.event.pull_request.head.repo.full_name == github.repository
-    environment:
-      name: ci
-      deployment: false
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    # Shared with docs.yaml rather than with the rest of this workflow: both jobs commit to the
-    # pull request branch through the API, which rejects a commit whose parent has moved. Racing
-    # them would fail one of the two for a reason its log does not explain, so they queue. Only
-    # this half takes the queue: the format job above writes nothing.
-    concurrency:
-      group: branch-writes-${{ github.event.pull_request.head.repo.full_name || github.repository }}:${{ github.event.pull_request.head.ref || github.ref_name }}
-      queue: max
-      cancel-in-progress: false
-    permissions:
-      contents: read # Required to fetch the commit the patch applies to
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-        with:
-          egress-policy: audit
-
-      # Only git's objects are needed. Nothing in this checkout is executed.
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Generate Bot Token
-        id: generate_token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
-          private-key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
-          permission-contents: write # Required to commit the patch to the pull request's branch
-
-      # The artifact name is a literal, not the format job's output: that job ran the pull
-      # request's code.
-      - name: Commit Format
-        uses: TimSchoenle/actions/actions/common/commit-patch@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-commit-patch-v1.1.1
-        with:
-          token: ${{ steps.generate_token.outputs.token }}
-          artifact_name: rust-auto-format
-          # Rust sources only: the only files `cargo fmt` rewrites. Any other path fails this job.
-          allowed_paths: '**/*.rs'
-          commit_message: 'style: auto-format rust code'
 
   clippy:
     name: Clippy
