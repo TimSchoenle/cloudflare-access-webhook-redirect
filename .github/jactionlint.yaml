@@ -10,8 +10,9 @@
 profile: pedantic
 
 rules:
-  # Every step inherits bash from the runner's default; naming it on each step adds noise without
-  # changing what runs.
+  # The runner's implicit shell is `bash -e {0}`. An explicit `shell: bash` would add pipefail; instead
+  # the pipeline-without-pipefail rule flags each pipeline that needs it, so the key is not required
+  # on every step.
   require-shell: off
   # `if: steps.x.outputs.y == 'true'` is valid syntax, and the workflows write conditions both ways.
   require-expression-wrapping: off
@@ -20,3 +21,11 @@ rules:
   # zizmor no longer runs, so a `# zizmor: ignore[...]` comment that suppresses nothing is stale.
   unused-ignore:
     zizmor: true
+
+ignores:
+  # getsentry/action-release runs its Docker image by tag
+  # (docker://ghcr.io/getsentry/action-release-image:<version>), so the commit pin cannot hold the
+  # image. Every release up to v3.7.2 does this; there is nothing to pin from here.
+  - rule: unpinnable-action
+    uses: getsentry/action-release@e6703d0b00208e0b3687ba660d18ab5af7892821
+    reason: the action references its image by tag; not pinnable from the caller

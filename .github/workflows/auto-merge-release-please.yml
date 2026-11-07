@@ -27,7 +27,7 @@ jobs:
       name: ci
       deployment: false
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     # Every call is made with the app token minted below, so this job needs nothing from the
     # ambient `GITHUB_TOKEN`.
     permissions: {}

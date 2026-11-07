@@ -15,7 +15,7 @@ jobs:
   auto-approve-renovate:
     name: Auto Approve Renovate
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     permissions:
       pull-requests: write # To read the pull request and its commits, and to approve it
     steps:
