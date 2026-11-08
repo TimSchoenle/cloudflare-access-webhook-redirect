@@ -45,35 +45,18 @@ jobs:
           egress-policy: block
           allowed-endpoints: >
             api.github.com:443
+            *.actions.githubusercontent.com:443
             *.blob.core.windows.net:443
 
-      # Only the patch's size is read; nothing in the artifact is executed.
-      - name: Look For A Non-Empty Patch
+      # Validates the patch exactly as commit-patch will, against the head the pull_request run
+      # checked out, and reports whether it holds anything to commit. Nothing in it is executed.
+      - name: Find The Patch
         id: patch
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
-          ARTIFACT: docs-render
-        run: |
-          set -euo pipefail
-          count="$(gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}/artifacts?name=${ARTIFACT}" --jq '[.artifacts[] | select(.expired | not)] | length')"
-          if [ "${count}" = "0" ]; then
-            echo "The run uploaded no ${ARTIFACT} artifact: the job that makes it did not run."
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          gh run download "${RUN_ID}" --repo "${REPOSITORY}" --name "${ARTIFACT}" --dir "${RUNNER_TEMP}/patch"
-          if [ ! -f "${RUNNER_TEMP}/patch/changes.patch" ]; then
-            echo "::error::The ${ARTIFACT} artifact holds no changes.patch; refusing to read it as empty."
-            exit 1
-          fi
-          if [ -s "${RUNNER_TEMP}/patch/changes.patch" ]; then
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "The ${ARTIFACT} patch is empty: nothing changed."
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-          fi
+        uses: TimSchoenle/actions/actions/common/find-patch@7b20a67f0b18a6e64c30e5f47c92636729f6ad41 # tag=actions-common-find-patch-v1.1.0
+        with:
+          run_id: ${{ github.event.workflow_run.id }}
+          artifact_name: docs-render
+          expected_head_sha: ${{ github.event.workflow_run.head_sha }}
 
   render-commit:
     name: Commit Render
@@ -126,7 +109,7 @@ jobs:
       # `outcome: branch_moved`; the new head starts a new run, which renders again.
       - name: Commit the generated files
         id: commit
-        uses: TimSchoenle/actions/actions/common/commit-patch@95d5504ec41c354a35ce0414234107a8eaf921b9 # tag=actions-common-commit-patch-v1.2.0
+        uses: TimSchoenle/actions/actions/common/commit-patch@7b20a67f0b18a6e64c30e5f47c92636729f6ad41 # tag=actions-common-commit-patch-v1.3.0
         with:
           token: ${{ steps.generate_token.outputs.token }}
           run_id: ${{ github.event.workflow_run.id }}
