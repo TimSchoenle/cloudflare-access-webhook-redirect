@@ -161,7 +161,7 @@ jobs:
           persist-credentials: false
 
       - name: Install pinned toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
 
       # One feature set is enough here: nothing in the crate documentation is behind a `cfg`, so
       # `--all-features` renders every page there is. `config-schema` only adds the generator.
@@ -256,7 +256,7 @@ jobs:
       # the build wrote, which is what lets it check the Dockerfile's region and the committed
       # document in the same pass as the image.
       - name: Install pinned toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
         with:
           # This job builds and loads a runtime image, and a restored cache is writable by any
           # branch: caching here is a path from a poisoned entry into a runtime artefact, which is
@@ -341,7 +341,7 @@ jobs:
       # code-scanning alerts carry over instead of being orphaned under the derived
       # `trivy-linux-<arch>`.
       - name: Check Docker image
-        uses: TimSchoenle/actions/actions/docker/image-check@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-docker-image-check-v1.1.9
+        uses: TimSchoenle/actions/actions/docker/image-check@e2799424abd778c41e7f6d1547fd402386ef398e # tag=actions-docker-image-check-v1.1.10
         with:
           image: ${{ env.IMAGE }}
           platform: ${{ matrix.platform }}
