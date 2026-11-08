@@ -2469,8 +2469,8 @@ dependencies = [
 
 [[package]]
 name = "terrace-config"
-version = "0.18.0"
-source = "git+https://github.com/TimSchoenle/terrace-config?tag=v0.18.0#3130dd099f721067055dc1c1d4d2ac57e7bf1d39"
+version = "0.18.1"
+source = "git+https://github.com/TimSchoenle/terrace-config?tag=v0.18.1#da7d54b6290348a9a8e4728286fc3ce54bce6adc"
 dependencies = [
  "figment",
  "notify",
@@ -2487,8 +2487,8 @@ dependencies = [
 
 [[package]]
 name = "terrace-config-macros"
-version = "0.18.0"
-source = "git+https://github.com/TimSchoenle/terrace-config?tag=v0.18.0#3130dd099f721067055dc1c1d4d2ac57e7bf1d39"
+version = "0.18.1"
+source = "git+https://github.com/TimSchoenle/terrace-config?tag=v0.18.1#da7d54b6290348a9a8e4728286fc3ce54bce6adc"
 dependencies = [
  "proc-macro2",
  "quote",
