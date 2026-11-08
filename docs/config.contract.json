@@ -2,7 +2,7 @@
   "terrace_contract": 1,
   "producer": {
     "name": "terrace-config",
-    "version": "0.18.0",
+    "version": "0.18.1",
     "loader": "figment"
   },
   "app": {
