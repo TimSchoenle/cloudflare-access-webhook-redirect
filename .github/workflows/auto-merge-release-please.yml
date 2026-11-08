@@ -3,8 +3,6 @@ name: Auto-Merge Release PRs
 on:
   schedule:
     - cron: '0 */6 * * *' # Run every 6 hours
-  pull_request_review:
-    types: [dismissed]
   workflow_dispatch:
     inputs:
       time_elapsed:
@@ -58,7 +56,7 @@ jobs:
           trusted_authors: '253958393,248313786' # actions-maintenance-bot, automatic-release-manager
           branch_pattern: 'release-please--branches--%'
           pattern_mode: 'legacy'
-          # `inputs` is empty on `schedule` and `pull_request_review`, hence the fallback.
+          # `inputs` is empty on `schedule`, hence the fallback.
           time_elapsed: ${{ inputs.time_elapsed || '7d' }}
           # The floor a dispatch cannot go below. Deliberately not a dispatch input: lowering it has
           # to take a commit to this file.

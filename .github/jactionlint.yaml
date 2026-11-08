@@ -29,3 +29,15 @@ ignores:
   - rule: unpinnable-action
     uses: getsentry/action-release@e6703d0b00208e0b3687ba660d18ab5af7892821
     reason: the action references its image by tag; not pinnable from the caller
+  # The point of this workflow: it runs the default branch's copy, which a pull request cannot
+  # change, holds the App key there, and treats the pull_request run's patch as untrusted
+  # (commit-patch's allowed_paths and expected_head_sha; the find job's same-repository guard).
+  - rule: dangerous-triggers
+    file: .github/workflows/build-commit.yaml
+    reason: workflow_run commit job; the artifact is validated by commit-patch, nothing from it runs
+  # The point of this workflow: it runs the default branch's copy, which a pull request cannot
+  # change, holds the App key there, and treats the pull_request run's patch as untrusted
+  # (commit-patch's allowed_paths and expected_head_sha; the find job's same-repository guard).
+  - rule: dangerous-triggers
+    file: .github/workflows/docs-commit.yaml
+    reason: workflow_run commit job; the artifact is validated by commit-patch, nothing from it runs
