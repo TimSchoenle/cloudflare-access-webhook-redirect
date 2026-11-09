@@ -1,15 +1,20 @@
 name: CodeRabbit Review
 
-# pull_request_target, not pull_request: GitHub runs this file from the default branch, so a pull
-# request cannot rewrite the job that receives the token. That is safe only because the job checks
-# out nothing and runs no code from the pull request; keep it that way.
+# workflow_run, not pull_request_target: GitHub runs this file from the default branch, so a pull
+# request cannot rewrite the job that receives the token, and nothing from the pull request is
+# checked out or run. It follows `Generate`, the pull_request workflow that generates files, so
+# CodeRabbit reviews the head after the generated files are committed. The action reads the pull
+# request from the event and skips it when its head has moved since, when it is a draft or a bot's,
+# and when it targets another branch than the default.
 on:
-  pull_request_target: # zizmor: ignore[dangerous-triggers] -- no checkout, no PR code; see above
-    types: [opened, reopened, ready_for_review, synchronize]
+  workflow_run: # zizmor: ignore[dangerous-triggers] -- no checkout, no code from the pull request; see above
+    workflows: [Generate]
+    types: [completed]
 
-# A newer push to the same pull request supersedes a run that has not posted yet.
+# A newer push to the same branch supersedes a run that has not posted yet. The head repository is
+# part of the group, so a fork branch with the same name cannot cancel a run of this repository.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: true
 
 permissions: {}
@@ -19,21 +24,18 @@ jobs:
     name: Trigger CodeRabbit Review
     # CodeRabbit does not review public repositories under 10 stars on its own, and answers
     # `@coderabbitai review` only from a user account, so the comment is posted with a personal
-    # access token. Forks, drafts and bot pull requests are not reviewed, and neither are pull
-    # requests into a branch other than the default one, which the environment below refuses; those
-    # runs stop here without entering the environment that holds the token.
+    # access token. Only a successful run on a branch of this repository asks: a failed Generate run
+    # usually means a patch is about to be committed, and the run on that commit asks instead. A
+    # fork's run stops here, before the job enters the environment that holds the token.
     if: >-
-      github.event.pull_request.base.ref == github.event.repository.default_branch &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      !github.event.pull_request.draft &&
-      github.event.pull_request.user.type != 'Bot'
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    # CODERABBIT_TRIGGER_TOKEN is an environment secret. Naming the environment is not a guard on
-    # its own: any workflow a pull request adds could name it too. The `coderabbit` environment must
-    # therefore be restricted to the default branch in the repository settings: a pull request's
-    # own workflow runs on its merge ref and is refused, this pull_request_target run is not.
-    # `deployment: false` keeps each run from recording a deployment.
+    timeout-minutes: 5
+    # CODERABBIT_TRIGGER_TOKEN is an environment secret. The `coderabbit` environment must be
+    # restricted to the default branch in the repository settings, so no workflow a pull request
+    # adds can read it. `deployment: false` keeps each run from recording a deployment.
     environment:
       name: coderabbit
       deployment: false
@@ -47,6 +49,6 @@ jobs:
             api.github.com:443
 
       - name: Trigger CodeRabbit Review
-        uses: TimSchoenle/actions/actions/maintenance/trigger-coderabbit-review@e4229b81c3c3c880b9561dc4d53bd87ccf49eaf3 # tag=actions-maintenance-trigger-coderabbit-review-v1.1.0
+        uses: TimSchoenle/actions/actions/maintenance/trigger-coderabbit-review@6a49261c7bbd756b4ceca9b1c168dfc7dc095e64 # tag=actions-maintenance-trigger-coderabbit-review-v2.0.0
         with:
           token: ${{ secrets.CODERABBIT_TRIGGER_TOKEN }}
