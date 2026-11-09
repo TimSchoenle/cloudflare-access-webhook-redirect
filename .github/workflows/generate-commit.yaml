@@ -1,0 +1,70 @@
+name: Generate Commit
+
+# Commits what `Generate` produced on a pull request. This workflow_run job runs the default
+# branch's copy, which a pull request cannot change, and only reads the merged patch the Generated
+# Files job uploaded: common/commit-generated-files finds it without a secret, mints the App token
+# only when there is something to commit, and commit-patch refuses anything outside allowed_paths or
+# made from another head. Nothing from the branch executes.
+
+on:
+  workflow_run:
+    workflows: ['Generate']
+    types: [completed]
+
+# Shares the per-branch group with every other job that writes to a pull request's branch, so
+# two commits never race for the same head. Runs wait rather than cancel: an older run completing
+# late must not drop the run for the current head, and its own patch is skipped as branch_moved.
+concurrency:
+  group: branch-writes-${{ github.repository }}:${{ github.event.workflow_run.head_branch }}
+  queue: max
+
+permissions: {}
+
+jobs:
+  commit:
+    name: Commit Generated Files
+    # The action checks the same again, but only once the job holds the environment's secrets. A
+    # fork's run, a push, the default branch or a cancelled run never reaches the environment.
+    if: >-
+      (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure') &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch != github.event.repository.default_branch
+    environment:
+      name: ci
+      deployment: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read # to list and download the pull_request run's artifacts
+      contents: read # to fetch the commit the patch applies to
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+
+      # The allowlist is every file a generator in generate.yaml writes, and nothing else:
+      #
+      #   **/*.rs                    `fmt`
+      #   README.md                  `render`
+      #   config.example.toml        `render`
+      #   docs/config.contract.json  `render`
+      - name: Commit Generated Files
+        uses: TimSchoenle/actions/actions/common/commit-generated-files@ad314497a72ffde698037b8547e0aedcceff7475 # tag=actions-common-commit-generated-files-v1.1.0
+        with:
+          client_id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
+          private_key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
+          allowed_paths: >-
+            **/*.rs
+            README.md
+            config.example.toml
+            docs/config.contract.json
+          commit_message: 'chore: update generated files'

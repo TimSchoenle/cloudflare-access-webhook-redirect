@@ -74,55 +74,6 @@ jobs:
       - name: Run Test
         uses: TimSchoenle/actions/actions/rust/test@e16a1e466faf8ec751b26289c1898143a253269f # tag=actions-rust-test-v1.1.2
 
-  # Auto-format comes in two halves. `cargo fmt` runs the toolchain `rust-toolchain.toml` names
-  # and honours any `rustfmt.toml`, both of which the pull request controls, so the half that runs
-  # it holds no secret and a read-only `GITHUB_TOKEN` and hands on only a patch artifact. The second
-  # half, `fmt-commit` in build-commit.yaml, runs in the `ci` environment from the default branch's
-  # copy, mints the maintenance App's token and commits that patch; it runs nothing from the
-  # checkout, and `allowed_paths` refuses any path that is not Rust source.
-  #
-  # Pull requests only: the patch is committed to the pull request's branch, and a push to `master`
-  # has none. Code reaches `master` through a pull request that already went through this.
-  fmt:
-    name: Auto Format
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read # Required to checkout the code
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-        with:
-          egress-policy: audit
-
-      # The pull request head, not the default merge commit: the patch is committed to the branch,
-      # so it has to be computed against the commit the branch points at.
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Auto Format
-        id: format
-        uses: TimSchoenle/actions/actions/rust/auto-format@e4229b81c3c3c880b9561dc4d53bd87ccf49eaf3 # tag=actions-rust-auto-format-v2.0.1
-        with:
-          artifact_name: rust-auto-format
-
-      # `cargo fmt` reformats rather than fails, and build-commit.yaml commits the patch only after
-      # this whole run has finished, when every other required check on this head may already be
-      # green. Failing here keeps the unformatted head from merging; the run on the formatting
-      # commit decides. Nothing commits to a fork's branch, so a fork's pull request is not held,
-      # as it was not before the commit moved out of this run.
-      - name: Fail while a formatting commit is pending
-        if: >-
-          steps.format.outputs.changes_detected == 'true' &&
-          github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          echo "::error::cargo fmt changed files; build-commit.yaml commits them and the run on that commit decides. If no bot commit appears, run cargo fmt locally and push."
-          exit 1
-
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
