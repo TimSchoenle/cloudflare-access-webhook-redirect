@@ -165,6 +165,6 @@ jobs:
             *.blob.core.windows.net:443
 
       - name: Generated Files Verdict
-        uses: TimSchoenle/actions/actions/common/generated-files-verdict@ad314497a72ffde698037b8547e0aedcceff7475 # tag=actions-common-generated-files-verdict-v1.1.0
+        uses: TimSchoenle/actions/actions/common/generated-files-verdict@927daf80ad493b627b7384abf496d83abbac5f43 # tag=actions-common-generated-files-verdict-v1.2.0
         with:
           needs: ${{ toJSON(needs) }}
