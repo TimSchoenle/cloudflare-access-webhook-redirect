@@ -1,0 +1,170 @@
+name: Generate
+
+# Every file a tool writes rather than a person. Each generator job runs on the pull request's head
+# and uploads a patch; the Generated Files job is a required check and fails while a patch is not
+# committed yet or a generator failed.
+# generate-commit.yaml, a workflow_run workflow the pull request cannot edit, commits the merged
+# patch to the branch, and the run on that commit decides.
+#
+# Both generators run the pull request's code, so they hold no secret and no write permission and
+# hand on only a patch. The reverse gates stay in build.yaml and the docs workflow, which run on
+# every event and therefore also cover the default branch and forks.
+#
+# No `paths` filter: the Generated Files check has to report on every pull request to be required.
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: { }
+
+jobs:
+  # `cargo fmt` honours the pull request's own `rust-toolchain.toml` and `rustfmt.toml`, so this
+  # job runs code the pull request chose: it holds no secret and hands on only a patch.
+  fmt:
+    name: Rust Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # Required to checkout the code
+    outputs:
+      has_changes: ${{ steps.format.outputs.changes_detected }}
+      artifact_name: ${{ steps.format.outputs.artifact_name }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      # The pull request head, not the default merge commit: the patch is committed to the branch,
+      # so it has to be computed against the commit the branch points at.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Auto Format
+        id: format
+        uses: TimSchoenle/actions/actions/rust/auto-format@e4229b81c3c3c880b9561dc4d53bd87ccf49eaf3 # tag=actions-rust-auto-format-v2.0.1
+        with:
+          artifact_name: rust-auto-format
+
+  render:
+    name: Render
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # This half runs the pull request's code — the `just` recipes, the generator example and the
+    # payload script — so it holds no secret and no write token. It writes the regenerated files
+    # into its own checkout and uploads them as a patch; generate-commit.yaml commits
+    # that patch without running anything from the branch.
+    permissions:
+      contents: read # Required to checkout the code
+    outputs:
+      has_changes: ${{ steps.patch.outputs.has_changes }}
+      artifact_name: ${{ steps.patch.outputs.artifact_name }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      # The head of the pull request, not the merge commit: the render has to read the `Cargo.toml`
+      # and the `Config` the pull request proposes, and the patch is committed to the branch, so it
+      # has to be computed against the commit the branch points at. The SHA rather than the branch
+      # name, so the patch's base is the commit generate-commit.yaml checks the
+      # branch against.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Install pinned toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
+
+      # The recipes under `justfile` are what a developer runs before pushing, so CI runs them
+      # rather than a second spelling of the same cargo invocation. A generated file that only
+      # ever came out right on a runner is a generated file nobody can reproduce.
+      - name: Install just
+        uses: taiki-e/install-action@288e746965032cfcc232e09af2daf5f23c14d780 # v2.86.1
+        with:
+          tool: just
+
+      - name: Regenerate config.example.toml
+        run: just render toml > config.example.toml
+
+      # The committed contract, so a key rename or a prefix change shows up as a diff in the pull
+      # request that made it rather than as a label mismatch in a container build later. No
+      # `--revision` or `--created`: they would make the document differ on every run and the diff
+      # meaningless.
+      - name: Regenerate the configuration contract
+        run: just contract-json
+
+      # The half of the payload no shared action can derive: the published image name and the two
+      # configuration tables. Invoked through `bash` rather than executed: the repository is
+      # authored on Windows, where git does not record the executable bit.
+      - name: Generate the configuration payload
+        id: config
+        run: |
+          set -euo pipefail
+          json="$(bash .github/scripts/readme-variables.sh)"
+          echo "json=${json}" >> "$GITHUB_OUTPUT"
+
+      # The other half, and the merge. `branch` is pinned to the default branch rather than left
+      # to default to `github.ref_name`, which on a pull request is `<number>/merge`: the badge
+      # and permalink URLs would then differ between this job and `verify`, and every merge would
+      # fail the gate for a reason absent from the diff.
+      - name: Collect the README payload
+        id: variables
+        uses: TimSchoenle/actions/actions/common/readme-variables@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-readme-variables-v2.1.1
+        with:
+          branch: ${{ github.event.repository.default_branch }}
+          extra: ${{ steps.config.outputs.json }}
+
+      # Written, not committed: the commit is generate-commit.yaml's, over every generated file at once.
+      - name: Render the README
+        uses: TimSchoenle/actions/actions/common/render-template@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-render-template-v3.0.1
+        with:
+          template: .github/templates/README.md.hbs
+          output: README.md
+          variables: ${{ steps.variables.outputs.variables }}
+
+      # Every generated path is named rather than left to default to `.`, so nothing else a step
+      # left dirty in the workspace can ride along. generate-commit.yaml holds the
+      # same list as its allowlist and refuses a patch touching anything outside it.
+      - name: Create Patch
+        id: patch
+        uses: TimSchoenle/actions/actions/common/create-patch@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-create-patch-v1.1.1
+        with:
+          artifact_name: docs-render
+          paths: README.md config.example.toml docs/config.contract.json
+
+  # The required check. It needs every generator above and runs whatever their result, so it
+  # reports on every pull request.
+  verdict:
+    name: Generated Files
+    needs: [ fmt, render ]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # to check out the commit the merged patch is made from
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+
+      - name: Generated Files Verdict
+        uses: TimSchoenle/actions/actions/common/generated-files-verdict@927daf80ad493b627b7384abf496d83abbac5f43 # tag=actions-common-generated-files-verdict-v1.2.0
+        with:
+          needs: ${{ toJSON(needs) }}
