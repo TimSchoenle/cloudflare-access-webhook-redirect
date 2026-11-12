@@ -30,11 +30,13 @@ jobs:
     # Only a failed run: the Generated Files verdict fails the run whenever the merged
     # patch is non-empty, so a successful run has nothing to commit, and entering the
     # environment for it only spends a runner.
+    # No branch named like a full ref: refs/heads/<default> passes the name comparison.
     if: >-
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.event == 'pull_request' &&
       (github.event.workflow_run.head_repository.full_name != github.repository ||
-        github.event.workflow_run.head_branch != github.event.repository.default_branch)
+        github.event.workflow_run.head_branch != github.event.repository.default_branch) &&
+      !startsWith(github.event.workflow_run.head_branch, 'refs/')
     environment:
       name: ci
       deployment: false
