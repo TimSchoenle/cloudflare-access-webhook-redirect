@@ -14,6 +14,10 @@ permissions: {}
 jobs:
   auto-approve-renovate:
     name: Auto Approve Renovate
+    # Every pull request triggers the workflow, but the action approves only branches matching
+    # branch_pattern below. Checking the prefix here skips the runner and its API calls for every
+    # other pull request; the action still checks the pattern, the authors and the fork.
+    if: startsWith(github.head_ref, 'renovate/')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
