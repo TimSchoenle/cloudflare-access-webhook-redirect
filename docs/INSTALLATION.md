@@ -22,7 +22,7 @@ docker run -d \
   -v "$(pwd)/config.toml:/app/config.toml:ro" \
   -v "$(pwd)/secrets:/run/secrets:ro" \
   -e WEBHOOK_REDIRECT_SECRETS_DIR=/run/secrets \
-  timmi6790/cloudflare-access-webhook-redirect
+  timschoenle/cloudflare-access-webhook-redirect
 ```
 
 With `secrets/cloudflare__client_id` and `secrets/cloudflare__client_secret` holding the service
@@ -34,7 +34,7 @@ file is picked up without a restart.
 ```yaml
 services:
   webhook-redirect:
-    image: timmi6790/cloudflare-access-webhook-redirect
+    image: timschoenle/cloudflare-access-webhook-redirect
     container_name: cf-webhook-redirect
     restart: unless-stopped
     ports:
@@ -106,7 +106,7 @@ spec:
     spec:
       containers:
         - name: cf-webhook-redirect
-          image: timmi6790/cloudflare-access-webhook-redirect
+          image: timschoenle/cloudflare-access-webhook-redirect
           ports:
             - containerPort: 8080
           env:
