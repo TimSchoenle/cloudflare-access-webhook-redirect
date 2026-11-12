@@ -35,7 +35,7 @@ jobs:
       contents: read # Required to checkout the code
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
         with:
           egress-policy: audit
 
@@ -63,14 +63,14 @@ jobs:
 
       - name: Collect the README payload
         id: variables
-        uses: TimSchoenle/actions/actions/common/readme-variables@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-readme-variables-v2.1.1
+        uses: TimSchoenle/actions/actions/common/readme-variables@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-common-readme-variables-v2.1.4
         with:
           branch: ${{ github.event.repository.default_branch }}
           extra: ${{ steps.config.outputs.json }}
 
       # Writes nothing; fails with the first differing line when README.md is stale.
       - name: Verify README.md is current
-        uses: TimSchoenle/actions/actions/common/render-template@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-common-render-template-v3.0.1
+        uses: TimSchoenle/actions/actions/common/render-template@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-common-render-template-v3.0.4
         with:
           template: .github/templates/README.md.hbs
           output: README.md
@@ -94,7 +94,7 @@ jobs:
       # half: it reports a renamed key without waiting for a container build. The expensive half
       # is `build.yaml`, which runs the same action against the image it just built.
       - name: Verify the configuration contract
-        uses: TimSchoenle/actions/actions/rust/config-contract@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-rust-config-contract-v2.0.1
+        uses: TimSchoenle/actions/actions/rust/config-contract@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-rust-config-contract-v2.0.4
         with:
           features: config-schema
           image: ''

@@ -20,14 +20,14 @@ jobs:
       pull-requests: write # To read the pull request and its commits, and to approve it
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
         with:
           egress-policy: block
           allowed-endpoints: >
             api.github.com:443
 
       - name: Auto-approve Renovate PRs
-        uses: TimSchoenle/actions/actions/maintenance/auto-approve-pr@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-maintenance-auto-approve-pr-v3.0.1
+        uses: TimSchoenle/actions/actions/maintenance/auto-approve-pr@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-maintenance-auto-approve-pr-v3.0.4
         with:
           token: ${{ github.token }}
           user_ids: '29139614,253958393' # Renovate, actions-maintenance-bot
