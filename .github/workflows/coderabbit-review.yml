@@ -27,10 +27,14 @@ jobs:
     # access token. Only a successful run on a branch of this repository asks: a failed Generate run
     # usually means a patch is about to be committed, and the run on that commit asks instead. A
     # fork's run stops here, before the job enters the environment that holds the token.
+    # Renovate and release-please branches stop here too: their pull requests are a bot's, which
+    # the action skips, so entering the environment for them only spends a runner.
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.head_repository.full_name == github.repository
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      !startsWith(github.event.workflow_run.head_branch, 'renovate/') &&
+      !startsWith(github.event.workflow_run.head_branch, 'release-please--')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     # CODERABBIT_TRIGGER_TOKEN is an environment secret. The `coderabbit` environment must be
