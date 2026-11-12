@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.8](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.7...v2.3.8) (2026-11-12)
+
+
+### Dependencies
+
+* **deps:** update alpine:3.24 docker digest to f59abe6 ([#664](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/664)) ([492537c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/492537ce9190a339e051579309ebd81c38ca9f4a))
+* **deps:** update rust crate actix-web to v4.18.2 [security] ([#654](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/654)) ([f8c783a](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/f8c783ad7ddcea3a3ec6161166e3f1caad402eaa))
+* **deps:** update rust crate terrace-config to v0.18.1 ([#660](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/660)) ([3ada2da](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/3ada2da9f4de8ad7820476a12d69330186b94ef4))
+
 ## [2.3.7](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.6...v2.3.7) (2026-11-02)
 
 
