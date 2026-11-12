@@ -16,7 +16,7 @@ concurrency:
 permissions: { }
 
 env:
-  DOCKER_REPO: timmi6790/cloudflare-access-webhook-redirect
+  DOCKER_REPO: timschoenle/cloudflare-access-webhook-redirect
   HELM_REPO: TimSchoenle/helm-charts
   CHART_PATH: charts/cloudflare-access-webhook-redirect
 
@@ -137,7 +137,7 @@ jobs:
           build-args: |
             version=${{ needs.release-please.outputs.tag_name }}
             release=${{ needs.release-please.outputs.tag_name }}
-            vendor=Timmi6790
+            vendor=TimSchoenle
             SENTRY_ORG=${{ secrets.SENTRY_ORG }}
             SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
             VERSION=${{ needs.release-please.outputs.tag_name }}

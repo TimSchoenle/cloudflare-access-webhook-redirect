@@ -176,7 +176,7 @@ jobs:
           build-args: |
             version=test
             release=test
-            vendor=Timmi6790
+            vendor=TimSchoenle
             VERSION=test
           cache-from: type=gha,scope=build-${{ matrix.arch }}
           cache-to: ${{ github.event_name == 'push' && format('type=gha,mode=max,scope=build-{0}', matrix.arch) || '' }}
