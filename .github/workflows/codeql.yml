@@ -6,10 +6,13 @@ on:
   pull_request:
     branches: [ '**' ]
   schedule:
-    - cron: '0 6 * * 1'
+    # Off the hour: GitHub queues the most scheduled runs at the top of the hour and drops some.
+    - cron: '23 6 * * 1'
 
+# The event is part of the group: a scheduled run and a push to the default branch share its ref,
+# so without it a merge cancelled the weekly analysis.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions: { }
