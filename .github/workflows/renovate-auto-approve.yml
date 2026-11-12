@@ -1,12 +1,23 @@
 name: Renovate Auto Approve
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+# Approves Renovate pull requests once the Build workflow has passed on them. A pull_request run
+# executes the pull request's own copy of its workflow, so approving from one would let anyone who
+# can push a branch add a job that approves their own pull request with github.token, and it needs
+# the repository setting that lets Actions approve pull requests. This workflow_run job runs the
+# default branch's copy, which a pull request cannot change, and approves with the maintenance App's
+# token from the ci environment. Nothing from the pull request runs here: auto-approve-pr reads the
+# pull request through the API, checks the branch, the authors and every commit signature, and binds
+# the review to the head commit it verified.
 
-# A newer push to the same pull request supersedes the run judging the previous head.
+on:
+  workflow_run:
+    workflows: ['Build']
+    types: [completed]
+
+# One queue per pull request branch, keyed on the head repository too. A newer Build run for the
+# branch supersedes the one judging the previous head: auto-approve-pr reads the current head anyway.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-auto-approve-renovate
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_repository.full_name }}:${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: true
 
 permissions: {}
@@ -14,14 +25,24 @@ permissions: {}
 jobs:
   auto-approve-renovate:
     name: Auto Approve Renovate
-    # Every pull request triggers the workflow, but the action approves only branches matching
-    # branch_pattern below. Checking the prefix here skips the runner and its API calls for every
+    # A successful pull_request run from a renovate/ branch of this repository only, and only when
+    # GitHub linked it to a pull request. The prefix check skips the runner and its token for every
     # other pull request; the action still checks the pattern, the authors and the fork.
-    if: startsWith(github.head_ref, 'renovate/')
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_branch, 'renovate/') &&
+      github.event.workflow_run.pull_requests[0].number
+    # The maintenance app's secrets are read from the ci environment, as in the other jobs that use them.
+    environment:
+      name: ci
+      deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      pull-requests: write # To read the pull request and its commits, and to approve it
+    # Every call is made with the app token minted below, so this job needs nothing from the
+    # ambient `GITHUB_TOKEN`.
+    permissions: {}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
@@ -30,10 +51,22 @@ jobs:
           allowed-endpoints: >
             api.github.com:443
 
+      # Renovate opens these pull requests, so the maintenance app may review them: GitHub refuses
+      # only a review from a pull request's own author. Scoped to what the action does; without a
+      # `permission-*` input the token would inherit the whole installation.
+      - name: Generate Bot Token
+        id: token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
+          private-key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
+          permission-pull-requests: write # to read the pull request and its commits, and to approve it
+
       - name: Auto-approve Renovate PRs
         uses: TimSchoenle/actions/actions/maintenance/auto-approve-pr@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-maintenance-auto-approve-pr-v3.0.4
         with:
-          token: ${{ github.token }}
+          token: ${{ steps.token.outputs.token }}
+          pr_url: ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.workflow_run.pull_requests[0].number }}
           user_ids: '29139614,253958393' # Renovate, actions-maintenance-bot
           branch_pattern: '^renovate\/.*$'
           reject_forks: 'true'
