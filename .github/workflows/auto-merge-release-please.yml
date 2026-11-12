@@ -31,7 +31,7 @@ jobs:
     permissions: {}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -50,7 +50,7 @@ jobs:
           permission-pull-requests: write # to list the pull requests and approve them
 
       - name: Approve and Auto-merge
-        uses: TimSchoenle/actions/actions/maintenance/timed-auto-merge@dc5b395636dc1954383f11af4062a08814e9b15a # tag=actions-maintenance-timed-auto-merge-v2.0.2
+        uses: TimSchoenle/actions/actions/maintenance/timed-auto-merge@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-maintenance-timed-auto-merge-v2.0.5
         with:
           token: ${{ steps.token.outputs.token }}
           trusted_authors: '253958393,248313786' # actions-maintenance-bot, automatic-release-manager
