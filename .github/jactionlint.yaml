@@ -35,3 +35,10 @@ ignores:
   - rule: dangerous-triggers
     file: .github/workflows/generate-commit.yaml
     reason: workflow_run commit job; the artifact is validated by commit-patch, nothing from it runs
+  # The point of this workflow: it runs the default branch's copy, which a pull request cannot
+  # change, and approves with the App key there instead of from a pull_request run that could
+  # approve its own pull request. Nothing from the pull request runs; auto-approve-pr verifies the
+  # branch, the authors and every commit signature through the API.
+  - rule: dangerous-triggers
+    file: .github/workflows/renovate-auto-approve.yml
+    reason: workflow_run approval job; reads the pull request through the API only, nothing from it runs
