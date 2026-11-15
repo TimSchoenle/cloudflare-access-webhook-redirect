@@ -53,6 +53,6 @@ jobs:
             api.github.com:443
 
       - name: Trigger CodeRabbit Review
-        uses: TimSchoenle/actions/actions/maintenance/trigger-coderabbit-review@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-maintenance-trigger-coderabbit-review-v2.0.1
+        uses: TimSchoenle/actions/actions/maintenance/trigger-coderabbit-review@0b3967d3d992d12aa88da1f8facf412b162d5ab2 # tag=actions-maintenance-trigger-coderabbit-review-v2.0.3
         with:
           token: ${{ secrets.CODERABBIT_TRIGGER_TOKEN }}

@@ -65,7 +65,7 @@ jobs:
       #   config.example.toml        `render`
       #   docs/config.contract.json  `render`
       - name: Commit Generated Files
-        uses: TimSchoenle/actions/actions/common/commit-generated-files@0701d3b35ad7e10e3159471c82f4743b67fdc01f # tag=actions-common-commit-generated-files-v1.2.4
+        uses: TimSchoenle/actions/actions/common/commit-generated-files@0b3967d3d992d12aa88da1f8facf412b162d5ab2 # tag=actions-common-commit-generated-files-v1.3.2
         with:
           client_id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
           private_key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
