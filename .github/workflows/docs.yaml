@@ -63,14 +63,14 @@ jobs:
 
       - name: Collect the README payload
         id: variables
-        uses: TimSchoenle/actions/actions/common/readme-variables@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-common-readme-variables-v2.1.4
+        uses: TimSchoenle/actions/actions/common/readme-variables@0b3967d3d992d12aa88da1f8facf412b162d5ab2 # tag=actions-common-readme-variables-v2.1.6
         with:
           branch: ${{ github.event.repository.default_branch }}
           extra: ${{ steps.config.outputs.json }}
 
       # Writes nothing; fails with the first differing line when README.md is stale.
       - name: Verify README.md is current
-        uses: TimSchoenle/actions/actions/common/render-template@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-common-render-template-v3.0.4
+        uses: TimSchoenle/actions/actions/common/render-template@0b3967d3d992d12aa88da1f8facf412b162d5ab2 # tag=actions-common-render-template-v3.0.6
         with:
           template: .github/templates/README.md.hbs
           output: README.md
@@ -94,7 +94,7 @@ jobs:
       # half: it reports a renamed key without waiting for a container build. The expensive half
       # is `build.yaml`, which runs the same action against the image it just built.
       - name: Verify the configuration contract
-        uses: TimSchoenle/actions/actions/rust/config-contract@7c1147cf1e275c068a8484fa9a2dcb38a8b1f92f # tag=actions-rust-config-contract-v2.0.4
+        uses: TimSchoenle/actions/actions/rust/config-contract@0b3967d3d992d12aa88da1f8facf412b162d5ab2 # tag=actions-rust-config-contract-v2.0.6
         with:
           features: config-schema
           image: ''
