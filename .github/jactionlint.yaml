@@ -25,9 +25,9 @@ rules:
 ignores:
   # getsentry/action-release runs its Docker image by tag
   # (docker://ghcr.io/getsentry/action-release-image:<version>), so the commit pin cannot hold the
-  # image. Every release up to v3.7.2 does this; there is nothing to pin from here.
+  # image. Every release up to v3.8.0 does this; there is nothing to pin from here.
   - rule: unpinnable-action
-    uses: getsentry/action-release@e6703d0b00208e0b3687ba660d18ab5af7892821
+    uses: getsentry/action-release@d55c8c3b7375607e972b710f12926b676d89d7d2
     reason: the action references its image by tag; not pinnable from the caller
   # The point of this workflow: it runs the default branch's copy, which a pull request cannot
   # change, holds the App key there, and treats the pull_request run's patch as untrusted
