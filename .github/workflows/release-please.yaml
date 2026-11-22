@@ -226,7 +226,7 @@ jobs:
         uses: TimSchoenle/actions/actions/terrace/setup@54a4dc05fd351a9bf9e9638fa3ebbc572b5f2d7f # tag=actions-terrace-setup-v4.0.3
         with:
           # renovate: datasource=github-releases depName=TimSchoenle/terrace-config extractVersion=^terrace-contract-v(?<version>.+)$
-          version: '0.14.1'
+          version: '0.14.2'
           oras: 'false'
 
       - name: Install Cosign
