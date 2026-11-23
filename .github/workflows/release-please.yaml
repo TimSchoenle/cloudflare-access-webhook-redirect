@@ -35,6 +35,7 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
+      body: ${{ steps.release.outputs.body }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
@@ -517,3 +518,7 @@ jobs:
               }
             }
           app-version: ${{ needs.release-please.outputs.tag_name }}
+          # Carried into the chart pull request as its release notes. The action sanitizes it
+          # (mentions and issue-closing keywords are neutralized), so the notes can cross
+          # repositories without the chart pull request cross-linking or closing anything here.
+          changelog: ${{ needs.release-please.outputs.body }}
