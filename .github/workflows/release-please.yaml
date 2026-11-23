@@ -35,6 +35,9 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
+      # `tag_name` carries the `v` and `version` does not: image tags are `vX.Y.Z`, appVersion is `X.Y.Z`.
+      version: ${{ steps.release.outputs.version }}
+      body: ${{ steps.release.outputs.body }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
@@ -516,4 +519,9 @@ jobs:
                 "digest": "${{ needs.docker-release.outputs.image_digest }}"
               }
             }
-          app-version: ${{ needs.release-please.outputs.tag_name }}
+          # `Chart.yaml` records `appVersion` without the `v` its image tag carries.
+          app-version: ${{ needs.release-please.outputs.version }}
+          # Carried into the chart pull request as its release notes. The action neutralizes
+          # mentions and issue-closing keywords, so the chart pull request notifies nobody and
+          # closes nothing here; issue links in the notes still show up as references on them.
+          changelog: ${{ needs.release-please.outputs.body }}
