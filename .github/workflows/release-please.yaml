@@ -521,7 +521,7 @@ jobs:
             }
           # `Chart.yaml` records `appVersion` without the `v` its image tag carries.
           app-version: ${{ needs.release-please.outputs.version }}
-          # Carried into the chart pull request as its release notes. The action sanitizes it
-          # (mentions and issue-closing keywords are neutralized), so the notes can cross
-          # repositories without the chart pull request cross-linking or closing anything here.
+          # Carried into the chart pull request as its release notes. The action neutralizes
+          # mentions and issue-closing keywords, so the chart pull request notifies nobody and
+          # closes nothing here; issue links in the notes still show up as references on them.
           changelog: ${{ needs.release-please.outputs.body }}
