@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.10](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.9...v2.3.10) (2026-11-27)
+
+
+### Dependencies
+
+* **deps:** update docker/dockerfile docker tag to v1.29 ([#682](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/682)) ([7d5a575](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/7d5a57521704f703c584fc80ef085d1b2e70ab50))
+* **deps:** update rust crate actix-web to v4.20.0 ([#683](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/683)) ([9e2eecb](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/9e2eecbfa33b5229c135c1f74eccbd687bc84ad6))
+* **deps:** update rust crate anyhow to v1.0.105 ([#681](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/681)) ([943bb2c](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/943bb2c80082252b70fa6867306c27eb144b900f))
+* **deps:** update rust crate sentry to v0.49.6 ([#678](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/678)) ([95d9306](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/95d9306c18162e9663a643727d470d0678a6b7b6))
+* **deps:** update rust crate terrace-config to v0.18.3 ([#679](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/679)) ([0a1d8f8](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/0a1d8f8261a3aec6817088620909262325592e63))
+* **deps:** update rust to v1.100.0 ([#684](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/issues/684)) ([367e1c6](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/commit/367e1c622e0428c1d43cc4a41a622e62c34aea0f))
+
 ## [2.3.9](https://github.com/TimSchoenle/cloudflare-access-webhook-redirect/compare/v2.3.8...v2.3.9) (2026-11-23)
 
 
