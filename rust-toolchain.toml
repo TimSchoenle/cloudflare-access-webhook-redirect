@@ -7,7 +7,7 @@
 # pull request red on the day it ships. The base image's floating `latest-rust-alpine` tag does
 # not decide the compiler: when it carries a different release, the build installs this one.
 [toolchain]
-channel = "1.99.1"
+channel = "1.100.0"
 # What the `cargo fmt --check` and `cargo clippy -- -D warnings` gates run.
 components = ["rustfmt", "clippy"]
 profile = "minimal"
