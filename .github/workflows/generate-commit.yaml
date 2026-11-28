@@ -47,7 +47,7 @@ jobs:
       contents: read # to fetch the commit the patch applies to
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -65,7 +65,7 @@ jobs:
       #   config.example.toml        `render`
       #   docs/config.contract.json  `render`
       - name: Commit Generated Files
-        uses: TimSchoenle/actions/actions/common/commit-generated-files@0b3967d3d992d12aa88da1f8facf412b162d5ab2 # tag=actions-common-commit-generated-files-v1.3.2
+        uses: TimSchoenle/actions/actions/common/commit-generated-files@7594d1c64de290a99195e47fc6d7b5699243b951 # tag=actions-common-commit-generated-files-v1.3.5
         with:
           client_id: ${{ secrets.ACTIONS_MAINTENANCE_APP_ID }}
           private_key: ${{ secrets.ACTIONS_MAINTENANCE_PRIVATE_KEY }}
