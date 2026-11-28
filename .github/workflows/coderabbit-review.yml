@@ -46,13 +46,13 @@ jobs:
     permissions: {} # the comment is posted with the token, not github.token
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: block
           allowed-endpoints: >
             api.github.com:443
 
       - name: Trigger CodeRabbit Review
-        uses: TimSchoenle/actions/actions/maintenance/trigger-coderabbit-review@0b3967d3d992d12aa88da1f8facf412b162d5ab2 # tag=actions-maintenance-trigger-coderabbit-review-v2.0.3
+        uses: TimSchoenle/actions/actions/maintenance/trigger-coderabbit-review@54a4dc05fd351a9bf9e9638fa3ebbc572b5f2d7f # tag=actions-maintenance-trigger-coderabbit-review-v2.0.4
         with:
           token: ${{ secrets.CODERABBIT_TRIGGER_TOKEN }}
